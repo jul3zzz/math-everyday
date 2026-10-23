@@ -128,12 +128,13 @@
     var nb = LECONS.length;
     var cta = st.profil
       ? '<a class="btn btn-lg" href="#/aujourdhui">' + I('sun') + 'Mes leçons du jour</a><a class="btn btn-lg btn-2" href="#/programme">Voir le programme</a>'
-      : '<a class="btn btn-lg" href="#/test">' + I('target') + 'Passer le test de niveau</a><a class="btn btn-lg btn-2" href="#/programme">Voir le programme</a>';
+      : '<a class="btn btn-lg" href="#/compte">' + I('user') + 'Créer mon compte gratuit</a><a class="btn btn-lg btn-2" href="#/compte/connexion">J\'ai déjà un compte</a>';
     var steps = [
+      ['Ton compte', 'Gratuit, en une minute : prénom, e-mail et mot de passe. Ta progression est gardée.'],
       ['Le test', '20 questions qui s\'adaptent à toi pour estimer ton niveau, de la 6e à la prépa.'],
       ['La confirmation', '5 exercices à rédiger pour confirmer, et tu es placé au bon niveau.'],
       ['Chaque jour', 'Un mail avec 3 leçons choisies pour toi. Une est gratuite, tous les jours.'],
-      ['30 minutes', 'La leçon, une vidéo conseillée et 3 exercices corrigés. Et c\'est fini.']
+      ['30 minutes', 'La leçon, une vidéo conseillée et 3 exercices corrigés. Calculatrice et notes à portée de main.']
     ].map(function (s, i) {
       return '<div class="step"><span class="step-n">' + (i + 1) + '</span><h3>' + s[0] + '</h3><p>' + s[1] + '</p></div>';
     }).join('');
@@ -175,7 +176,8 @@
   /* ================= Aujourd'hui ================= */
   function vAujourdhui(main) {
     var st = Store.get();
-    if (!st.profil) { location.hash = '#/'; return; }
+    if (!st.profil) { location.hash = '#/compte/connexion'; return; }
+    if (!st.niveau) { location.hash = '#/test'; return; }
     var j = Jour.get();
     var prem = Store.estPremium();
     var serie = Store.serie();
@@ -238,7 +240,9 @@
     if (acc !== true) {
       var corps;
       if (!st.profil) {
-        corps = '<div class="card center" style="padding:40px 24px">' + I('target') + '<h2 style="margin-top:12px">Commence par le test de niveau</h2><p class="muted">Il te place au bon niveau et débloque ta première leçon gratuite. Environ 20 minutes.</p><div class="btn-row" style="justify-content:center"><a class="btn btn-lg" href="#/test">Passer le test</a><a class="btn btn-lg btn-2" href="#/abonnement">Voir les offres</a></div></div>';
+        corps = '<div class="card center" style="padding:40px 24px">' + I('user') + '<h2 style="margin-top:12px">Crée ton compte gratuit</h2><p class="muted">Un compte, un test de niveau d\'une vingtaine de minutes, et ta première leçon gratuite est débloquée.</p><div class="btn-row" style="justify-content:center"><a class="btn btn-lg" href="#/compte">Créer mon compte</a><a class="btn btn-lg btn-2" href="#/compte/connexion">Se connecter</a></div></div>';
+      } else if (!st.niveau) {
+        corps = '<div class="card center" style="padding:40px 24px">' + I('target') + '<h2 style="margin-top:12px">Passe d\'abord le test de niveau</h2><p class="muted">Il te place au bon niveau et débloque ta première leçon gratuite.</p><div class="btn-row" style="justify-content:center"><a class="btn btn-lg" href="#/test">Passer le test</a></div></div>';
       } else if (acc === 'choix') {
         corps = '<div class="card center" style="padding:40px 24px"><h2>Utiliser ta leçon gratuite du jour ?</h2><p class="muted">Tu as une leçon offerte aujourd\'hui, à choisir parmi les 3 proposées. Une fois choisie, les deux autres restent réservées aux abonnés jusqu\'à demain.</p>' +
           '<div class="btn-row" style="justify-content:center"><button class="btn btn-lg" type="button" id="b-choisir">' + I('unlock') + 'Oui, je prends celle-ci</button><a class="btn btn-lg btn-2" href="#/aujourdhui">Revoir les 3 leçons</a></div></div>';
@@ -267,7 +271,8 @@
     var f = st.faites[id];
     main.innerHTML = page(entete +
       '<div class="lesson-steps"><span class="ls on">' + I('book') + 'Cours · 10 min</span><span class="ls on">' + I('playline') + 'Vidéo · ' + U.esc(v && v.d ? v.d : '≈ 8 min') + '</span><span class="ls on" id="ls-exos">' + I('pencil') + 'Exercices · 12 min</span>' +
-      (f ? '<span class="ls ok">' + I('check') + 'Déjà faite · ' + f.score + '/3</span>' : '') + '</div></div>' +
+      (f ? '<span class="ls ok">' + I('check') + 'Déjà faite · ' + f.score + '/3</span>' : '') + '</div>' +
+      '<div class="lesson-outils"><button type="button" class="btn btn-2 btn-sm" id="l-note">' + I('pencil') + 'Prendre des notes sur cette leçon</button><button type="button" class="btn btn-ghost btn-sm" data-outil="calc">Ouvrir la calculatrice</button></div></div>' +
       '<div class="block"><div class="block-h"><span class="block-num">1</span><h2>Le cours</h2></div><div class="card cours">' + l.cours + '</div></div>' +
       (l.retenir && l.retenir.length ? '<div class="block"><div class="block-h"><span class="block-num">' + I('star') + '</span><h2>À retenir</h2></div><div class="card"><ul class="retenir">' + l.retenir.map(function (x) { return '<li>' + I('check') + '<span>' + x + '</span></li>'; }).join('') + '</ul></div></div>' : '') +
       '<div class="block"><div class="block-h"><span class="block-num">2</span><h2>La vidéo conseillée</h2></div>' + videoHtml + '</div>' +
@@ -276,6 +281,7 @@
       '<div id="fin"></div></div>', true);
     U.math(main);
 
+    U.$('#l-note', main).onclick = function () { Outils.ouvrir('notes'); Notes.nouvelleDepuisLecon(); };
     var vb = U.$('#video button', main);
     if (vb) vb.onclick = function () {
       var box = U.$('#video', main);
@@ -370,7 +376,7 @@
         '<div class="card card-flat" style="margin:16px 0"><b>Mode démo</b><p class="small muted" style="margin:6px 0 0">Le paiement sécurisé (Stripe) sera branché à la mise en ligne définitive. Ici, l\'abonnement est simulé : aucune carte n\'est demandée, rien n\'est débité.</p></div>' +
         '<div class="btn-row"><button class="btn" type="button" id="m-ok" autofocus>' + I('crown') + 'Activer (démo)</button><button class="btn btn-2" type="button" data-close>Annuler</button></div>');
       U.$('#m-ok').onclick = function () {
-        if (!Store.get().profil) { Modal.fermer(); toast('Passe d\'abord le test de niveau pour créer ton espace.'); location.hash = '#/test'; return; }
+        if (!Store.get().profil) { Modal.fermer(); toast('Crée d\'abord ton compte gratuit.'); location.hash = '#/compte'; return; }
         Store.set({ premium: { plan: p.id, depuis: U.today() } });
         Modal.fermer(); toast('Abonnement ' + p.nom.toLowerCase() + ' activé (démo).');
         location.hash = '#/aujourdhui';
@@ -382,7 +388,7 @@
   /* ================= Réglages ================= */
   function vReglages(main) {
     var st = Store.get();
-    if (!st.profil) { location.hash = '#/'; return; }
+    if (!st.profil) { location.hash = '#/compte/connexion'; return; }
     var heures = ['07:00', '08:00', '12:00', '16:30', '17:30', '18:30', '19:30', '20:30'];
     var themes = Theme.liste.map(function (t) {
       return '<button type="button" class="choice" data-theme-pick="' + t.id + '" aria-pressed="' + (Theme.actuel() === t.id) + '"><span class="choice-l">' + I('palette') + '</span><span><b>' + U.esc(t.nom) + '</b><br><span class="small muted">' + U.esc(t.desc) + '</span></span></button>';
@@ -412,27 +418,42 @@
 
       '<div class="card"><h2>' + I('crown') + 'Abonnement</h2>' + ab + '</div>' +
 
+      '<div class="card"><h2>' + I('lock') + 'Mot de passe</h2><form class="form" id="r-mdp" novalidate>' +
+      '<div class="field"><label for="r-m1">Mot de passe actuel</label><input class="input" id="r-m1" name="ancien" type="password" autocomplete="current-password"></div>' +
+      '<div class="field"><label for="r-m2">Nouveau mot de passe</label><input class="input" id="r-m2" name="nouveau" type="password" autocomplete="new-password" minlength="8"><small>8 caractères minimum.</small></div>' +
+      '<div><button class="btn btn-sm" type="submit">Changer le mot de passe</button></div></form></div>' +
+
+      '<div class="card"><h2>' + I('user') + 'Compte</h2><p class="muted small">Connecté en tant que <b>' + U.esc(st.profil.mail) + '</b> depuis le ' + U.esc(st.profil.cree) + '. Dans la version démo, les comptes sont enregistrés sur cet appareil.</p>' +
+      '<div class="btn-row"><button class="btn btn-2 btn-sm" type="button" id="r-deco">Se déconnecter</button><button class="btn btn-ghost btn-sm" type="button" id="r-suppr">' + I('trash') + 'Supprimer mon compte</button></div></div>' +
+
       '<div class="card" style="grid-column:1/-1"><h2>' + I('palette') + 'Design du site</h2><div class="choices g3 grid">' + themes + '</div></div>' +
 
-      '<div class="card card-flat" style="grid-column:1/-1"><h2>' + I('trash') + 'Données</h2><p class="muted small">Tout est enregistré sur cet appareil. Réinitialiser efface ton profil, ta progression et ton abonnement démo.</p><button class="btn btn-2 btn-sm" type="button" id="r-reset">Tout réinitialiser</button></div>' +
       '</div>'
     );
     U.$('#r-profil', main).onsubmit = function (e) {
       e.preventDefault();
       var nom = this.nom.value.trim(), mail = this.mail.value.trim();
       if (!nom || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { toast('Prénom ou e-mail invalide.'); return; }
-      st.profil.nom = nom; st.profil.mail = mail; Store.save(); toast('Profil enregistré.');
+      if (!Store.changerMail(mail)) { toast('Un autre compte utilise déjà cet e-mail.'); return; }
+      st.profil.nom = nom; Store.save(); toast('Profil enregistré.');
     };
     U.$('#r-notif', main).onchange = function () { st.notif.actif = this.checked; Store.save(); toast(this.checked ? 'Mail quotidien activé.' : 'Mail quotidien désactivé.'); };
     U.$('#r-heure', main).onchange = function () { st.notif.heure = this.value; Store.save(); toast('Rappel à ' + this.value + '.'); };
     U.$('#r-niv', main).onchange = function () { Store.set({ niveau: this.value, jour: null }); toast('Niveau changé : ' + niv(this.value).long + '. Tes leçons du jour sont mises à jour.'); };
-    U.$('#r-apercu', main).onclick = function () { Modal.ouvrir(apercuMail(), { large: true }); };
+    U.$('#r-apercu', main).onclick = function () { if (!st.niveau) { toast('Passe d\'abord le test de niveau.'); return; } Modal.ouvrir(apercuMail(), { large: true }); };
     U.$('#r-test', main).onclick = function () { Test.recommencer(); location.hash = '#/test'; };
     var rs = U.$('#r-resil', main);
     if (rs) rs.onclick = function () { Store.set({ premium: null }); toast('Abonnement résilié (démo).'); vReglages(main); };
-    U.$('#r-reset', main).onclick = function () {
-      Modal.ouvrir('<h2 id="modal-title">Tout réinitialiser ?</h2><p class="muted">Ton profil, ta progression et ton abonnement démo seront effacés de cet appareil.</p><div class="btn-row"><button class="btn" type="button" id="m-reset">Oui, tout effacer</button><button class="btn btn-2" type="button" data-close autofocus>Annuler</button></div>');
-      U.$('#m-reset').onclick = function () { Store.reset(); Test.recommencer(); Modal.fermer(); location.hash = '#/'; toast('Données effacées.'); };
+    U.$('#r-mdp', main).onsubmit = function (e) {
+      e.preventDefault();
+      var f = this;
+      if (f.nouveau.value.length < 8) { toast('Le nouveau mot de passe doit faire au moins 8 caractères.'); return; }
+      Store.changerMdp(f.ancien.value, f.nouveau.value).then(function () { f.reset(); toast('Mot de passe changé.'); }, function () { toast('Mot de passe actuel incorrect.'); });
+    };
+    U.$('#r-deco', main).onclick = function () { Store.deconnexion(); Test.recommencer(); location.hash = '#/'; toast('Tu es déconnecté. À bientôt !'); };
+    U.$('#r-suppr', main).onclick = function () {
+      Modal.ouvrir('<h2 id="modal-title">Supprimer ton compte ?</h2><p class="muted">Ton profil, ta progression, tes notes et ton abonnement démo seront définitivement effacés de cet appareil.</p><div class="btn-row"><button class="btn" type="button" id="m-suppr">Oui, supprimer</button><button class="btn btn-2" type="button" data-close autofocus>Annuler</button></div>');
+      U.$('#m-suppr').onclick = function () { Store.supprimerCompte(); Test.recommencer(); Modal.fermer(); location.hash = '#/'; toast('Compte supprimé.'); };
     };
   }
 
@@ -469,7 +490,90 @@
     toast('Design : ' + Theme.nom(Theme.actuel()));
   });
 
+  /* ================= Compte : création et connexion ================= */
+  function vCompte(main, mode) {
+    if (Store.connecte()) { location.hash = Store.get().niveau ? '#/aujourdhui' : '#/test'; return; }
+    var connexion = mode === 'connexion';
+    var heures = ['07:00', '08:00', '12:00', '16:30', '17:30', '18:30', '19:30', '20:30'];
+    var classes = '<option value="">Je ne sais pas / adulte</option>' + NIVEAUX.map(function (n) { return '<option value="' + n.id + '">' + U.esc(n.long) + '</option>'; }).join('');
+    var onglets = '<div class="tabs" role="tablist" style="margin-bottom:22px">' +
+      '<a class="tab" role="tab" href="#/compte" aria-selected="' + !connexion + '" style="text-decoration:none">Créer un compte</a>' +
+      '<a class="tab" role="tab" href="#/compte/connexion" aria-selected="' + connexion + '" style="text-decoration:none">Se connecter</a></div>';
+    var mdpChamp = function (id, label, auto, aide) {
+      return '<div class="field"><label for="' + id + '">' + label + '</label><div class="pw"><input class="input" id="' + id + '" name="' + id + '" type="password" autocomplete="' + auto + '" required minlength="' + (connexion ? 1 : 8) + '" maxlength="128">' +
+        '<button type="button" class="btn btn-ghost btn-sm pw-voir" data-voir="' + id + '" aria-label="Afficher le mot de passe">Afficher</button></div>' + (aide || '') + '</div>';
+    };
+    var corps;
+    if (connexion) {
+      corps = '<span class="eyebrow">Bon retour</span><h1>Se connecter</h1><p class="muted">Retrouve ta progression, tes notes et tes leçons du jour.</p>' + onglets +
+        '<form class="form" id="f-compte" novalidate>' +
+        '<div class="field"><label for="c-mail">Adresse e-mail</label><input class="input" id="c-mail" name="mail" type="email" autocomplete="email" required maxlength="120"></div>' +
+        mdpChamp('c-mdp', 'Mot de passe', 'current-password') +
+        '<p class="small" id="c-err" role="alert" style="margin:0;color:var(--ko)"></p>' +
+        '<div class="btn-row"><button class="btn btn-lg" type="submit">' + I('arrow') + 'Se connecter</button></div>' +
+        '<p class="small muted" style="margin:0">Pas encore de compte ? <a href="#/compte">Crée-le en une minute</a>.</p></form>';
+    } else {
+      corps = '<span class="eyebrow">Gratuit · 1 minute</span><h1>Crée ton compte</h1><p class="muted">Ensuite, un test de niveau d\'une vingtaine de minutes, et ta première leçon gratuite est prête.</p>' + onglets +
+        '<form class="form" id="f-compte" novalidate>' +
+        '<div class="field"><label for="c-nom">Prénom</label><input class="input" id="c-nom" name="nom" autocomplete="given-name" required maxlength="40"></div>' +
+        '<div class="field"><label for="c-mail">Adresse e-mail</label><input class="input" id="c-mail" name="mail" type="email" autocomplete="email" required maxlength="120"><small>Pour te connecter et recevoir le rappel quotidien. Jamais revendue.</small></div>' +
+        mdpChamp('c-mdp', 'Mot de passe', 'new-password', '<div class="pw-force" aria-hidden="true"><i></i></div><small id="c-force">8 caractères minimum.</small>') +
+        mdpChamp('c-mdp2', 'Confirme le mot de passe', 'new-password') +
+        '<div class="field"><label for="c-classe">Ta classe</label><select class="input" id="c-classe" name="classe">' + classes + '</select><small>Le test de niveau démarrera à ce niveau.</small></div>' +
+        '<div class="field"><label for="c-heure">Heure du rappel quotidien</label><select class="input" id="c-heure" name="heure">' + heures.map(function (h) { return '<option' + (h === '17:30' ? ' selected' : '') + '>' + h + '</option>'; }).join('') + '</select></div>' +
+        '<label class="switch"><input type="checkbox" name="notif" checked> Recevoir le mail avec mes 3 leçons du jour</label>' +
+        '<p class="small" id="c-err" role="alert" style="margin:0;color:var(--ko)"></p>' +
+        '<div class="btn-row"><button class="btn btn-lg" type="submit">' + I('check') + 'Créer mon compte</button></div>' +
+        '<p class="small muted" style="margin:0">Déjà inscrit ? <a href="#/compte/connexion">Connecte-toi</a>. Version démo : le compte est enregistré sur cet appareil.</p></form>';
+    }
+    main.innerHTML = page(corps, true);
+    var f = U.$('#f-compte', main), err = U.$('#c-err', main);
+    main.onclick = function (e) {
+      var b = e.target.closest('[data-voir]'); if (!b) return;
+      var inp = U.$('#' + b.getAttribute('data-voir'), main);
+      var vis = inp.type === 'password';
+      inp.type = vis ? 'text' : 'password'; b.textContent = vis ? 'Masquer' : 'Afficher';
+      b.setAttribute('aria-label', vis ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+    };
+    var force = U.$('.pw-force i', main);
+    if (force) f.querySelector('#c-mdp').oninput = function () {
+      var v = this.value, n = 0;
+      if (v.length >= 8) n++; if (v.length >= 12) n++; if (/[A-Z]/.test(v) && /[a-z]/.test(v)) n++; if (/\d/.test(v)) n++; if (/[^A-Za-z0-9]/.test(v)) n++;
+      var lib = ['Trop court', 'Faible', 'Correct', 'Bon', 'Très bon', 'Excellent'][v.length < 8 ? 0 : n];
+      force.style.width = (v.length < 8 ? 10 : n * 20) + '%';
+      force.setAttribute('data-n', v.length < 8 ? 0 : n);
+      U.$('#c-force', main).textContent = v ? 'Solidité : ' + lib : '8 caractères minimum.';
+    };
+    setTimeout(function () { var p = f.querySelector('input'); if (p) p.focus(); }, 30);
+    f.onsubmit = function (e) {
+      e.preventDefault();
+      err.textContent = '';
+      var mail = f.mail.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { err.textContent = 'Cette adresse e-mail ne semble pas valide.'; f.mail.focus(); return; }
+      if (connexion) {
+        Store.connexion(mail, f['c-mdp'].value).then(function () {
+          Test.recommencer();
+          var st = Store.get();
+          location.hash = st.niveau ? '#/aujourdhui' : '#/test';
+          toast('Bon retour ' + st.profil.nom + ' !');
+        }, function (x) { err.textContent = x.message === 'inconnu' ? 'Aucun compte avec cet e-mail sur cet appareil.' : 'Mot de passe incorrect.'; });
+        return;
+      }
+      var nom = f.nom.value.trim();
+      if (!nom) { err.textContent = 'Indique ton prénom.'; f.nom.focus(); return; }
+      if (f['c-mdp'].value.length < 8) { err.textContent = 'Le mot de passe doit faire au moins 8 caractères.'; f['c-mdp'].focus(); return; }
+      if (f['c-mdp'].value !== f['c-mdp2'].value) { err.textContent = 'Les deux mots de passe ne sont pas identiques.'; f['c-mdp2'].focus(); return; }
+      if (Store.existe(mail)) { err.textContent = 'Un compte existe déjà avec cet e-mail. Connecte-toi.'; return; }
+      Store.creerCompte({ nom: nom, mail: mail, mdp: f['c-mdp'].value, classe: f.classe.value || null, notif: { actif: f.notif.checked, heure: f.heure.value } }).then(function () {
+        Test.recommencer();
+        location.hash = '#/test';
+        toast('Compte créé. Bienvenue ' + nom + ' ! Place au test de niveau.');
+      }, function () { err.textContent = 'Impossible de créer le compte.'; });
+    };
+  }
+
   window.Vues = {
+    compte: vCompte,
     accueil: vAccueil, aujourdhui: vAujourdhui, lecon: vLecon, programme: vProgramme,
     abonnement: vAbonnement, reglages: vReglages, themes: modalThemes, lecon_: lecon
   };

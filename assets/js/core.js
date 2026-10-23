@@ -114,23 +114,101 @@
   }
 
   /* ---------------- Stockage local ---------------- */
-  var KEY = 'mathEveryday.v1';
+  /* Plusieurs comptes par appareil : racine = { theme, comptes: { mail: { hash, sel, data } }, actif }.
+     Store.get() renvoie les données du compte connecté (ou d'un invité, non sauvegardé). */
+  var KEY = 'mathEveryday.v2';
   var defaut = function () {
     return {
-      v: 1, theme: null, profil: null, niveau: null, placement: null,
-      faites: {}, jour: null, premium: null, notif: { actif: true, heure: '17:30' }
+      profil: null, niveau: null, placement: null, classe: null,
+      faites: {}, jour: null, premium: null, notif: { actif: true, heure: '17:30' },
+      notes: [], carnets: ['Général'], calc: { hist: [], vars: {}, angle: 'deg' }
     };
   };
-  var etat;
-  try { etat = JSON.parse(localStorage.getItem(KEY)) || defaut(); } catch (e) { etat = defaut(); }
-  var base = defaut();
-  for (var k in base) if (!(k in etat)) etat[k] = base[k];
+  function completer(d) { var b = defaut(); for (var k in b) if (!(k in d)) d[k] = b[k]; return d; }
+  var racine;
+  try { racine = JSON.parse(localStorage.getItem(KEY)); } catch (e) { racine = null; }
+  if (!racine) {
+    racine = { v: 2, theme: null, comptes: {}, actif: null };
+    /* Reprise de la version 1 (un seul profil, sans mot de passe) */
+    try {
+      var v1 = JSON.parse(localStorage.getItem('mathEveryday.v1'));
+      if (v1) {
+        racine.theme = v1.theme || null;
+        if (v1.profil && v1.profil.mail) {
+          var m1 = v1.profil.mail.toLowerCase();
+          delete v1.theme; delete v1.v;
+          racine.comptes[m1] = { hash: null, sel: null, data: completer(v1) };
+          racine.actif = m1;
+        }
+      }
+    } catch (e) { /* rien à reprendre */ }
+  }
+  var etat = racine.actif && racine.comptes[racine.actif] ? completer(racine.comptes[racine.actif].data) : defaut();
+
+  function hex(buf) { return Array.prototype.map.call(new Uint8Array(buf), function (b) { return b.toString(16).padStart(2, '0'); }).join(''); }
+  function hacher(sel, mdp) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(sel + ':' + mdp)).then(hex);
+  }
+  function nouveauSel() { var a = new Uint8Array(16); crypto.getRandomValues(a); return hex(a.buffer); }
 
   var Store = {
     get: function () { return etat; },
-    save: function () { try { localStorage.setItem(KEY, JSON.stringify(etat)); } catch (e) { /* stockage indisponible : on reste en mémoire */ } },
+    save: function () {
+      if (racine.actif && racine.comptes[racine.actif]) racine.comptes[racine.actif].data = etat;
+      try { localStorage.setItem(KEY, JSON.stringify(racine)); } catch (e) { /* stockage indisponible : on reste en mémoire */ }
+    },
     set: function (patch) { for (var k in patch) etat[k] = patch[k]; Store.save(); },
-    reset: function () { var t = etat.theme; etat = defaut(); etat.theme = t; Store.save(); },
+    theme: function () { return racine.theme; },
+    setTheme: function (id) { racine.theme = id; Store.save(); },
+    connecte: function () { return !!(racine.actif && racine.comptes[racine.actif]); },
+    existe: function (mail) { return !!racine.comptes[String(mail).trim().toLowerCase()]; },
+    nbComptes: function () { return Object.keys(racine.comptes).length; },
+    /* infos : { nom, mail, mdp, classe, notif } — renvoie une promesse */
+    creerCompte: function (infos) {
+      var mail = infos.mail.trim().toLowerCase();
+      if (racine.comptes[mail]) return Promise.reject(new Error('existe'));
+      var sel = nouveauSel();
+      return hacher(sel, infos.mdp).then(function (h) {
+        var d = defaut();
+        d.profil = { nom: infos.nom, mail: mail, cree: U.today() };
+        d.classe = infos.classe;
+        d.notif = infos.notif;
+        racine.comptes[mail] = { hash: h, sel: sel, data: d };
+        racine.actif = mail; etat = d; Store.save();
+      });
+    },
+    connexion: function (mail, mdp) {
+      mail = String(mail).trim().toLowerCase();
+      var c = racine.comptes[mail];
+      if (!c) return Promise.reject(new Error('inconnu'));
+      if (!c.hash) { /* compte repris de la v1 : le premier mot de passe saisi devient le sien */
+        c.sel = nouveauSel();
+        return hacher(c.sel, mdp).then(function (h) { c.hash = h; racine.actif = mail; etat = completer(c.data); Store.save(); });
+      }
+      return hacher(c.sel, mdp).then(function (h) {
+        if (h !== c.hash) throw new Error('mdp');
+        racine.actif = mail; etat = completer(c.data); Store.save();
+      });
+    },
+    changerMdp: function (ancien, nouveau) {
+      var c = racine.comptes[racine.actif];
+      return hacher(c.sel, ancien).then(function (h) {
+        if (c.hash && h !== c.hash) throw new Error('mdp');
+        c.sel = nouveauSel();
+        return hacher(c.sel, nouveau);
+      }).then(function (h2) { c.hash = h2; Store.save(); });
+    },
+    changerMail: function (nouveau) {
+      nouveau = nouveau.trim().toLowerCase();
+      if (nouveau === racine.actif) return true;
+      if (racine.comptes[nouveau]) return false;
+      racine.comptes[nouveau] = racine.comptes[racine.actif];
+      delete racine.comptes[racine.actif];
+      racine.actif = nouveau; etat.profil.mail = nouveau; Store.save();
+      return true;
+    },
+    deconnexion: function () { Store.save(); racine.actif = null; etat = defaut(); Store.save(); },
+    supprimerCompte: function () { delete racine.comptes[racine.actif]; racine.actif = null; etat = defaut(); Store.save(); },
     estPremium: function () { return !!etat.premium; },
     marquerFaite: function (id, score) {
       var prev = etat.faites[id];
@@ -246,14 +324,14 @@
     appliquer: function (id) {
       if (!THEMES.some(function (t) { return t.id === id; })) id = 'minimal';
       document.documentElement.setAttribute('data-theme', id);
-      Store.set({ theme: id });
+      Store.setTheme(id);
       var b = document.getElementById('theme-btn');
       if (b) b.innerHTML = I('palette') + '<span>' + U.esc(Theme.nom(id)) + '</span>';
     },
     actuel: function () { return document.documentElement.getAttribute('data-theme'); },
     nom: function (id) { var t = THEMES.filter(function (t) { return t.id === id; })[0]; return t ? t.nom : ''; }
   };
-  document.documentElement.setAttribute('data-theme', etat.theme || 'minimal');
+  document.documentElement.setAttribute('data-theme', racine.theme || 'minimal');
 
   /* ---------------- Modale & toast ---------------- */
   var dernierFocus = null;

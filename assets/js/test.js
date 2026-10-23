@@ -1,11 +1,12 @@
-/* Math Everyday — test de niveau : 20 QCM adaptatifs, puis 5 exercices de confirmation, puis création du profil. */
+/* Math Everyday — test de niveau : 20 QCM adaptatifs, puis 5 exercices de confirmation (le compte est créé avant). */
 (function () {
   'use strict';
   var NB_Q = 20, NB_CONF = 5;
   var T = null;
 
   function nouveau() {
-    return { etape: 'intro', classe: null, idx: 3, hist: [], used: {}, q: null, estim: null, conf: null, final: null };
+    var cl = nivIndex(Store.get().classe);
+    return { etape: 'intro', classe: cl >= 0 ? cl : null, idx: 3, hist: [], used: {}, q: null, estim: null, conf: null, final: null };
   }
 
   /* Choisit une question non posée au niveau idx, sinon au niveau le plus proche. */
@@ -64,7 +65,6 @@
     else if (T.etape === 'estim') h = vEstim();
     else if (T.etape === 'conf') h = vConf();
     else if (T.etape === 'resultat') h = vResultat();
-    else if (T.etape === 'profil') h = vProfil();
     main.innerHTML = '<section class="page"><div class="wrap wrap-narrow">' + h + '</div></section>';
     U.math(main);
     lier(main);
@@ -154,24 +154,7 @@
       '<p style="font-size:1.08rem">' + msg + '</p>' +
       '<p class="muted">Chaque jour, on te proposera 3 leçons de ce niveau. Tu peux le changer ici ou plus tard dans les réglages.</p>' +
       '<div class="lvl-grid" style="margin:18px 0 28px">' + g + '</div>' +
-      '<button class="btn btn-lg" type="button" data-go="profil">' + I('arrow') + 'Créer mon espace</button>';
-  }
-
-  function vProfil() {
-    var st = Store.get();
-    var heures = ['07:00', '08:00', '12:00', '16:30', '17:30', '18:30', '19:30', '20:30'];
-    var opts = heures.map(function (h) { return '<option' + (h === st.notif.heure ? ' selected' : '') + '>' + h + '</option>'; }).join('');
-    return '<span class="eyebrow">Dernière étape</span>' +
-      '<h1>Ton espace Math Everyday</h1>' +
-      '<p class="muted">Chaque jour, on t\'envoie un mail avec tes 3 leçons du jour. Une est gratuite : la leçon, ses 3 exercices et une vidéo conseillée, environ 30 minutes.</p>' +
-      '<form class="form" id="f-profil" novalidate style="margin-top:22px">' +
-      '<div class="field"><label for="p-nom">Prénom</label><input class="input" id="p-nom" name="nom" autocomplete="given-name" required maxlength="40"></div>' +
-      '<div class="field"><label for="p-mail">Adresse e-mail</label><input class="input" id="p-mail" name="mail" type="email" autocomplete="email" required maxlength="120"><small>Pour le rappel quotidien. Jamais revendue.</small></div>' +
-      '<div class="field"><label for="p-heure">Heure du rappel</label><select class="input" id="p-heure" name="heure">' + opts + '</select></div>' +
-      '<label class="switch"><input type="checkbox" name="notif" checked> Recevoir le mail quotidien</label>' +
-      '<p class="small muted" id="p-err" role="alert" style="margin:0"></p>' +
-      '<div class="btn-row"><button class="btn btn-lg" type="submit">' + I('check') + 'C\'est parti</button></div>' +
-      '</form>';
+      '<button class="btn btn-lg" type="button" data-go="valider">' + I('check') + 'C\'est parti</button>';
   }
 
   /* ---------------- Interactions ---------------- */
@@ -201,26 +184,18 @@
           T.final = s >= 3 ? (s === T.conf.liste.length && e < 7 && T.estim.score >= 17 ? e + 1 : e) : Math.max(0, e - 1);
           T.etape = 'resultat'; rendre(main);
         }
-      } else if (go === 'profil') { T.etape = 'profil'; rendre(main); U.$('#p-nom', main).focus(); }
+      } else if (go === 'valider') {
+        Store.set({
+          niveau: NIVEAUX[T.final].id,
+          placement: { date: U.today(), estime: NIVEAUX[T.estim.idx].id, score: T.estim.score, conf: T.conf.score, classe: T.classe != null ? NIVEAUX[T.classe].id : null },
+          jour: null
+        });
+        T = null;
+        location.hash = '#/aujourdhui';
+        toast('C\'est parti ! Voici tes 3 leçons du jour.');
+        return;
+      }
       window.scrollTo(0, 0);
-    };
-    var f = U.$('#f-profil', main);
-    if (f) f.onsubmit = function (e) {
-      e.preventDefault();
-      var nom = f.nom.value.trim(), mail = f.mail.value.trim();
-      var err = U.$('#p-err', main);
-      if (!nom) { err.textContent = 'Indique ton prénom.'; f.nom.focus(); return; }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { err.textContent = 'Cette adresse e-mail ne semble pas valide.'; f.mail.focus(); return; }
-      Store.set({
-        profil: { nom: nom, mail: mail, cree: U.today() },
-        niveau: NIVEAUX[T.final].id,
-        placement: { date: U.today(), estime: NIVEAUX[T.estim.idx].id, score: T.estim.score, conf: T.conf.score, classe: T.classe != null ? NIVEAUX[T.classe].id : null },
-        notif: { actif: f.notif.checked, heure: f.heure.value },
-        jour: null
-      });
-      T = null;
-      location.hash = '#/aujourdhui';
-      toast('Bienvenue ' + nom + ' ! Voici tes leçons du jour.');
     };
   }
 
