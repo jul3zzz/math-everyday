@@ -1,0 +1,46 @@
+<!doctype html>
+<!-- Modèle du mail quotidien Math Everyday.
+     Variables remplacées par le service d'envoi : {{prenom}} {{niveau}} {{serie}} {{lien_aujourdhui}} {{lien_desabonnement}}
+     et le bloc répété {{#lecons}} … {{/lecons}} avec {{titre}} {{domaine}} {{lien}}.
+     Mise en page en tableaux + styles en ligne : c'est ce que les messageries (Gmail, Outlook…) affichent correctement. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tes 3 leçons du jour</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f4;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;">
+<tr><td align="center" style="padding:24px 12px;">
+  <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e3e3e3;border-radius:8px;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;">
+    <tr><td style="padding:26px 28px 6px;">
+      <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+        <td style="width:34px;height:34px;background:#111111;border-radius:8px;text-align:center;font-size:22px;line-height:34px;color:#ffffff;font-family:Georgia,serif;">&#966;</td>
+        <td style="padding-left:10px;font-size:16px;font-weight:bold;">Math Everyday</td>
+      </tr></table>
+    </td></tr>
+    <tr><td style="padding:14px 28px 0;">
+      <h1 style="margin:0 0 8px;font-size:22px;line-height:1.3;color:#111111;">Bonjour {{prenom}},</h1>
+      <p style="margin:0 0 14px;font-size:15px;line-height:1.55;">Voici les 3 leçons choisies pour toi aujourd'hui ({{niveau}}). Choisis-en une : elle est offerte, avec sa vidéo et ses 3 exercices corrigés. Compte environ 30 minutes.</p>
+    </td></tr>
+    {{#lecons}}
+    <tr><td style="padding:4px 28px;">
+      <a href="{{lien}}" style="display:block;border:1px solid #e3e3e3;border-radius:6px;padding:12px 14px;text-decoration:none;color:#111111;">
+        <strong style="font-size:15px;">{{titre}}</strong><br>
+        <span style="font-size:13px;color:#666666;">{{domaine}}</span>
+      </a>
+    </td></tr>
+    {{/lecons}}
+    <tr><td style="padding:16px 28px 6px;">
+      <a href="{{lien_aujourdhui}}" style="display:inline-block;background:#111111;color:#ffffff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:15px;">Faire ma leçon du jour</a>
+    </td></tr>
+    <tr><td style="padding:8px 28px 24px;font-size:13.5px;color:#555555;">Série en cours : {{serie}} jour(s). Ne la casse pas !</td></tr>
+    <tr><td style="padding:14px 28px;border-top:1px solid #eeeeee;font-size:12px;color:#777777;">
+      Tu reçois ce mail car tu as activé le rappel quotidien sur Math Everyday.
+      <a href="{{lien_desabonnement}}" style="color:#777777;">Se désabonner</a>
+    </td></tr>
+  </table>
+</td></tr>
+</table>
+</body>
+</html>
