@@ -1,0 +1,170 @@
+/* Math Everyday — styles des ajouts : mascotte, progression, entraînement, examens, fiches,
+   brouillon, géométrie, formulaire, aide IA. */
+
+/* ---------- Mascotte φ ---------- */
+:root{--masc-fond:#fff6d6;--masc-trait:#0a0a0a;--masc-ink:#0a0a0a;--masc-joue:rgba(244,114,182,.45)}
+[data-theme="minimal"]{--masc-fond:#ffffff;--masc-trait:#0a0a0a;--masc-ink:#0a0a0a}
+@media (prefers-color-scheme:dark){[data-theme="minimal"]{--masc-fond:#1b1b1b;--masc-trait:#f2f2f2;--masc-ink:#f2f2f2}}
+[data-theme="enfantin"]{--masc-fond:#ffd23f;--masc-trait:#1d1b4b;--masc-ink:#1d1b4b;--masc-joue:#ff6f91}
+[data-theme="dore"]{--masc-fond:#fbf3d8;--masc-trait:#7a5b1f;--masc-ink:#2a2318;--masc-joue:rgba(194,120,80,.35)}
+.masc{width:64px;height:64px;flex-shrink:0}
+.masc-w{display:flex;align-items:flex-end;gap:12px;margin:0 0 20px}
+.masc-bulle{position:relative;background:var(--surface);border:var(--bw) solid var(--line-card);border-radius:var(--r);padding:12px 16px;font-size:.95rem;box-shadow:var(--shadow-sm);max-width:640px;text-align:left}
+.masc-bulle::before{content:"";position:absolute;left:-8px;bottom:16px;width:14px;height:14px;background:inherit;border-left:inherit;border-bottom:inherit;transform:rotate(45deg)}
+.masc-ast{display:block;margin-top:6px;font-size:.86rem;color:var(--ink-2)}
+.end-card .masc-w,.center .masc-w{justify-content:center}
+[data-theme="enfantin"] .masc{animation:sautille 2.4s ease-in-out infinite}
+@keyframes sautille{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px) rotate(-3deg)}}
+
+/* notification de fête (badge, niveau) */
+.fete{position:fixed;left:50%;top:18px;z-index:95;display:flex;align-items:center;gap:12px;background:var(--surface);color:var(--ink);border:var(--bw) solid var(--line-strong);border-radius:var(--r);padding:10px 18px 10px 10px;box-shadow:0 16px 40px rgba(0,0,0,.2);transform:translate(-50%,-140%);transition:transform .35s cubic-bezier(.2,1.4,.4,1);max-width:calc(100vw - 32px)}
+.fete.on{transform:translate(-50%,0)}
+.fete .masc{width:48px;height:48px}
+.fete b{display:block}
+.fete span{font-size:.85rem;color:var(--ink-2)}
+
+/* ---------- Navigation ---------- */
+.nav-pastille{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--ko);color:#fff;font-size:.7rem;font-weight:800;margin-left:2px}
+.banner-rv{text-decoration:none;color:inherit;background:var(--surface);color:var(--ink)}
+.banner-rv:hover{background:var(--hover)}
+.kbd{font-family:var(--font-mono);font-size:.7rem;border:1px solid currentColor;border-radius:4px;padding:0 4px;opacity:.6;margin-left:4px}
+
+/* ---------- Hub & entraînement ---------- */
+.hub{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.hub-t{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit;position:relative;transition:transform .18s}
+.hub-t:hover{transform:translateY(-2px)}
+.hub-t>svg{width:30px;height:30px}
+.hub-t b{font-family:var(--font-head);font-size:1.25rem}
+.hub-pastille{position:absolute;top:16px;right:16px;min-width:28px;height:28px;border-radius:99px;background:var(--ko);color:#fff;font-weight:800;display:grid;place-items:center;padding:0 8px}
+.pl-mix{margin-top:4px}
+.pl-mix .pl-n svg{width:18px;height:18px}
+.rv-carte{min-height:260px}
+.rv-recto{font-size:1.1rem}
+.rv-choix{margin:12px 0 0;padding-left:1.4em}
+.rv-notes .btn{flex:1;min-width:120px}
+.ex-carte{display:flex;flex-direction:column;gap:6px;color:inherit;transition:transform .18s}
+.ex-carte:hover{transform:translateY(-2px)}
+.ex-carte b{font-family:var(--font-head);font-size:1.15rem}
+.ex-barre{position:sticky;top:64px;z-index:5;display:flex;align-items:center;gap:12px;padding:10px 14px;margin-bottom:12px;background:var(--surface);border:var(--bw) solid var(--line-card);border-radius:var(--r-sm)}
+.ex-chrono{font-family:var(--font-mono);font-weight:700}
+.ex-chrono.urgent{color:var(--ko)}
+.ex-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.ex-n{width:34px;height:34px;border-radius:var(--r-sm);border:var(--bw) solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font-weight:700;font-family:var(--font-mono)}
+.ex-n.fait{background:var(--hover);border-color:var(--line-strong)}
+.ex-n.on{background:var(--nav-on-bg);color:var(--nav-on-ink);border-color:var(--nav-on-line)}
+
+/* ---------- Progrès ---------- */
+.niv-carte{display:flex;align-items:center;gap:20px}
+.niv-carte .masc{width:84px;height:84px}
+.niv-t{flex:1;min-width:0}
+.niv-t b{display:block;font-family:var(--font-head);font-size:1.6rem}
+.cal{display:grid;gap:4px;overflow-x:auto;padding-bottom:4px}
+.cal-m{display:grid;grid-template-columns:repeat(var(--sem),14px);gap:3px;font-size:.68rem;color:var(--ink-2);height:14px}
+.cal-m span{white-space:nowrap}
+.cal-g{display:grid;grid-template-columns:repeat(var(--sem),14px);gap:3px}
+.cal-s{display:grid;grid-template-rows:repeat(7,14px);gap:3px}
+.cal-c{display:block;width:14px;height:14px;border-radius:3px;background:var(--track)}
+.cal-c[data-l="-1"]{background:transparent}
+.cal-c[data-l="1"]{background:color-mix(in srgb,var(--ok) 30%,var(--track))}
+.cal-c[data-l="2"]{background:color-mix(in srgb,var(--ok) 55%,var(--track))}
+.cal-c[data-l="3"]{background:color-mix(in srgb,var(--ok) 78%,var(--track))}
+.cal-c[data-l="4"]{background:var(--ok)}
+.cal-leg{display:flex;align-items:center;gap:3px;font-size:.72rem;color:var(--ink-2);justify-content:flex-end}
+.cal-leg span{margin:0 4px}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:16px 12px;border:var(--bw) dashed var(--line);border-radius:var(--r);color:var(--ink-2);opacity:.7}
+.badge svg{width:30px;height:30px}
+.badge b{color:var(--ink);font-size:.92rem}
+.badge span{font-size:.76rem}
+.badge.on{border-style:solid;border-color:var(--line-strong);background:var(--surface);opacity:1;color:var(--ink);box-shadow:var(--shadow-sm)}
+.badge.on svg{color:var(--stat-ic)}
+[data-theme="enfantin"] .badge.on:nth-child(3n+1){background:#fff4c9}
+[data-theme="enfantin"] .badge.on:nth-child(3n+2){background:#e9fbff}
+[data-theme="enfantin"] .badge.on:nth-child(3n){background:#ffe8ef}
+
+/* ---------- Fiches ---------- */
+.fiche{background:var(--surface);border:var(--bw) solid var(--line-card);border-radius:var(--r);padding:28px 32px;box-shadow:var(--shadow)}
+.fiche-h{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px}
+.fiche-h .logo-sm{width:18px;height:18px}
+.fiche h2{font-size:1.7rem;margin:0 0 4px}
+.fiche-r{color:var(--ink-2);margin-bottom:14px}
+.fiche-ret{border:var(--bw) solid var(--line-strong);border-radius:var(--r-sm);padding:12px 16px;margin-bottom:12px}
+.fiche-ret b{text-transform:uppercase;font-size:.78rem;letter-spacing:.08em}
+.fiche-ret ul{margin:6px 0 0;padding-left:1.2em}
+.fiche-f{font-size:.72rem;color:var(--ink-2);text-align:right;margin-top:14px;border-top:1px solid var(--line);padding-top:6px}
+@media print{
+  body.imprime-note #impression .fiche{break-after:page;page-break-after:always;border:0;box-shadow:none;padding:0;background:#fff;color:#000;font-size:11pt}
+  body.imprime-note #impression .fiche:last-child{break-after:auto;page-break-after:auto}
+  body.imprime-note #impression .def,body.imprime-note #impression .prop,body.imprime-note #impression .methode,body.imprime-note #impression .attention,body.imprime-note #impression .ex-box{border:1px solid #999;border-left:3px solid #333;padding:6px 10px;margin:6px 0;background:#fff;box-shadow:none}
+  body.imprime-note #impression .fig{max-width:240px}
+  .no-print{display:none!important}
+}
+
+/* ---------- Brouillon ---------- */
+.br{display:flex;flex-direction:column;height:100%;min-height:0}
+.br-barre{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+.br-barre .sw{width:22px;height:22px}
+.br-ep{display:flex;align-items:center}
+.br-ep input{width:80px}
+.br-pages{display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px;border-bottom:1px solid var(--line)}
+.br-pages .cb.on,.geo-outils .cb.on{background:var(--nav-on-bg);color:var(--nav-on-ink);border-color:var(--nav-on-line)}
+.br-cadre{flex:1;position:relative;min-height:320px;background:#fff}
+.br-cadre canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.br-info{position:absolute;left:10px;bottom:8px;font-size:.8rem;font-family:var(--font-mono);background:rgba(255,255,255,.9);color:#111;border-radius:4px;padding:2px 8px;pointer-events:none}
+.br-info:empty{display:none}
+
+/* ---------- Géométrie ---------- */
+.geo{display:flex;flex-direction:column;height:100%;min-height:0}
+.geo-outils{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+.geo-aide{padding:6px 12px;min-height:28px}
+.geo-cadre{flex:1;position:relative;min-height:300px;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.geo-cadre canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.geo-bas{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;padding:8px 12px;font-size:.85rem}
+.geo-bas .switch{font-weight:500;font-size:.85rem}
+.geo-bas .switch input{width:36px;height:20px}
+.geo-bas .switch input::after{width:14px;height:14px}
+.geo-bas .switch input:checked::after{transform:translateX(16px)}
+.geo-objets{padding:4px 12px 12px;max-height:150px;overflow:auto;font-size:.84rem}
+.geo-objets ul{margin:6px 0 0;padding-left:1.1em;font-family:var(--font-mono);font-size:.8rem;display:grid;gap:2px}
+
+/* ---------- Formulaire ---------- */
+.fo{display:flex;flex-direction:column;gap:12px}
+.fo-compact{padding:12px}
+.fo-barre{display:grid;gap:8px}
+.fo-barre .input{max-width:none;width:100%}
+.fo-nivs{display:flex;flex-wrap:wrap;gap:4px}
+.fo-niv h3{font-size:1.15rem;margin:14px 0 8px;padding-bottom:4px;border-bottom:var(--bw) solid var(--line-strong)}
+.fo-dom{margin-bottom:10px}
+.fo-dom>b{display:block;font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);margin:8px 0 4px}
+.fo-l{display:grid;grid-template-columns:minmax(120px,200px) 1fr;gap:4px 14px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.fo-n{font-size:.88rem;font-weight:600}
+.fo-f{overflow-x:auto}
+.fo-f .katex-display{margin:0;text-align:left}
+.fo-f .katex-display>.katex{text-align:left}
+.fo-compact .fo-l{grid-template-columns:1fr}
+@media (max-width:620px){.fo-l{grid-template-columns:1fr}}
+
+/* ---------- Aide IA ---------- */
+.ia-b{margin-top:10px}
+.ia-rep{white-space:normal;line-height:1.6}
+
+/* ---------- Tiroir : onglets plus nombreux ---------- */
+.outils-tabs{overflow-x:auto;scrollbar-width:none}
+.outils-tabs::-webkit-scrollbar{display:none}
+@media (max-width:900px){.outils-tab span{display:none}.outils-tab{padding:7px 9px}}
+@media (max-width:720px){.hub{grid-template-columns:1fr}.niv-carte{flex-direction:column;text-align:center}.ex-barre{top:104px}.masc{width:52px;height:52px}}
+.foot-liens{display:flex;align-items:center;gap:10px}
+.foot-liens a{color:inherit}
+/* navigation compacte : icônes seules (sauf la page active) quand la place manque */
+@media (max-width:1180px) and (min-width:721px){
+  .nav a:not([aria-current]) .nav-lbl{display:none}
+  .nav a{padding:8px 10px}
+  .theme-btn span{display:none}
+}
+@media (max-width:720px){.nav a .nav-lbl{display:inline}}
+/* boutons flottants : icônes rondes, libellé au survol */
+.fab{gap:8px}
+.fab-b{width:48px;height:48px;padding:0;justify-content:center;position:relative}
+.fab-b span{display:block!important;position:absolute;right:58px;top:50%;transform:translateY(-50%);background:var(--ink);color:var(--bg);padding:4px 10px;border-radius:6px;font-size:.8rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s}
+.fab-b:hover span,.fab-b:focus-visible span{opacity:1}
+@media (max-width:720px){.fab{right:12px;bottom:12px}.fab-b{width:46px;height:46px}.fab-b span{display:none!important}}

@@ -223,7 +223,7 @@
   function monterConf(main) {
     var c = T.conf, it = c.liste[c.i];
     Exo.monter(U.$('#conf-exo', main), it.exo, {
-      num: c.i + 1, essais: 1,
+      num: c.i + 1, essais: 1, sansIA: true,
       onFin: function (ok) {
         if (ok) c.score++;
         var nx = U.$('#conf-next', main);

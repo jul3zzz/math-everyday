@@ -88,19 +88,24 @@
         U.$$('button, input', el).forEach(function (x) { if (!x.closest('.fb-zone')) x.disabled = true; });
         if (o.onFin) o.onFin(ok && tentative === 1, ok);
       }
+      var derniere = '';
       function fb(ok, final) {
         var t = ok ? (tentative === 1 ? 'Bonne réponse !' : 'Bonne réponse, au deuxième essai.') : (final ? 'Ce n\'est pas ça.' : 'Pas tout à fait. Réessaie !');
         var body = '';
         if (ok || final) body = '<div class="corr"><b>Correction.</b> ' + exo.corr + '</div>';
         else if (exo.indice) body = '<div class="corr"><b>Indice.</b> ' + exo.indice + '</div>';
+        if (!ok && window.IA && !o.sansIA) body += '<button type="button" class="btn btn-ghost btn-sm ia-b">' + I('bulb') + 'Pourquoi c\'est faux ?</button>';
         zone.innerHTML = '<div class="fb ' + (ok ? 'ok' : 'ko') + '"><div class="fb-t">' + I(ok ? 'check' : 'x') + t + '</div>' + body + '</div>';
         U.math(zone);
+        var ib = U.$('.ia-b', zone);
+        if (ib) ib.onclick = function () { IA.expliquer(exo, derniere, o.lecon); };
       }
       if (exo.type === 'qcm') {
         el.addEventListener('click', function (e) {
           var b = e.target.closest('.choice'); if (!b || fini) return;
           tentative = 1;
           var ci = +b.getAttribute('data-ci'), ok = ci === exo.rep;
+          derniere = 'proposition ' + b.querySelector('.choice-l').textContent;
           b.classList.add(ok ? 'is-ok' : 'is-ko');
           if (!ok) { var bon = U.$('.choice[data-ci="' + exo.rep + '"]', el); if (bon) bon.classList.add('is-ok'); }
           fb(ok, true); terminer(ok);
@@ -111,7 +116,7 @@
           e.preventDefault(); if (fini) return;
           var v = inp.value.trim();
           if (!v) { inp.focus(); return; }
-          tentative++;
+          tentative++; derniere = v;
           var ok = Check.juger(exo, v);
           var final = ok || tentative >= essais;
           fb(ok, final);
@@ -180,7 +185,7 @@
     if (!st.niveau) { location.hash = '#/test'; return; }
     var j = Jour.get();
     var prem = Store.estPremium();
-    var serie = Store.serie();
+    var serie = Progres.serie(), nDues = Entrainement.dues(), Nv = Progres.niveau(Progres.xp());
     var nbF = Object.keys(st.faites).length;
     var scores = Object.keys(st.faites).map(function (k) { return st.faites[k].score; });
     var moy = scores.length ? Math.round(scores.reduce(function (a, b) { return a + b; }, 0) / (scores.length * 3) * 100) : null;
@@ -215,10 +220,13 @@
       '<div class="today-h"><div><span class="eyebrow">' + U.esc(U.dateLongue()) + '</span><h1>Bonjour ' + U.esc(st.profil.nom) + '.</h1></div>' +
       '<div class="stats">' +
       '<div class="stat">' + I('flame') + '<span><b>' + serie + '</b><small>jour' + (serie > 1 ? 's' : '') + ' de suite</small></span></div>' +
+      '<a class="stat" href="#/progres" style="text-decoration:none">' + I('star') + '<span><b>Niv. ' + Nv.n + '</b><small>' + U.esc(Nv.titre) + '</small></span></a>' +
       '<div class="stat">' + I('book') + '<span><b>' + nbF + '</b><small>leçon' + (nbF > 1 ? 's' : '') + ' faite' + (nbF > 1 ? 's' : '') + '</small></span></div>' +
       '<div class="stat">' + I('target') + '<span><b>' + (moy == null ? '–' : moy + ' %') + '</b><small>réussite</small></span></div>' +
       '</div></div>' +
+      Mascotte.bulle(Mascotte.salut(st.profil.nom)) +
       '<div class="daily">' + cartes + '</div>' + info +
+      (nDues ? '<a class="banner banner-rv" href="#/revisions">' + I('refresh') + '<div class="banner-t"><b>' + nDues + ' carte' + (nDues > 1 ? 's' : '') + ' mémo à réviser</b><span>Quelques minutes pour ne pas oublier les leçons déjà faites.</span></div><span class="btn btn-2">Réviser</span></a>' : '') +
       '<div class="card card-flat" style="margin-top:24px"><div class="row"><b>Programme ' + U.esc(NIVEAUX[idx].long) + '</b><span class="spacer"></span><span class="muted small mono">' + fNiv + ' / ' + tot + '</span></div>' +
       '<div class="progress" style="margin-top:10px"><i style="width:' + (tot ? fNiv / tot * 100 : 0) + '%"></i></div>' +
       (faitesAuj ? '<p class="small muted" style="margin:10px 0 0">Bravo, ta séance du jour est faite. À demain !</p>' : '') + '</div>'
@@ -272,7 +280,7 @@
     main.innerHTML = page(entete +
       '<div class="lesson-steps"><span class="ls on">' + I('book') + 'Cours · 10 min</span><span class="ls on">' + I('playline') + 'Vidéo · ' + U.esc(v && v.d ? v.d : '≈ 8 min') + '</span><span class="ls on" id="ls-exos">' + I('pencil') + 'Exercices · 12 min</span>' +
       (f ? '<span class="ls ok">' + I('check') + 'Déjà faite · ' + f.score + '/3</span>' : '') + '</div>' +
-      '<div class="lesson-outils"><button type="button" class="btn btn-2 btn-sm" id="l-note">' + I('pencil') + 'Prendre des notes sur cette leçon</button><button type="button" class="btn btn-ghost btn-sm" data-outil="calc">Ouvrir la calculatrice</button></div></div>' +
+      '<div class="lesson-outils"><button type="button" class="btn btn-2 btn-sm" id="l-note">' + I('pencil') + 'Prendre des notes</button><a class="btn btn-ghost btn-sm" href="#/fiche/' + l.id + '">' + I('book') + 'Fiche résumé</a><a class="btn btn-ghost btn-sm" href="#/entrainement/' + l.id + '">' + I('refresh') + 'S\'entraîner à l\'infini</a><button type="button" class="btn btn-ghost btn-sm" data-outil="calc">Calculatrice</button><button type="button" class="btn btn-ghost btn-sm" data-outil="brouillon">Brouillon</button></div></div>' +
       '<div class="block"><div class="block-h"><span class="block-num">1</span><h2>Le cours</h2></div><div class="card cours">' + l.cours + '</div></div>' +
       (l.retenir && l.retenir.length ? '<div class="block"><div class="block-h"><span class="block-num">' + I('star') + '</span><h2>À retenir</h2></div><div class="card"><ul class="retenir">' + l.retenir.map(function (x) { return '<li>' + I('check') + '<span>' + x + '</span></li>'; }).join('') + '</ul></div></div>' : '') +
       '<div class="block"><div class="block-h"><span class="block-num">2</span><h2>La vidéo conseillée</h2></div>' + videoHtml + '</div>' +
@@ -291,7 +299,7 @@
     var res = [], faits = 0;
     l.exos.forEach(function (e, i) {
       Exo.monter(U.$('#exo-' + i, main), e, {
-        num: i + 1, essais: 2,
+        num: i + 1, essais: 2, lecon: l,
         onFin: function (okPremier, ok) {
           res[i] = ok ? 1 : 0; faits++;
           if (faits === l.exos.length) finir();
@@ -301,10 +309,12 @@
     function finir() {
       var score = res.reduce(function (a, b) { return a + b; }, 0);
       Store.marquerFaite(id, score);
+      var xp = Progres.gagner('lecon', { score: score });
+      Entrainement.synchroniser();
       var msg = score === 3 ? 'Parfait, leçon maîtrisée.' : score === 2 ? 'Très bien. Relis la correction de l\'exercice manqué.' : score === 1 ? 'C\'est un début. Cette leçon reviendra en révision.' : 'Pas de panique : cette leçon te sera reproposée en révision.';
       var fin = U.$('#fin', main);
-      fin.innerHTML = '<div class="card end-card"><span class="eyebrow">Leçon terminée</span><div class="end-score">' + score + ' / 3</div><p>' + msg + '</p>' +
-        '<div class="btn-row" style="justify-content:center"><a class="btn" href="#/aujourdhui">' + I('sun') + 'Retour à aujourd\'hui</a>' +
+      fin.innerHTML = '<div class="card end-card">' + Mascotte.bulle(msg + (xp ? ' <b>+' + xp + ' XP</b>' : '') + ' Ses cartes mémo reviendront demain dans tes révisions.', score >= 2 ? 'bravo' : 'pense') + '<span class="eyebrow">Leçon terminée</span><div class="end-score">' + score + ' / 3</div>' +
+        '<div class="btn-row" style="justify-content:center"><a class="btn" href="#/aujourdhui">' + I('sun') + 'Retour à aujourd\'hui</a><a class="btn btn-2" href="#/entrainement/' + id + '">S\'entraîner encore</a>' +
         (Store.estPremium() ? '' : '<a class="btn btn-2" href="#/abonnement">Débloquer la suite</a>') + '</div></div>';
       U.$('#ls-exos', main).classList.add('ok');
       fin.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -358,7 +368,12 @@
       '<tr><td>Leçons complètes par jour</td><td>1</td><td>Illimité</td></tr>' +
       '<tr><td>Vidéo conseillée et 3 exercices corrigés</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
       '<tr><td>Accès libre à tout le programme (' + LECONS.length + ' leçons)</td><td>' + no + '</td><td>' + ok + '</td></tr>' +
-      '<tr><td>Révisions des leçons déjà faites</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Révisions espacées (cartes mémo) et fiches des leçons faites</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Entraînement : exercices générés à l\'infini</td><td>10 par jour</td><td>Illimité</td></tr>' +
+      '<tr><td>Brevet, bac et concours blancs</td><td>1 par semaine</td><td>Illimité</td></tr>' +
+      '<tr><td>Fiches résumé de tout le programme</td><td>' + no + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Calculatrice, notes, brouillon, géométrie, formulaire</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>XP, badges, calendrier de série</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
       '</tbody></table></div>' +
       '<div class="faq" style="max-width:760px;margin:34px auto 0"><h2>Questions fréquentes</h2>' +
       faq('Comment marche le « satisfait ou remboursé » ?', 'Sur l\'offre mensuelle, si le premier mois ne te convient pas, tu demandes le remboursement dans les 30 jours suivant ton premier paiement et on te rembourse intégralement, sans justification.') +
@@ -469,7 +484,7 @@
       '<div class="mail-body"><div style="width:34px;height:34px">' + LOGO.replace('<svg', '<svg style="width:34px;height:34px"').replace('class="lg-bg"', 'class="lg-bg" fill="#111"').replace('class="lg-phi"', 'class="lg-phi" stroke="#fff"') + '</div>' +
       '<h2>Bonjour ' + U.esc(st.profil.nom) + ',</h2><p>Voici les 3 leçons choisies pour toi aujourd\'hui (' + U.esc(niv(st.niveau).long) + '). ' + (Store.estPremium() ? 'Tu es abonné : elles sont toutes ouvertes.' : 'Choisis-en une : elle est offerte, avec sa vidéo et ses 3 exercices corrigés.') + '</p>' +
       items + '<a class="mail-cta" href="#/aujourdhui">Faire ma leçon (≈ 30 min)</a>' +
-      '<p style="color:#555;font-size:13.5px">Série en cours : ' + Store.serie() + ' jour' + (Store.serie() > 1 ? 's' : '') + '. Ne la casse pas !</p></div>' +
+      '<p style="color:#555;font-size:13.5px">Série en cours : ' + Progres.serie() + ' jour' + (Progres.serie() > 1 ? 's' : '') + '. Ne la casse pas !' + (Entrainement.dues() ? ' Et ' + Entrainement.dues() + ' cartes mémo t\'attendent.' : '') + '</p></div>' +
       '<div class="mail-foot">Tu reçois ce mail car tu as activé le rappel quotidien. Se désabonner · Changer l\'heure</div></div>';
   }
 
