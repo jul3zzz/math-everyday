@@ -1,0 +1,63 @@
+rules_version = '2';
+// Math Everyday — règles de sécurité Firestore.
+// À copier dans la console Firebase : Firestore Database > Règles > Publier.
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    function connecte() { return request.auth != null; }
+    function moi(uid) { return connecte() && request.auth.uid == uid; }
+    // La seule différence entre l'ancienne et la nouvelle liste est l'utilisateur lui-même (ajout ou retrait).
+    function seulMoiChange(champ) {
+      let avant = resource.data.get(champ, []).toSet();
+      let apres = request.resource.data.get(champ, []).toSet();
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([champ])
+        && avant.difference(apres).union(apres.difference(avant)).hasOnly([request.auth.uid]);
+    }
+
+    // Données privées de l'élève (progression, notes…) : lui seul.
+    match /users/{uid} {
+      allow read, delete: if moi(uid);
+      allow create, update: if moi(uid) && request.resource.data.keys().hasOnly(['json', 'maj']);
+    }
+
+    // Profil visible par les élèves connectés (prénom, niveau, XP, série…).
+    match /publics/{uid} {
+      allow read: if connecte();
+      allow create, delete: if moi(uid);
+      allow update: if moi(uid) || (connecte() && seulMoiChange('amis'));
+    }
+
+    // Codes amis : PHI-XXXXX -> uid. Création unique, jamais modifiés.
+    match /codes/{code} {
+      allow read: if connecte();
+      allow create: if connecte() && request.resource.data.uid == request.auth.uid;
+      allow delete: if connecte() && resource.data.uid == request.auth.uid;
+    }
+
+    // Classes : le professeur gère tout, un élève ne peut que s'ajouter ou se retirer.
+    match /classes/{id} {
+      allow read: if connecte();
+      allow create: if connecte() && request.resource.data.prof == request.auth.uid;
+      allow update: if connecte() && (resource.data.prof == request.auth.uid
+        || (seulMoiChange('eleves')));
+      allow delete: if connecte() && resource.data.prof == request.auth.uid;
+    }
+
+    // Codes de classe : CL-XXXXX -> classe.
+    match /codesClasse/{code} {
+      allow read: if connecte();
+      allow create: if connecte() && request.resource.data.prof == request.auth.uid
+        && get(/databases/$(db)/documents/classes/$(request.resource.data.classe)).data.prof == request.auth.uid;
+      allow delete: if connecte() && resource.data.prof == request.auth.uid;
+    }
+
+    // Défis entre amis : visibles et modifiables par les deux joueurs uniquement.
+    match /duels/{id} {
+      allow read: if connecte() && (request.auth.uid == resource.data.de || request.auth.uid == resource.data.a);
+      allow create: if connecte() && request.resource.data.de == request.auth.uid;
+      allow update: if connecte() && (request.auth.uid == resource.data.de || request.auth.uid == resource.data.a)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['scores']);
+      allow delete: if connecte() && request.auth.uid == resource.data.de;
+    }
+  }
+}

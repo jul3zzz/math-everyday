@@ -153,10 +153,21 @@
 
   var Store = {
     get: function () { return etat; },
-    save: function () {
-      if (racine.actif && racine.comptes[racine.actif]) racine.comptes[racine.actif].data = etat;
+    save: function (sansHorodatage) {
+      if (racine.actif && racine.comptes[racine.actif]) { if (!sansHorodatage) etat._maj = Date.now(); racine.comptes[racine.actif].data = etat; }
       try { localStorage.setItem(KEY, JSON.stringify(racine)); } catch (e) { /* stockage indisponible : on reste en mémoire */ }
+      if (Store.apresSauvegarde && racine.actif) Store.apresSauvegarde(etat);
     },
+    /* accès internes pour la synchronisation en ligne (synchro.js) */
+    _defaut: function () { return defaut(); },
+    _activer: function (mail, data, infos) {
+      mail = mail.toLowerCase();
+      racine.comptes[mail] = Object.assign(racine.comptes[mail] || { hash: null, sel: null }, infos || {}, { data: completer(data) });
+      racine.actif = mail; etat = racine.comptes[mail].data;
+      try { localStorage.setItem(KEY, JSON.stringify(racine)); } catch (e) { /* mémoire seule */ }
+    },
+    _local: function (mail) { var c = racine.comptes[String(mail).toLowerCase()]; return c ? c.data : null; },
+    _quitter: function () { racine.actif = null; etat = defaut(); try { localStorage.setItem(KEY, JSON.stringify(racine)); } catch (e) { /* mémoire seule */ } },
     set: function (patch) { for (var k in patch) etat[k] = patch[k]; Store.save(); },
     theme: function () { return racine.theme; },
     setTheme: function (id) { racine.theme = id; Store.save(); },

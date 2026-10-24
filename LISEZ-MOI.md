@@ -42,3 +42,10 @@ Ajouter une leçon : copier un bloc `{ id: …, titre: …, cours: …, exos: [.
 1. **Comptes** : Firebase Authentication (connexion par e-mail) + Firestore pour sauvegarder la progression.
 2. **Mails** : un service d'envoi (ex. Brevo, gratuit jusqu'à 300 mails/jour) déclenché chaque quart d'heure par une tâche planifiée (GitHub Actions), qui remplit `mails/lecon-du-jour.html`.
 3. **Paiement** : Stripe (liens de paiement pour les 3 offres + webhook qui active l'abonnement dans Firestore). Le remboursement du 1er mois se fait depuis le tableau de bord Stripe.
+
+## Comptes en ligne (Firebase)
+
+- Projet Firebase : `math-everyday-b8137` (configuration dans `assets/js/config.js`).
+- Les règles de sécurité sont dans `firestore.rules` : à recopier dans la console Firebase (Firestore Database → Règles → Publier) après chaque modification.
+- Données : `users/{uid}` (progression privée), `publics/{uid}` (prénom, niveau, XP, amis), `codes/` (codes amis), `classes/` et `codesClasse/` (espace professeur), `duels/` (défis).
+- Tester sans vrais comptes : ouvrir `http://localhost:4182/?fauxcloud=1` (faux nuage enregistré dans le navigateur).

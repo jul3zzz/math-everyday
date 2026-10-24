@@ -48,6 +48,7 @@
       var st = Store.get();
       if (Store.estPremium()) return true;
       if (st.faites[id]) return true;
+      if (st.devoirsLecons && st.devoirsLecons.indexOf(id) >= 0) return true;
       var j = Jour.get();
       if (!j) return false;
       if (j.choisie === id) return true;
@@ -225,12 +226,14 @@
       '<div class="stat">' + I('target') + '<span><b>' + (moy == null ? '–' : moy + ' %') + '</b><small>réussite</small></span></div>' +
       '</div></div>' +
       Mascotte.bulle(Mascotte.salut(st.profil.nom)) +
+      '<div id="bandeau-devoirs"></div>' +
       '<div class="daily">' + cartes + '</div>' + info +
       (nDues ? '<a class="banner banner-rv" href="#/revisions">' + I('refresh') + '<div class="banner-t"><b>' + nDues + ' carte' + (nDues > 1 ? 's' : '') + ' mémo à réviser</b><span>Quelques minutes pour ne pas oublier les leçons déjà faites.</span></div><span class="btn btn-2">Réviser</span></a>' : '') +
       '<div class="card card-flat" style="margin-top:24px"><div class="row"><b>Programme ' + U.esc(NIVEAUX[idx].long) + '</b><span class="spacer"></span><span class="muted small mono">' + fNiv + ' / ' + tot + '</span></div>' +
       '<div class="progress" style="margin-top:10px"><i style="width:' + (tot ? fNiv / tot * 100 : 0) + '%"></i></div>' +
       (faitesAuj ? '<p class="small muted" style="margin:10px 0 0">Bravo, ta séance du jour est faite. À demain !</p>' : '') + '</div>'
     );
+    if (window.Social) Social.bandeauDevoirs(U.$('#bandeau-devoirs', main));
   }
 
   function planNom(id) { for (var i = 0; i < PLANS.length; i++) if (PLANS[i].id === id) return PLANS[i].nom.toLowerCase(); return ''; }
@@ -432,13 +435,14 @@
       '<div><button class="btn btn-2 btn-sm" type="button" id="r-test">' + I('refresh') + 'Repasser le test</button></div></div></div>' +
 
       '<div class="card"><h2>' + I('crown') + 'Abonnement</h2>' + ab + '</div>' +
+      (window.Cloud && Cloud.actif ? '<div class="card"><h2>' + I('book') + 'Classes</h2><p class="muted small">Rejoins la classe de ton professeur avec son code, ou crée tes propres classes si tu enseignes.</p><div class="btn-row"><a class="btn btn-2 btn-sm" href="#/classes">Mes classes</a><a class="btn btn-ghost btn-sm" href="#/prof">' + (st.prof ? 'Espace professeur' : 'Je suis professeur') + '</a></div></div>' : '') +
 
       '<div class="card"><h2>' + I('lock') + 'Mot de passe</h2><form class="form" id="r-mdp" novalidate>' +
       '<div class="field"><label for="r-m1">Mot de passe actuel</label><input class="input" id="r-m1" name="ancien" type="password" autocomplete="current-password"></div>' +
       '<div class="field"><label for="r-m2">Nouveau mot de passe</label><input class="input" id="r-m2" name="nouveau" type="password" autocomplete="new-password" minlength="8"><small>8 caractères minimum.</small></div>' +
       '<div><button class="btn btn-sm" type="submit">Changer le mot de passe</button></div></form></div>' +
 
-      '<div class="card"><h2>' + I('user') + 'Compte</h2><p class="muted small">Connecté en tant que <b>' + U.esc(st.profil.mail) + '</b> depuis le ' + U.esc(st.profil.cree) + '. Dans la version démo, les comptes sont enregistrés sur cet appareil.</p>' +
+      '<div class="card"><h2>' + I('user') + 'Compte</h2><p class="muted small">Connecté en tant que <b>' + U.esc(st.profil.mail) + '</b> depuis le ' + U.esc(st.profil.cree) + '. ' + (window.Synchro && Synchro.actif ? 'Ta progression est sauvegardée en ligne : <b id="synchro">' + ({ ok: 'Synchronisé', attente: 'Synchronisation…', erreur: 'Hors ligne' }[Synchro.etat()] || 'Synchronisé') + '</b>.' : 'Dans la version démo, les comptes sont enregistrés sur cet appareil.') + '</p>' +
       '<div class="btn-row"><button class="btn btn-2 btn-sm" type="button" id="r-deco">Se déconnecter</button><button class="btn btn-ghost btn-sm" type="button" id="r-suppr">' + I('trash') + 'Supprimer mon compte</button></div></div>' +
 
       '<div class="card" style="grid-column:1/-1"><h2>' + I('palette') + 'Design du site</h2><div class="choices g3 grid">' + themes + '</div></div>' +
@@ -463,12 +467,19 @@
       e.preventDefault();
       var f = this;
       if (f.nouveau.value.length < 8) { toast('Le nouveau mot de passe doit faire au moins 8 caractères.'); return; }
-      Store.changerMdp(f.ancien.value, f.nouveau.value).then(function () { f.reset(); toast('Mot de passe changé.'); }, function () { toast('Mot de passe actuel incorrect.'); });
+      Store.changerMdp(f.ancien.value, f.nouveau.value).then(function () { f.reset(); toast('Mot de passe changé.'); }, function (x) { toast(x && x.message && x.message !== 'mdp' ? x.message : 'Mot de passe actuel incorrect.'); });
     };
     U.$('#r-deco', main).onclick = function () { Store.deconnexion(); Test.recommencer(); location.hash = '#/'; toast('Tu es déconnecté. À bientôt !'); };
     U.$('#r-suppr', main).onclick = function () {
-      Modal.ouvrir('<h2 id="modal-title">Supprimer ton compte ?</h2><p class="muted">Ton profil, ta progression, tes notes et ton abonnement démo seront définitivement effacés de cet appareil.</p><div class="btn-row"><button class="btn" type="button" id="m-suppr">Oui, supprimer</button><button class="btn btn-2" type="button" data-close autofocus>Annuler</button></div>');
-      U.$('#m-suppr').onclick = function () { Store.supprimerCompte(); Test.recommencer(); Modal.fermer(); location.hash = '#/'; toast('Compte supprimé.'); };
+      var enLigne = window.Synchro && Synchro.actif;
+      Modal.ouvrir('<h2 id="modal-title">Supprimer ton compte ?</h2><p class="muted">Ton profil, ta progression, tes notes et ton abonnement seront définitivement effacés' + (enLigne ? ', en ligne et sur cet appareil.' : ' de cet appareil.') + '</p>' +
+        (enLigne ? '<div class="field" style="margin-bottom:14px"><label for="m-mdp">Confirme avec ton mot de passe</label><input class="input" id="m-mdp" type="password" autocomplete="current-password"></div><p class="small" id="m-err" style="color:var(--ko)"></p>' : '') +
+        '<div class="btn-row"><button class="btn" type="button" id="m-suppr">Oui, supprimer</button><button class="btn btn-2" type="button" data-close autofocus>Annuler</button></div>');
+      U.$('#m-suppr').onclick = function () {
+        var mdp = enLigne ? U.$('#m-mdp').value : null;
+        if (enLigne && !mdp) { U.$('#m-err').textContent = 'Indique ton mot de passe.'; return; }
+        Promise.resolve(Store.supprimerCompte(mdp)).then(function () { Test.recommencer(); Modal.fermer(); location.hash = '#/'; toast('Compte supprimé.'); }, function (x) { var e = U.$('#m-err'); if (e) e.textContent = x.message; });
+      };
     };
   }
 
@@ -525,7 +536,7 @@
         '<div class="field"><label for="c-mail">Adresse e-mail</label><input class="input" id="c-mail" name="mail" type="email" autocomplete="email" required maxlength="120"></div>' +
         mdpChamp('c-mdp', 'Mot de passe', 'current-password') +
         '<p class="small" id="c-err" role="alert" style="margin:0;color:var(--ko)"></p>' +
-        '<div class="btn-row"><button class="btn btn-lg" type="submit">' + I('arrow') + 'Se connecter</button></div>' +
+        '<div class="btn-row"><button class="btn btn-lg" type="submit">' + I('arrow') + 'Se connecter</button>' + (Store.motDePasseOublie ? '<button class="btn btn-ghost btn-sm" type="button" id="c-oubli">Mot de passe oublié ?</button>' : '') + '</div>' +
         '<p class="small muted" style="margin:0">Pas encore de compte ? <a href="#/compte">Crée-le en une minute</a>.</p></form>';
     } else {
       corps = '<span class="eyebrow">Gratuit · 1 minute</span><h1>Crée ton compte</h1><p class="muted">Ensuite, un test de niveau d\'une vingtaine de minutes, et ta première leçon gratuite est prête.</p>' + onglets +
@@ -539,7 +550,7 @@
         '<label class="switch"><input type="checkbox" name="notif" checked> Recevoir le mail avec mes 3 leçons du jour</label>' +
         '<p class="small" id="c-err" role="alert" style="margin:0;color:var(--ko)"></p>' +
         '<div class="btn-row"><button class="btn btn-lg" type="submit">' + I('check') + 'Créer mon compte</button></div>' +
-        '<p class="small muted" style="margin:0">Déjà inscrit ? <a href="#/compte/connexion">Connecte-toi</a>. Version démo : le compte est enregistré sur cet appareil.</p></form>';
+        '<p class="small muted" style="margin:0">Déjà inscrit ? <a href="#/compte/connexion">Connecte-toi</a>. ' + (window.Synchro && Synchro.actif ? 'Ta progression est sauvegardée en ligne et te suit sur tous tes appareils.' : 'Version démo : le compte est enregistré sur cet appareil.') + '</p></form>';
     }
     main.innerHTML = page(corps, true);
     var f = U.$('#f-compte', main), err = U.$('#c-err', main);
@@ -571,19 +582,26 @@
           var st = Store.get();
           location.hash = st.niveau ? '#/aujourdhui' : '#/test';
           toast('Bon retour ' + st.profil.nom + ' !');
-        }, function (x) { err.textContent = x.message === 'inconnu' ? 'Aucun compte avec cet e-mail sur cet appareil.' : 'Mot de passe incorrect.'; });
+        }, function (x) { err.textContent = x.cloud ? x.message : x.message === 'inconnu' ? 'Aucun compte avec cet e-mail sur cet appareil.' : 'Mot de passe incorrect.'; });
         return;
       }
       var nom = f.nom.value.trim();
       if (!nom) { err.textContent = 'Indique ton prénom.'; f.nom.focus(); return; }
       if (f['c-mdp'].value.length < 8) { err.textContent = 'Le mot de passe doit faire au moins 8 caractères.'; f['c-mdp'].focus(); return; }
       if (f['c-mdp'].value !== f['c-mdp2'].value) { err.textContent = 'Les deux mots de passe ne sont pas identiques.'; f['c-mdp2'].focus(); return; }
-      if (Store.existe(mail)) { err.textContent = 'Un compte existe déjà avec cet e-mail. Connecte-toi.'; return; }
+      if (!(window.Synchro && Synchro.actif) && Store.existe(mail)) { err.textContent = 'Un compte existe déjà avec cet e-mail. Connecte-toi.'; return; }
+      var bouton = f.querySelector('[type="submit"]'); bouton.disabled = true;
       Store.creerCompte({ nom: nom, mail: mail, mdp: f['c-mdp'].value, classe: f.classe.value || null, notif: { actif: f.notif.checked, heure: f.heure.value } }).then(function () {
         Test.recommencer();
         location.hash = '#/test';
         toast('Compte créé. Bienvenue ' + nom + ' ! Place au test de niveau.');
-      }, function () { err.textContent = 'Impossible de créer le compte.'; });
+      }, function (x) { bouton.disabled = false; err.textContent = (x && x.message && x.message !== 'existe') ? x.message : 'Impossible de créer le compte.'; });
+    };
+    var ob = U.$('#c-oubli', main);
+    if (ob) ob.onclick = function () {
+      var mail = f.mail.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { err.textContent = 'Écris d\'abord ton adresse e-mail ci-dessus.'; f.mail.focus(); return; }
+      Store.motDePasseOublie(mail).then(function () { err.style.color = 'var(--ok)'; err.textContent = 'Si un compte existe pour ' + mail + ', un e-mail pour choisir un nouveau mot de passe vient d\'être envoyé (pense aux spams).'; }, function (x) { err.textContent = x.message; });
     };
   }
 

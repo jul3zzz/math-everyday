@@ -6,9 +6,11 @@
   function nav(route) {
     var st = Store.get();
     var items = st.profil
-      ? [['aujourdhui', 'Aujourd\'hui', 'sun'], ['sentrainer', 'S\'entraîner', 'pencil'], ['programme', 'Programme', 'list'], ['progres', 'Progrès', 'star'], ['abonnement', Store.estPremium() ? 'Illimité' : 'Abonnement', 'crown'], ['reglages', 'Réglages', 'gear']]
+      ? [['aujourdhui', 'Aujourd\'hui', 'sun'], ['sentrainer', 'S\'entraîner', 'pencil'], ['programme', 'Programme', 'list'], ['progres', 'Progrès', 'star']]
+        .concat(window.Cloud && Cloud.actif ? [['amis', 'Amis', 'user']] : [['abonnement', Store.estPremium() ? 'Illimité' : 'Abonnement', 'crown']])
+        .concat(st.prof ? [['prof', 'Prof', 'book']] : []).concat([['reglages', 'Réglages', 'gear']])
       : [['', 'Accueil', 'sun'], ['programme', 'Programme', 'list'], ['formulaire', 'Formulaire', 'book'], ['abonnement', 'Abonnement', 'crown'], ['compte/connexion', 'Se connecter', 'user']];
-    var groupe = { revisions: 'sentrainer', entrainement: 'sentrainer', examens: 'sentrainer', fiches: 'sentrainer', fiche: 'sentrainer', lecon: st.profil ? 'aujourdhui' : '' };
+    var groupe = { revisions: 'sentrainer', entrainement: 'sentrainer', examens: 'sentrainer', fiches: 'sentrainer', fiche: 'sentrainer', duel: 'amis', classes: 'amis', lecon: st.profil ? 'aujourdhui' : '' };
     var actif = groupe[route] != null ? groupe[route] : route;
     var nd = st.profil && window.Entrainement ? Entrainement.dues() : 0;
     document.getElementById('nav').innerHTML = items.map(function (it) {
@@ -45,6 +47,10 @@
       case 'fiches': Fiches.liste(main, parts[1]); break;
       case 'fiche': Fiches.fiche(main, parts[1]); break;
       case 'formulaire': Formulaire.page(main); break;
+      case 'amis': Social.amis(main); break;
+      case 'duel': Social.duel(main, parts[1]); break;
+      case 'classes': Social.classes(main); break;
+      case 'prof': Social.prof(main, parts[1]); break;
       default: Vues.accueil(main);
     }
     U.math(main);
