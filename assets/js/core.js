@@ -359,6 +359,39 @@
   };
   document.documentElement.setAttribute('data-theme', racine.theme || 'minimal');
 
+  /* ---------------- Affichage personnalisé (propre à l'appareil) ----------------
+     taille du texte, espacement, mode clair/sombre et couleur d'accent (design Minimaliste),
+     côté du panneau d'outils. Posés en attributs sur <html>, lus par refonte.css. */
+  var CLE_AFF = 'mathEveryday.affichage';
+  var AFF_DEFAUT = { taille: 'm', espace: 'normal', mode: 'auto', accent: 'encre', cote: 'droite' };
+  var AFF_CHOIX = {
+    taille: [['s', 'Petite'], ['m', 'Normale'], ['l', 'Grande'], ['xl', 'Très grande']],
+    espace: [['compact', 'Compact'], ['normal', 'Normal'], ['aere', 'Aéré']],
+    mode: [['auto', 'Auto'], ['clair', 'Clair'], ['sombre', 'Sombre']],
+    accent: [['encre', 'Encre'], ['bleu', 'Bleu'], ['vert', 'Vert'], ['violet', 'Violet'], ['orange', 'Orange'], ['rose', 'Rose']],
+    cote: [['droite', 'À droite'], ['gauche', 'À gauche']]
+  };
+  var Affichage = {
+    CHOIX: AFF_CHOIX,
+    get: function () {
+      var a = {};
+      try { a = JSON.parse(localStorage.getItem(CLE_AFF) || '{}') || {}; } catch (e) { a = {}; }
+      for (var k in AFF_DEFAUT) if (!AFF_CHOIX[k].some(function (c) { return c[0] === a[k]; })) a[k] = AFF_DEFAUT[k];
+      return a;
+    },
+    set: function (cle, val) {
+      var a = Affichage.get(); a[cle] = val;
+      try { localStorage.setItem(CLE_AFF, JSON.stringify(a)); } catch (e) { /* stockage indisponible */ }
+      Affichage.appliquer();
+      if (window.Outils && Outils.recaler) Outils.recaler();
+    },
+    appliquer: function () {
+      var a = Affichage.get(), h = document.documentElement;
+      for (var k in a) h.setAttribute('data-' + k, a[k]);
+    }
+  };
+  Affichage.appliquer();
+
   /* ---------------- Modale & toast ---------------- */
   var dernierFocus = null;
   var Modal = {
@@ -396,6 +429,7 @@
   }
 
   window.U = U; window.I = I; window.LOGO = LOGO; window.rectangleOr = rectangleOr;
+  window.Affichage = Affichage;
   window.Store = Store; window.Check = Check; window.Theme = Theme; window.Modal = Modal; window.toast = toast;
   window.LECONS = window.LECONS || [];
   /* Les fichiers data/lecons-*.js appellent addLecons([...]) */

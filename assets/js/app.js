@@ -13,6 +13,8 @@
     var groupe = { revisions: 'sentrainer', entrainement: 'sentrainer', examens: 'sentrainer', fiches: 'sentrainer', fiche: 'sentrainer', atelier: 'sentrainer', 'calcul-mental': 'sentrainer', sujets: 'sentrainer', plan: 'sentrainer', bilan: 'progres', nouveautes: 'abonnement', duel: 'amis', classes: 'amis', lecon: st.profil ? 'aujourdhui' : '' };
     var actif = groupe[route] != null ? groupe[route] : route;
     var nd = st.profil && window.Entrainement ? Entrainement.dues() : 0;
+    /* beaucoup d'onglets : sur écran moyen, icônes seules (voir refonte.css) */
+    document.getElementById('nav').classList.toggle('nav-longue', items.length > 5);
     document.getElementById('nav').innerHTML = items.map(function (it) {
       var on = actif === it[0].split('/')[0];
       return '<a href="#/' + it[0] + '" title="' + it[1] + '"' + (on ? ' aria-current="page"' : '') + '>' + I(it[2]) + '<span class="nav-lbl">' + it[1] + '</span>' + (it[0] === 'sentrainer' && nd ? '<span class="nav-pastille">' + nd + '</span>' : '') + '</a>';

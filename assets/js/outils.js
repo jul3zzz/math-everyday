@@ -1,6 +1,7 @@
-/* Math Everyday — tiroir d'outils (calculatrice, notes, brouillon, géométrie, formulaire), ouvert
+/* Math Everyday — panneau d'outils (calculatrice, notes, brouillon, géométrie, formulaire), ouvert
    depuis n'importe quelle page. Boutons flottants, raccourcis Alt+C / Alt+N / Alt+B / Alt+G / Alt+F,
-   largeur réglable à la souris, mode plein écran. */
+   largeur réglable à la souris, plein écran. Sur un grand écran le panneau se range sur le côté
+   (droite ou gauche, au choix dans « Personnaliser ») et la page se resserre à côté au lieu d'être cachée. */
 (function () {
   'use strict';
   function ic(p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; }
@@ -15,7 +16,7 @@
     reduire: ic('<path d="M20 10h-6V4M4 14h6v6M14 10l7-7M10 14l-7 7"/>')
   };
   var OUTILS = [
-    ['calc', 'Calculatrice', 'c', 460], ['notes', 'Notes', 'n', 780], ['brouillon', 'Brouillon', 'b', 720],
+    ['calc', 'Calculatrice', 'c', 560], ['notes', 'Notes', 'n', 780], ['brouillon', 'Brouillon', 'b', 720],
     ['geometrie', 'Géométrie', 'g', 760], ['formulaire', 'Formulaire', 'f', 560]
   ];
   var el, ouvert = null, grand = false, contexte = { lecon: null }, dernierAutre = 'brouillon';
@@ -66,13 +67,15 @@
     poignee.addEventListener('pointerdown', function (e) { dep = { x: e.clientX, w: el.offsetWidth }; poignee.setPointerCapture(e.pointerId); document.body.classList.add('redim'); });
     poignee.addEventListener('pointermove', function (e) {
       if (!dep) return;
-      var w = Math.max(340, Math.min(window.innerWidth - 40, dep.w + dep.x - e.clientX));
+      var dx = gauche() ? e.clientX - dep.x : dep.x - e.clientX;
+      var w = Math.max(340, Math.min(window.innerWidth - 360, dep.w + dx));
       el.style.width = w + 'px';
+      document.documentElement.style.setProperty('--outils-l', w + 'px');
       prefs()['l_' + ouvert] = w;
       redessiner();
     });
     poignee.addEventListener('pointerup', function () { if (dep) { dep = null; document.body.classList.remove('redim'); Store.save(); redessiner(); } });
-    window.addEventListener('resize', function () { if (ouvert === 'notes' && window.Notes) Notes.adapter(); });
+    window.addEventListener('resize', function () { if (ouvert) appliquerLargeur(); });
   }
   function redessiner() {
     if (ouvert === 'notes' && window.Notes) Notes.adapter();
@@ -80,9 +83,17 @@
     if (ouvert === 'brouillon' && window.Brouillon) Brouillon.redessiner();
     if (ouvert === 'geometrie' && window.Geometrie) Geometrie.redessiner();
   }
+  function gauche() { return window.Affichage && Affichage.get().cote === 'gauche'; }
   function appliquerLargeur() {
+    var w = Math.min(largeur(ouvert), window.innerWidth - 360);
     el.classList.toggle('grand', grand);
-    el.style.width = grand ? '' : largeur(ouvert) + 'px';
+    el.classList.toggle('gauche', gauche());
+    el.style.width = grand ? '' : w + 'px';
+    /* rangé sur le côté : la page se resserre (grand écran seulement) */
+    var range = !grand && window.innerWidth >= 1100;
+    document.body.classList.toggle('outils-range', range);
+    document.body.classList.toggle('outils-gauche', gauche());
+    document.documentElement.style.setProperty('--outils-l', range ? w + 'px' : '0px');
     setTimeout(redessiner, 0);
   }
 
@@ -105,11 +116,13 @@
   function fermer() {
     if (ouvert === 'notes' && window.Notes) Notes.enregistrer();
     ouvert = null; el.hidden = true;
-    document.body.classList.remove('outils-ouverts');
+    document.body.classList.remove('outils-ouverts', 'outils-range', 'outils-gauche');
+    document.documentElement.style.setProperty('--outils-l', '0px');
   }
 
   window.Outils = {
     init: init, ouvrir: ouvrir, fermer: fermer,
+    recaler: function () { if (ouvert) appliquerLargeur(); },
     route: function (r, param) {
       contexte.lecon = r === 'lecon' ? param : null;
       /* le mode libre a sa propre calculatrice : sur téléphone, les boutons flottants gêneraient la feuille */

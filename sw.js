@@ -3,11 +3,11 @@
    Bibliothèques et polices (cdnjs, Google Fonts) : copie locale d'abord.
    Abonnés : « tout télécharger » range aussi les polices KaTeX, le SDK Firebase et les miniatures
    des vidéos dans un cache à part, conservé d'une version à l'autre. */
-var VERSION = 'me-v5';
+var VERSION = 'me-v6';
 var HORS_LIGNE = 'me-hors-ligne';
 var FICHIERS = [
   '', 'index.html', 'manifest.json', 'favicon.svg', 'icone-192.png', 'icone-512.png', 'icone-masque-512.png',
-  'assets/css/base.css', 'assets/css/themes.css', 'assets/css/outils.css', 'assets/css/plus.css', 'assets/css/themes-plus.css',
+  'assets/css/base.css', 'assets/css/themes.css', 'assets/css/outils.css', 'assets/css/plus.css', 'assets/css/themes-plus.css', 'assets/css/refonte.css',
   'assets/js/config.js', 'assets/js/core.js', 'assets/js/test.js', 'assets/js/views.js', 'assets/js/progres.js',
   'assets/js/calc-moteur.js', 'assets/js/calculatrice.js', 'assets/js/notes.js', 'assets/js/entrainement.js',
   'assets/js/fiches.js', 'assets/js/brouillon.js', 'assets/js/geometrie.js', 'assets/js/formulaire.js',

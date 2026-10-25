@@ -482,7 +482,7 @@
       '<div class="card"><h2>' + I('user') + 'Compte</h2><p class="muted small">Connecté en tant que <b>' + U.esc(st.profil.mail) + '</b> depuis le ' + U.esc(st.profil.cree) + '. ' + (window.Synchro && Synchro.actif ? 'Ta progression est sauvegardée en ligne : <b id="synchro">' + ({ ok: 'Synchronisé', attente: 'Synchronisation…', erreur: 'Hors ligne' }[Synchro.etat()] || 'Synchronisé') + '</b>.' : 'Dans la version démo, les comptes sont enregistrés sur cet appareil.') + '</p>' +
       '<div class="btn-row"><button class="btn btn-2 btn-sm" type="button" id="r-deco">Se déconnecter</button><button class="btn btn-ghost btn-sm" type="button" id="r-suppr">' + I('trash') + 'Supprimer mon compte</button></div></div>' +
 
-      '<div class="card" style="grid-column:1/-1"><h2>' + I('palette') + 'Design du site</h2><div class="choices g3 grid">' + themes + '</div></div>' +
+      '<div class="card" style="grid-column:1/-1"><h2>' + I('palette') + 'Apparence</h2><div id="perso-zone">' + personnaliser() + '</div><h3 style="margin-top:28px">Design</h3><div class="choices g3 grid">' + themes + '</div></div>' +
 
       '</div>'
     );
@@ -548,14 +548,39 @@
         '<span class="dp-prev p-' + t.id + '"><i></i><i></i><i></i><i></i><i></i></span>' +
         '<span class="dp-txt"><b>' + U.esc(t.nom) + (t.premium ? ' <span class="chip chip-prem">' + I(bloque ? 'lock' : 'crown') + 'Exclusif</span>' : '') + '</b><span>' + U.esc(t.desc) + '</span></span></button>';
     }).join('');
-    Modal.ouvrir('<h2 id="modal-title">Choisis ton design</h2><p class="muted">Le contenu reste le même, seule l\'ambiance change.' + (prem ? '' : ' Les designs exclusifs sont réservés aux abonnés.') + '</p><div class="theme-opts">' + b + '</div>');
+    Modal.ouvrir('<h2 id="modal-title">Apparence</h2><div id="perso-zone">' + personnaliser() + '</div>' +
+      '<h3 style="margin-top:28px">Design</h3><p class="muted">Le contenu reste le même, seule l\'ambiance change.' + (prem ? '' : ' Les designs exclusifs sont réservés aux abonnés.') + '</p><div class="theme-opts">' + b + '</div>', { large: true });
   }
+  /* Personnaliser l'affichage (réglages de l'appareil, voir Affichage dans core.js) */
+  var COULEURS_ACCENT = { encre: 'var(--ink)', bleu: '#2563eb', vert: '#15803d', violet: '#7c3aed', orange: '#c2410c', rose: '#db2777' };
+  function personnaliser() {
+    var a = Affichage.get(), C = Affichage.CHOIX, mini = Theme.actuel() === 'minimal';
+    function ligne(cle, titre, aide) {
+      return '<div class="perso-l"><b>' + titre + '</b>' + (aide ? '<small>' + aide + '</small>' : '') + '<div class="perso-ch">' + C[cle].map(function (c) {
+        var attrs = 'type="button" data-perso="' + cle + '" data-val="' + c[0] + '" aria-pressed="' + (a[cle] === c[0]) + '"';
+        if (cle === 'accent') return '<button ' + attrs + ' class="perso-sw" style="--sw:' + COULEURS_ACCENT[c[0]] + '" title="' + c[1] + '" aria-label="' + c[1] + '"></button>';
+        return '<button ' + attrs + '>' + c[1] + '</button>';
+      }).join('') + '</div></div>';
+    }
+    return '<div class="perso">' + ligne('taille', 'Taille du texte') + ligne('espace', 'Espacement') +
+      (mini ? ligne('mode', 'Clair ou sombre', 'Auto suit le réglage de ton appareil.') + ligne('accent', 'Couleur')
+        : '<p class="small muted" style="margin:0">Le mode clair / sombre et la couleur se règlent avec le design Minimaliste.</p>') +
+      ligne('cote', 'Calculatrice et outils', 'Sur grand écran, le panneau se range de ce côté et la page se resserre.') + '</div>';
+  }
+  document.addEventListener('click', function (e) {
+    var p = e.target.closest('[data-perso]');
+    if (!p) return;
+    Affichage.set(p.getAttribute('data-perso'), p.getAttribute('data-val'));
+    U.$$('[data-perso="' + p.getAttribute('data-perso') + '"]').forEach(function (x) { x.setAttribute('aria-pressed', x === p); });
+  });
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-theme-pick]');
     if (!t) return;
     if (Theme.premium(t.getAttribute('data-theme-pick')) && !Store.estPremium()) { Modal.fermer(); location.hash = '#/abonnement'; toast('Design exclusif : réservé aux abonnés.'); return; }
     Theme.appliquer(t.getAttribute('data-theme-pick'));
     U.$$('[data-theme-pick]').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-theme-pick') === Theme.actuel()); });
+    /* couleur et mode ne valent que pour Minimaliste : on rafraîchit les réglages affichés */
+    U.$$('#perso-zone').forEach(function (z) { z.innerHTML = personnaliser(); });
     toast('Design : ' + Theme.nom(Theme.actuel()));
   });
 
