@@ -74,6 +74,26 @@
   window.addEventListener('hashchange', router);
   router();
 
+  /* Mode « tout débloqué » pour tester en local (lancer-local.bat) : ?debloque=1 ouvre un compte de
+     démo abonné à vie, avec l'espace professeur. Jamais sur le vrai site ni avec les vrais comptes en ligne. */
+  (function debloquer() {
+    if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || !/[?&]debloque=1/.test(location.search)) return;
+    if (window.Cloud && Cloud.actif && !Cloud.faux) return;
+    var MAIL = 'demo@math-everyday.test', MDP = 'demo-local-1618';
+    var pret = Store.connecte() ? Promise.resolve()
+      : Store.connexion(MAIL, MDP).catch(function () { return Store.creerCompte({ nom: 'Démo', mail: MAIL, mdp: MDP, classe: '3e', notif: { actif: false, heure: '17:30' } }); });
+    pret.then(function () {
+      var s = Store.get();
+      if (!s.niveau) s.niveau = '3e';
+      if (!s.premium) s.premium = { plan: 'vie', depuis: U.today() };
+      s.prof = true;
+      Store.save();
+      if (!location.hash || location.hash === '#/' || /^#\/(compte|test)/.test(location.hash)) location.hash = '#/aujourdhui';
+      else router();
+      toast('Mode local : tout est débloqué (compte Démo, abonnement à vie).');
+    }).catch(function (e) { toast('Mode tout débloqué indisponible : ' + e.message); });
+  })();
+
   /* Application installable et lecture hors connexion */
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () { /* hors ligne indisponible */ }); });
