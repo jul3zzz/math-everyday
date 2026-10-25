@@ -75,7 +75,10 @@
     infinity: '<path d="M7 8.5c-2 0-3.5 1.5-3.5 3.5S5 15.5 7 15.5c3.5 0 6.5-7 10-7 2 0 3.5 1.5 3.5 3.5S19 15.5 17 15.5c-3.5 0-6.5-7-10-7z"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/>',
     bulb: '<path d="M9 18h6M10 21.5h4M12 2.5a6.5 6.5 0 0 0-4 11.6c.7.6 1 1.4 1 2.4h6c0-1 .3-1.8 1-2.4a6.5 6.5 0 0 0-4-11.6z"/>',
-    trash: '<path d="M4 6.5h16M9.5 6.5V4h5v2.5M6.5 6.5l1 14h9l1-14"/>'
+    trash: '<path d="M4 6.5h16M9.5 6.5V4h5v2.5M6.5 6.5l1 14h9l1-14"/>',
+    compass: '<circle cx="12" cy="4.5" r="2"/><path d="M11 6.3L5 21M13 6.3L19 21M7.2 15h9.6"/>',
+    download: '<path d="M12 3.5v12M7 10.5l5 5 5-5M4 20.5h16"/>',
+    sparkle: '<path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 17v4M17 19h4"/>'
   };
   function I(name, cls) {
     return '<svg class="ic ' + (cls || '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (P[name] || '') + '</svg>';
@@ -309,6 +312,12 @@
         var tl = exo.tol != null ? exo.tol : 1e-6;
         return a.every(function (x, i) { return Math.abs(x - b[i]) <= tl; });
       }
+      if (exo.type === 'une') {
+        /* plusieurs bonnes réponses possibles : chaque valeur donnée doit en faire partie */
+        var vals = String(val).split(/;|\bet\b/).map(function (x) { return nombre(x); }).filter(function (x) { return !isNaN(x); });
+        var t1 = exo.tol != null ? exo.tol : 1e-6;
+        return vals.length > 0 && vals.every(function (x) { return exo.rep.some(function (r) { return Math.abs(x - r) <= t1; }); });
+      }
       if (exo.type === 'texte') {
         var n = texteNorm(val);
         return exo.rep.some(function (r) { return texteNorm(r) === n; });
@@ -320,6 +329,7 @@
       if (exo.type === 'num') return exo.tol && exo.tol >= 0.005 ? 'Valeur exacte ou arrondie. Tu peux écrire 3/4, √2, π/3, 2^5…' : 'Virgule ou point. Tu peux écrire 3/4, √2, π/3, 2^5…';
       if (exo.type === 'liste') return 'Sépare les valeurs par un point-virgule, ex. : 2 ; -3 (π/3, √2… acceptés)';
       if (exo.type === 'texte') return 'Écris ta réponse sans espaces superflus.';
+      if (exo.type === 'une') return 'Une valeur suffit (arrondi accepté). Tu peux en donner plusieurs séparées par ;';
       return '';
     }
   };
@@ -328,12 +338,17 @@
   var THEMES = [
     { id: 'minimal', nom: 'Minimaliste', desc: 'Noir et blanc, épuré, sans distraction.' },
     { id: 'enfantin', nom: 'Enfantin', desc: 'Maximaliste, coloré, plein d\'énergie.' },
-    { id: 'dore', nom: 'Doré élégant', desc: 'Crème et or, comme un vieux traité de géométrie.' }
+    { id: 'dore', nom: 'Doré élégant', desc: 'Crème et or, comme un vieux traité de géométrie.' },
+    { id: 'tableau', nom: 'Tableau noir', desc: 'Ardoise verte et craie, comme en classe.', premium: true },
+    { id: 'cahier', nom: 'Cahier d\'écolier', desc: 'Papier quadrillé, marge rouge et stylo bleu.', premium: true },
+    { id: 'nuit', nom: 'Nuit douce', desc: 'Bleu nuit apaisant pour travailler le soir.', premium: true }
   ];
   var Theme = {
     liste: THEMES,
+    premium: function (id) { return THEMES.some(function (t) { return t.id === id && t.premium; }); },
     appliquer: function (id) {
       if (!THEMES.some(function (t) { return t.id === id; })) id = 'minimal';
+      if (Theme.premium(id) && !Store.estPremium()) id = 'minimal';
       document.documentElement.setAttribute('data-theme', id);
       Store.setTheme(id);
       var b = document.getElementById('theme-btn');

@@ -112,6 +112,8 @@
     init: init, ouvrir: ouvrir, fermer: fermer,
     route: function (r, param) {
       contexte.lecon = r === 'lecon' ? param : null;
+      /* le mode libre a sa propre calculatrice : sur téléphone, les boutons flottants gêneraient la feuille */
+      document.body.classList.toggle('route-atelier', r === 'atelier');
       if (window.Notes) Notes.contexte(contexte);
       /* un changement de compte (connexion / déconnexion) remonte l'outil ouvert */
       if (ouvert) ouvrir(ouvert);

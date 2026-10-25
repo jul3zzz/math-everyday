@@ -137,9 +137,11 @@
           '<span class="nl-x">' + esc(ex || 'Note vide') + '</span>' +
           '<span class="nl-d">' + esc(dateCourte(n.modif)) + ' · ' + esc(n.carnet || 'Général') + '</span></button>';
       }).join('') : '<p class="small muted nl-vide">' + (s.notes.length ? 'Aucune note ne correspond.' : 'Aucune note pour l\'instant.') + '</p>') + '</div>' +
-      '<p class="nl-c small muted">' + s.notes.length + ' note' + (s.notes.length > 1 ? 's' : '') + '</p>';
+      '<p class="nl-c small muted">' + s.notes.length + ' note' + (s.notes.length > 1 ? 's' : '') + '</p>' +
+      '<button type="button" class="btn btn-ghost btn-sm nl-cahier" id="n-cahier">' + I(Store.estPremium() ? 'download' : 'crown') + 'Tout le cahier en PDF</button>';
     nl.onclick = function (e) {
       if (e.target.closest('#n-new')) { nouvelle(); return; }
+      if (e.target.closest('#n-cahier')) { imprimerCahier(); return; }
       var t = e.target.closest('[data-tag]'); if (t) { f.tag = f.tag === t.getAttribute('data-tag') ? null : t.getAttribute('data-tag'); Store.save(); liste(); return; }
       var b = e.target.closest('[data-note]'); if (b) { enregistrer(); courante = b.getAttribute('data-note'); vueEditeur = true; adapter(); liste(); editeur(); }
     };
@@ -455,7 +457,35 @@
     setTimeout(function () { document.body.classList.remove('imprime-note'); }, 500);
   }
 
+  /* Cahier complet (abonnés) : toutes les notes rangées par carnet, puis les pages du brouillon.
+     La boîte d'impression du navigateur propose « Enregistrer en PDF ». */
+  function imprimerCahier() {
+    if (!Store.estPremium()) {
+      Modal.ouvrir('<h2 id="modal-title">Cahier en ligne + PDF</h2>' + Mascotte.bulle('Avec l\'abonnement, tes notes et ton brouillon te suivent sur tous tes appareils, et tu peux exporter tout ton cahier en un seul PDF.', 'content') + '<div class="btn-row"><a class="btn" href="#/abonnement" data-close>' + I('crown') + 'Voir les offres</a></div>');
+      return;
+    }
+    enregistrer();
+    var s = st(), nom = s.profil ? s.profil.nom : '';
+    if (!s.notes.length && !(window.Brouillon && Brouillon.imagePage(0))) { toast('Ton cahier est vide pour l\'instant.'); return; }
+    var carnets = {};
+    s.notes.slice().sort(function (a, b) { return a.cree < b.cree ? -1 : 1; }).forEach(function (n) { (carnets[n.carnet || 'Général'] = carnets[n.carnet || 'Général'] || []).push(n); });
+    var html = '<div class="cahier-garde"><h1>Cahier de maths</h1><p>' + esc(nom) + '</p><p>' + s.notes.length + ' note' + (s.notes.length > 1 ? 's' : '') + ' · imprimé le ' + new Date().toLocaleDateString('fr-FR') + '</p></div>';
+    Object.keys(carnets).forEach(function (c) {
+      html += '<h1 class="cahier-carnet">' + esc(c) + '</h1>' + carnets[c].map(function (n) { return '<section class="cahier-note"><h2>' + esc(n.titre || 'Sans titre') + '</h2><div class="ne-zone">' + n.html + '</div></section>'; }).join('');
+    });
+    var imgs = [];
+    if (window.Brouillon) for (var i = 0; i < Brouillon.nbPages(); i++) { var im = Brouillon.imagePage(i); if (im) imgs.push(im); }
+    if (imgs.length) html += '<h1 class="cahier-carnet">Brouillon</h1>' + imgs.map(function (src, k) { return '<section class="cahier-note"><h2>Page ' + (k + 1) + '</h2><img src="' + src + '" alt="Page de brouillon ' + (k + 1) + '" style="max-width:100%"></section>'; }).join('');
+    var zone = document.getElementById('impression') || document.body.appendChild(Object.assign(document.createElement('div'), { id: 'impression' }));
+    zone.innerHTML = html;
+    rendreMaths(zone);
+    document.body.classList.add('imprime-note');
+    toast('Choisis « Enregistrer en PDF » dans la fenêtre d\'impression.');
+    setTimeout(function () { window.print(); setTimeout(function () { document.body.classList.remove('imprime-note'); }, 500); }, 300);
+  }
+
   window.Notes = {
+    imprimerCahier: imprimerCahier,
     monter: monter, adapter: function () { var avant = compact; adapter(); if (avant !== compact && racine && U.$('#ne', racine)) editeur(); },
     enregistrer: enregistrer, nouvelleDepuisLecon: function () { nouvelle(); }, contexte: function (c) { contexte = c; }
   };

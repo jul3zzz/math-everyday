@@ -144,7 +144,7 @@
         num: total + 1, essais: 2, etiquette: 'Entraînement',
         onFin: function (premier, ok) {
           total++; st().entr.n++;
-          if (ok) { justes++; serie++; meilleure = Math.max(meilleure, serie); Progres.gagner('exo', { ok: true }); } else { serie = 0; Progres.rate(); }
+          if (ok) { justes++; serie++; meilleure = Math.max(meilleure, serie); Progres.gagner('exo', { ok: true, lecon: l.id }); } else { serie = 0; Progres.rate({ lecon: l.id }); }
           Store.save();
           var nx = U.$('#en-next', main); nx.classList.remove('hidden'); nx.focus();
           nx.onclick = nouvel;
@@ -268,11 +268,16 @@
       ['#/revisions', 'refresh', 'Cartes mémo', nd ? nd + ' carte' + (nd > 1 ? 's' : '') + ' à revoir aujourd\'hui' : 'Révisions espacées des leçons déjà faites', nd],
       ['#/entrainement', 'pencil', 'Entraînement', 'Des exercices nouveaux à l\'infini, chapitre par chapitre'],
       ['#/examens', 'clock', 'Examens blancs', 'Brevet, bac et concours blancs chronométrés, notés sur 20'],
-      ['#/fiches', 'book', 'Fiches résumé', 'Une fiche d\'une page par leçon, à imprimer ou garder en PDF']
+      ['#/fiches', 'book', 'Fiches résumé', 'Une fiche d\'une page par leçon, à imprimer ou garder en PDF'],
+      ['#/calcul-mental', 'target', 'Calcul mental', Store.estPremium() ? 'Séries de calculs de tête, sans limite' : 'Séries de calculs de tête · ' + CalculMental.LIMITE + ' calculs gratuits par jour'],
+      ['#/atelier', 'compass', 'Mode libre', 'Géométrie, courbes, équations et exercices sur une même feuille', 0, true],
+      ['#/sujets', 'star', 'Sujets type examen', 'Brevet, bac et concours complets, corrigés et notés', 0, true],
+      ['#/plan', 'clock', 'Plan de révision', s.plan && s.plan.date >= U.today() ? 'Ton programme jusqu\'au ' + s.plan.date.split('-').reverse().join('/') : 'Un programme jour par jour jusqu\'à ton examen', 0, true]
     ];
+    var prem = Store.estPremium();
     main.innerHTML = page('<span class="eyebrow">S\'entraîner</span><h1>Ancrer ce que tu as appris</h1>' +
       Mascotte.bulle(nd ? 'Tu as ' + nd + ' carte' + (nd > 1 ? 's' : '') + ' mémo à revoir : c\'est le meilleur moyen de ne rien oublier !' : 'Rien à réviser pour l\'instant. Un peu d\'entraînement ?', nd ? 'content' : 'pense') +
-      '<div class="hub">' + tuiles.map(function (t) { return '<a class="card hub-t" href="' + t[0] + '">' + I(t[1]) + '<b>' + t[2] + '</b><span class="muted small">' + t[3] + '</span>' + (t[4] ? '<span class="hub-pastille">' + t[4] + '</span>' : '') + '</a>'; }).join('') + '</div>' +
+      '<div class="hub">' + tuiles.map(function (t) { return '<a class="card hub-t" href="' + t[0] + '">' + I(t[1]) + '<b>' + t[2] + '</b><span class="muted small">' + t[3] + '</span>' + (t[4] ? '<span class="hub-pastille">' + t[4] + '</span>' : '') + (t[5] ? '<span class="hub-prem' + (prem ? ' on' : '') + '">' + I(prem ? 'check' : 'crown') + (prem ? 'Inclus' : 'Abonnés') + '</span>' : '') + '</a>'; }).join('') + '</div>' +
       '<p class="small muted" style="margin-top:22px">Le formulaire complet, la calculatrice, le brouillon et la géométrie sont dans les outils (boutons en bas à droite).</p>');
   }
 
@@ -292,7 +297,11 @@
     var nbB = Object.keys(s.badges || {}).length;
     main.innerHTML = page('<span class="eyebrow">Progrès</span><h1>Ton parcours</h1>' +
       '<div class="card niv-carte">' + Mascotte.svg(nbB ? 'bravo' : 'content') + '<div class="niv-t"><span class="small muted">Niveau ' + N.n + '</span><b>' + esc(N.titre) + '</b>' +
-      '<div class="progress" style="margin:8px 0 4px"><i style="width:' + (N.dans / N.besoin * 100) + '%"></i></div><span class="small muted mono">' + N.dans + ' / ' + N.besoin + ' XP · total ' + Progres.xp() + ' XP</span></div></div>' +
+      '<div class="progress" style="margin:8px 0 4px"><i style="width:' + (N.dans / N.besoin * 100) + '%"></i></div><span class="small muted mono">' + N.dans + ' / ' + N.besoin + ' XP · total ' + Progres.xp() + ' XP</span></div>' +
+      '<div class="btn-row niv-act"><button class="btn btn-2 btn-sm" type="button" id="pg-masc">' + I('palette') + 'Ma mascotte</button><a class="btn btn-2 btn-sm" href="#/bilan">' + I('target') + 'Bilan détaillé</a></div></div>' +
+      (Store.estPremium()
+        ? '<div class="banner banner-prem">' + I('crown') + '<div class="banner-t"><b>Membre φ</b><span>' + Progres.jokersRestants() + ' joker' + (Progres.jokersRestants() > 1 ? 's' : '') + ' de série ce mois-ci (un jour manqué est protégé automatiquement) · XP doublée le week-end' + (Progres.weekend() ? ' : c\'est maintenant !' : '') + '</span></div></div>'
+        : '<a class="banner banner-prem" href="#/abonnement">' + I('crown') + '<div class="banner-t"><b>Avec l\'abonnement</b><span>2 jokers par mois pour protéger ta série, XP doublée le week-end, mascotte personnalisable et badge Membre φ.</span></div><span class="btn btn-2">Voir</span></a>') +
       '<div class="grid g4" style="margin:18px 0">' +
       tuile('flame', Progres.serie(), 'jours de suite', 'record : ' + Progres.meilleureSerie()) + tuile('book', nbF, 'leçons faites', LECONS.length + ' au total') +
       tuile('pencil', st0.exosOk, 'exercices justes', st0.exosTot ? Math.round(st0.exosOk / st0.exosTot * 100) + ' % de réussite' : 'en entraînement') + tuile('refresh', st0.cartes, 'cartes révisées', nbB + ' badge' + (nbB > 1 ? 's' : '')) + '</div>' +
@@ -301,7 +310,8 @@
       '<p class="small muted" style="margin:0">' + sem.lecons + ' / ' + obj + ' leçons cette semaine · ' + sem.jours + ' jour' + (sem.jours > 1 ? 's' : '') + ' actif' + (sem.jours > 1 ? 's' : '') + ' · ' + sem.xp + ' XP' + (sem.lecons >= obj ? ' · objectif atteint !' : '') + '</p></div>' +
       '<div class="card" style="margin-top:18px"><h2 style="margin:0 0 12px;font-size:1.2rem">Calendrier de série</h2>' + Progres.calendrier(26) + '</div>' +
       '<h2 style="margin-top:28px;font-size:1.3rem">Badges <span class="muted small">' + nbB + ' / ' + Progres.BADGES.length + '</span></h2><div class="badges">' + badges + '</div>');
-    U.$('#pg-obj', main).onchange = function () { s.objectif = s.objectif || {}; s.objectif.lecons = +this.value; Store.save(); vProgres(main); };
+    U.$('#pg-masc', main).onclick = Premium.editeurMascotte;
+    U.$('#pg-obj', main).onchange =function () { s.objectif = s.objectif || {}; s.objectif.lecons = +this.value; Store.save(); vProgres(main); };
     function tuile(ic, val, lib, sous) { return '<div class="stat" style="flex-direction:column;align-items:flex-start;padding:16px">' + I(ic) + '<b style="font-size:1.8rem;margin-top:6px">' + val + '</b><small>' + lib + '</small><small class="muted">' + sous + '</small></div>'; }
   }
 

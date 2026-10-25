@@ -50,8 +50,23 @@
     { id: 'matinal', nom: 'Lève-tôt', desc: 'Travailler avant 8 h', ic: 'sun', test: function () { return new Date().getHours() < 8; } },
     { id: 'nocturne', nom: 'Oiseau de nuit', desc: 'Travailler après 22 h', ic: 'sun', test: function () { return new Date().getHours() >= 22; } },
     { id: 'scribe', nom: 'Scribe', desc: 'Écrire 10 notes', ic: 'pencil', test: function (s) { return (s.notes || []).length >= 10; } },
-    { id: 'or', nom: 'Nombre d\'or', desc: 'Atteindre le niveau 8', ic: 'star', test: function (s) { return niveau(s.xp).n >= 8; } }
+    { id: 'or', nom: 'Nombre d\'or', desc: 'Atteindre le niveau 8', ic: 'star', test: function (s) { return niveau(s.xp).n >= 8; } },
+    { id: 'membre', nom: 'Membre φ', desc: 'Soutenir Math Everyday avec un abonnement', ic: 'crown', test: function () { return Store.estPremium(); } }
   ];
+  /* Avantages abonnés : XP doublée le week-end, 2 jokers de série par mois. */
+  function weekend() { var d = new Date().getDay(); return d === 0 || d === 6; }
+  var JOKERS_MOIS = 2;
+  function jokersRestants(mois) {
+    var u = st().jokers || {}, m = mois || U.today().slice(0, 7);
+    return Math.max(0, JOKERS_MOIS - Object.keys(u).filter(function (d) { return d.slice(0, 7) === m; }).length);
+  }
+  /* Statistiques par leçon pour le bilan détaillé */
+  function statLecon(id, ok) {
+    if (!id) return;
+    var s = st(); s.statsLecons = s.statsLecons || {};
+    var x = s.statsLecons[id] = s.statsLecons[id] || { ok: 0, tot: 0 };
+    x.tot++; if (ok) x.ok++;
+  }
 
   /* ---------------- API ---------------- */
   var GAINS = { lecon: function (o) { return 20 + 10 * (o.score || 0); }, exo: function () { return 5; }, carte: function (o) { return o.su ? 3 : 1; }, examen: function (o) { return Math.round(10 + (o.note || 0) * 3); } };
@@ -65,9 +80,10 @@
       var s = st(), avant = niveau(s.xp).n, j = jour(), premier = j.xp === 0;
       var g = GAINS[type] ? GAINS[type](o) : 0;
       if (premier && g > 0) g += 10; /* bonus première activité du jour */
+      if (g > 0 && Store.estPremium() && weekend()) g *= 2;
       s.xp += g; j.xp += g;
       if (type === 'lecon') j.lecons++;
-      if (type === 'exo') { j.exos++; s.stats.exosTot++; if (o.ok) s.stats.exosOk++; }
+      if (type === 'exo') { j.exos++; s.stats.exosTot++; if (o.ok) s.stats.exosOk++; statLecon(o.lecon, o.ok); }
       if (type === 'carte') { j.cartes++; s.stats.cartes++; }
       if (type === 'examen') s.stats.examens.push({ date: U.today(), niveau: o.niveau, note: o.note, titre: o.titre });
       Store.save();
@@ -77,7 +93,8 @@
       return g;
     },
     /* exo d'entraînement raté : compte dans les stats sans XP */
-    rate: function () { if (!Store.connecte()) return; var s = st(); s.stats.exosTot++; jour().exos++; Store.save(); },
+    rate: function (o) { if (!Store.connecte()) return; var s = st(); s.stats.exosTot++; jour().exos++; statLecon(o && o.lecon, false); Store.save(); },
+    weekend: weekend, jokersRestants: jokersRestants, JOKERS_MOIS: JOKERS_MOIS,
     verifierBadges: function () {
       var s = st(), nouveaux = [];
       BADGES.forEach(function (b) { if (!s.badges[b.id]) { try { if (b.test(s)) { s.badges[b.id] = U.today(); nouveaux.push(b); } } catch (e) { /* données incomplètes */ } } });
@@ -100,9 +117,18 @@
       var s = st(), jours = {};
       for (var k in s.activite) if (s.activite[k].xp > 0) jours[k] = 1;
       for (var id in s.faites) jours[s.faites[id].date] = 1;
-      var d = U.today(), n = 0;
+      var jk = s.jokers || {}, d = U.today(), n = 0, utilise = false;
+      for (var j in jk) if (!jours[j]) jours[j] = 2;
       if (!jours[d]) d = U.addDays(d, -1);
-      while (jours[d]) { n++; d = U.addDays(d, -1); }
+      for (;;) {
+        if (jours[d]) { if (jours[d] === 1) n++; d = U.addDays(d, -1); continue; }
+        /* jour manqué entre deux jours actifs : un joker le protège automatiquement (abonnés) */
+        if (n > 0 && jours[U.addDays(d, -1)] && Store.estPremium() && jokersRestants(d.slice(0, 7)) > 0) {
+          s.jokers = jk; jk[d] = U.today(); jours[d] = 2; utilise = true; continue;
+        }
+        break;
+      }
+      if (utilise) { Store.save(); setTimeout(function () { toast('Joker utilisé : ta série est protégée !'); }, 600); }
       return n;
     },
     meilleureSerie: function () {
@@ -158,6 +184,10 @@
   ];
   var Mascotte = {
     svg: function (humeur) {
+      var svg = Mascotte.brut(humeur);
+      return window.Premium ? Premium.decorerMascotte(svg) : svg;
+    },
+    brut: function (humeur) {
       humeur = humeur || 'content';
       var yeux = humeur === 'bravo'
         ? '<path d="M24 30q3-4 6 0M34 30q3-4 6 0" fill="none" stroke="var(--masc-ink)" stroke-width="2.4" stroke-linecap="round"/>'

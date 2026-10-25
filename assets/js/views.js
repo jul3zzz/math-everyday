@@ -48,6 +48,7 @@
       var st = Store.get();
       if (Store.estPremium()) return true;
       if (st.faites[id]) return true;
+      if (window.Premium && Premium.anticipe(lecon(id))) return false; /* accès anticipé : abonnés d'abord */
       if (st.devoirsLecons && st.devoirsLecons.indexOf(id) >= 0) return true;
       var j = Jour.get();
       if (!j) return false;
@@ -226,7 +227,7 @@
       '<div class="stat">' + I('target') + '<span><b>' + (moy == null ? '–' : moy + ' %') + '</b><small>réussite</small></span></div>' +
       '</div></div>' +
       Mascotte.bulle(Mascotte.salut(st.profil.nom)) +
-      '<div id="bandeau-devoirs"></div>' +
+      '<div id="bandeau-devoirs"></div>' + (window.Premium ? Premium.bandeauPlan() : '') +
       '<div class="daily">' + cartes + '</div>' + info +
       (nDues ? '<a class="banner banner-rv" href="#/revisions">' + I('refresh') + '<div class="banner-t"><b>' + nDues + ' carte' + (nDues > 1 ? 's' : '') + ' mémo à réviser</b><span>Quelques minutes pour ne pas oublier les leçons déjà faites.</span></div><span class="btn btn-2">Réviser</span></a>' : '') +
       '<div class="card card-flat" style="margin-top:24px"><div class="row"><b>Programme ' + U.esc(NIVEAUX[idx].long) + '</b><span class="spacer"></span><span class="muted small mono">' + fNiv + ' / ' + tot + '</span></div>' +
@@ -250,7 +251,9 @@
 
     if (acc !== true) {
       var corps;
-      if (!st.profil) {
+      if (st.profil && window.Premium && Premium.anticipe(l)) {
+        corps = '<div class="card center" style="padding:40px 24px">' + Mascotte.bulle('Cette leçon est toute nouvelle : les abonnés la découvrent en avant-première. Elle sera ouverte à tous le ' + U.addDays(l.nouveau, 31).split('-').reverse().join('/') + '.', 'content') + '<div class="btn-row" style="justify-content:center"><a class="btn btn-lg" href="#/abonnement">' + I('crown') + 'Voir les offres</a><a class="btn btn-lg btn-2" href="#/nouveautes">Nouveautés</a></div></div>';
+      } else if (!st.profil) {
         corps = '<div class="card center" style="padding:40px 24px">' + I('user') + '<h2 style="margin-top:12px">Crée ton compte gratuit</h2><p class="muted">Un compte, un test de niveau d\'une vingtaine de minutes, et ta première leçon gratuite est débloquée.</p><div class="btn-row" style="justify-content:center"><a class="btn btn-lg" href="#/compte">Créer mon compte</a><a class="btn btn-lg btn-2" href="#/compte/connexion">Se connecter</a></div></div>';
       } else if (!st.niveau) {
         corps = '<div class="card center" style="padding:40px 24px">' + I('target') + '<h2 style="margin-top:12px">Passe d\'abord le test de niveau</h2><p class="muted">Il te place au bon niveau et débloque ta première leçon gratuite.</p><div class="btn-row" style="justify-content:center"><a class="btn btn-lg" href="#/test">Passer le test</a></div></div>';
@@ -365,6 +368,8 @@
       '<div class="center" style="max-width:640px;margin:0 auto 34px"><span class="eyebrow">Abonnement</span><h1>Toutes les maths, sans limite.</h1>' +
       '<p class="muted" style="font-size:1.08rem">Gratuitement, tu as une leçon complète par jour. Avec l\'abonnement, tu fais les 3 leçons du jour et tu as accès à tout le programme, de la 6e à la prépa, quand tu veux.</p></div>' +
       '<div class="plans">' + cartes + '</div>' +
+      '<h2 class="center" style="margin-top:48px">Tout ce que tu débloques</h2>' +
+      '<div class="perks">' + AVANTAGES.map(function (a) { return '<a class="perk" href="' + a[3] + '">' + I(a[0]) + '<b>' + a[1] + '</b><span>' + a[2] + '</span></a>'; }).join('') + '</div>' +
       '<div class="card" style="margin-top:34px;overflow-x:auto"><table class="compare"><thead><tr><th>Ce qui est inclus</th><th>Gratuit</th><th>Abonné</th></tr></thead><tbody>' +
       '<tr><td>Test de niveau (20 questions + 5 exercices)</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
       '<tr><td>Mail quotidien avec 3 leçons proposées</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
@@ -375,8 +380,19 @@
       '<tr><td>Entraînement : exercices générés à l\'infini</td><td>10 par jour</td><td>Illimité</td></tr>' +
       '<tr><td>Brevet, bac et concours blancs</td><td>1 par semaine</td><td>Illimité</td></tr>' +
       '<tr><td>Fiches résumé de tout le programme</td><td>' + no + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Calcul mental (séries de calculs de tête)</td><td>' + CalculMental.LIMITE + ' calculs par jour</td><td>Illimité</td></tr>' +
+      '<tr><td>Mode libre : géométrie, courbes, équations, exercices sur la figure</td><td>' + no + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Sujets type brevet, bac et concours corrigés</td><td>' + no + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Plan de révision jusqu\'à l\'examen</td><td>' + no + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Bilan détaillé par chapitre</td><td>' + no + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Nouvelles leçons et nouveaux outils en avant-première</td><td>' + no + '</td><td>' + ok + '</td></tr>' +
       '<tr><td>Calculatrice, notes, brouillon, géométrie, formulaire</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Cahier en ligne (notes et brouillon sur tous tes appareils) + export PDF</td><td>Sur l\'appareil</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Tout le site hors connexion (polices, miniatures, outils)</td><td>Pages visitées</td><td>' + ok + '</td></tr>' +
       '<tr><td>XP, badges, calendrier de série</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Jokers de série (un jour manqué protégé)</td><td>' + no + '</td><td>2 par mois</td></tr>' +
+      '<tr><td>XP doublée le week-end + badge Membre φ</td><td>' + no + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Designs exclusifs et mascotte personnalisable</td><td>3 designs</td><td>6 designs + mascotte</td></tr>' +
       '</tbody></table></div>' +
       '<div class="faq" style="max-width:760px;margin:34px auto 0"><h2>Questions fréquentes</h2>' +
       faq('Comment marche le « satisfait ou remboursé » ?', 'Sur l\'offre mensuelle, si le premier mois ne te convient pas, tu demandes le remboursement dans les 30 jours suivant ton premier paiement et on te rembourse intégralement, sans justification.') +
@@ -401,6 +417,20 @@
       };
     };
   }
+  var AVANTAGES = [
+    ['infinity', 'Leçons illimitées', 'Les 3 leçons du jour et tout le programme, de la 6e à la prépa.', '#/programme'],
+    ['compass', 'Mode libre', 'Trace figures, fonctions et équations, écris tes maths et génère des exercices.', '#/atelier'],
+    ['star', 'Sujets type examen', 'Brevet, bac et concours complets, notés sur 20 et corrigés.', '#/sujets'],
+    ['clock', 'Plan de révision', 'Un programme jour par jour jusqu\'à la date de ton examen.', '#/plan'],
+    ['chart', 'Bilan détaillé', 'Tes points forts et tes points faibles, chapitre par chapitre.', '#/bilan'],
+    ['target', 'Calcul mental illimité', 'Autant de séries que tu veux, sur 10 thèmes.', '#/calcul-mental'],
+    ['book', 'Cahier en ligne + PDF', 'Notes et brouillon sur tous tes appareils, tout le cahier en un PDF.', '#/reglages'],
+    ['download', 'Tout hors connexion', 'Télécharge le site entier pour réviser sans réseau.', '#/reglages'],
+    ['sparkle', 'Accès anticipé', 'Chaque nouveauté t\'arrive 30 jours avant tout le monde.', '#/nouveautes'],
+    ['flame', 'Jokers de série', '2 jokers par mois protègent ta série si tu rates un jour.', '#/progres'],
+    ['crown', 'Badge Membre φ', 'Un badge visible par tes amis et l\'XP doublée le week-end.', '#/progres'],
+    ['palette', 'Designs et mascotte', 'Tableau noir, Cahier d\'écolier, Nuit douce, et une mascotte à ton goût.', '#/reglages']
+  ];
   function faq(q, r) { return '<details><summary>' + q + '</summary><p>' + r + '</p></details>'; }
 
   /* ================= Réglages ================= */
@@ -409,7 +439,7 @@
     if (!st.profil) { location.hash = '#/compte/connexion'; return; }
     var heures = ['07:00', '08:00', '12:00', '16:30', '17:30', '18:30', '19:30', '20:30'];
     var themes = Theme.liste.map(function (t) {
-      return '<button type="button" class="choice" data-theme-pick="' + t.id + '" aria-pressed="' + (Theme.actuel() === t.id) + '"><span class="choice-l">' + I('palette') + '</span><span><b>' + U.esc(t.nom) + '</b><br><span class="small muted">' + U.esc(t.desc) + '</span></span></button>';
+      return '<button type="button" class="choice" data-theme-pick="' + t.id + '" aria-pressed="' + (Theme.actuel() === t.id) + '"><span class="choice-l">' + I(t.premium && !st.premium ? 'lock' : 'palette') + '</span><span><b>' + U.esc(t.nom) + '</b>' + (t.premium ? ' <span class="chip chip-prem">' + I('crown') + 'Exclusif</span>' : '') + '<br><span class="small muted">' + U.esc(t.desc) + '</span></span></button>';
     }).join('');
     var nivOpts = NIVEAUX.map(function (n) { return '<option value="' + n.id + '"' + (n.id === st.niveau ? ' selected' : '') + '>' + U.esc(n.long) + '</option>'; }).join('');
     var ab = st.premium
@@ -435,6 +465,13 @@
       '<div><button class="btn btn-2 btn-sm" type="button" id="r-test">' + I('refresh') + 'Repasser le test</button></div></div></div>' +
 
       '<div class="card"><h2>' + I('crown') + 'Abonnement</h2>' + ab + '</div>' +
+      '<div class="card"><h2>' + I('sparkle') + 'Avantages abonnés</h2><p class="muted small">' + (st.premium ? 'Tout est inclus dans ton offre.' : 'Réservés aux abonnés : tu peux les découvrir ici.') + '</p><div class="btn-row">' +
+      '<button class="btn btn-2 btn-sm" type="button" id="r-masc">' + I('palette') + 'Ma mascotte</button>' +
+      '<button class="btn btn-2 btn-sm" type="button" id="r-cahier">' + I('book') + 'Cahier en PDF</button>' +
+      '<button class="btn btn-2 btn-sm" type="button" id="r-horsligne">' + I('download') + (st.horsLigne ? 'Mettre à jour le téléchargement' : 'Tout télécharger hors connexion') + '</button>' +
+      '<a class="btn btn-ghost btn-sm" href="#/nouveautes">' + I('sparkle') + 'Nouveautés</a></div>' +
+      (st.horsLigne ? '<p class="small muted" style="margin:10px 0 0">Dernier téléchargement complet : ' + U.esc(st.horsLigne.split('-').reverse().join('/')) + '.</p>' : '') +
+      (st.premium && window.Synchro && Synchro.actif ? '<p class="small muted" style="margin:10px 0 0">Cahier en ligne actif : tes notes et ton brouillon sont synchronisés.</p>' : '') + '</div>' +
       (window.Cloud && Cloud.actif ? '<div class="card"><h2>' + I('book') + 'Classes</h2><p class="muted small">Rejoins la classe de ton professeur avec son code, ou crée tes propres classes si tu enseignes.</p><div class="btn-row"><a class="btn btn-2 btn-sm" href="#/classes">Mes classes</a><a class="btn btn-ghost btn-sm" href="#/prof">' + (st.prof ? 'Espace professeur' : 'Je suis professeur') + '</a></div></div>' : '') +
 
       '<div class="card"><h2>' + I('lock') + 'Mot de passe</h2><form class="form" id="r-mdp" novalidate>' +
@@ -462,7 +499,10 @@
     U.$('#r-apercu', main).onclick = function () { if (!st.niveau) { toast('Passe d\'abord le test de niveau.'); return; } Modal.ouvrir(apercuMail(), { large: true }); };
     U.$('#r-test', main).onclick = function () { Test.recommencer(); location.hash = '#/test'; };
     var rs = U.$('#r-resil', main);
-    if (rs) rs.onclick = function () { Store.set({ premium: null }); toast('Abonnement résilié (démo).'); vReglages(main); };
+    if (rs) rs.onclick = function () { Store.set({ premium: null }); if (Theme.premium(Theme.actuel())) Theme.appliquer('minimal'); toast('Abonnement résilié (démo).'); vReglages(main); };
+    U.$('#r-masc', main).onclick = Premium.editeurMascotte;
+    U.$('#r-cahier', main).onclick = function () { Notes.imprimerCahier(); };
+    U.$('#r-horsligne', main).onclick = function () { Premium.toutTelecharger(this); };
     U.$('#r-mdp', main).onsubmit = function (e) {
       e.preventDefault();
       var f = this;
@@ -501,16 +541,19 @@
 
   /* ================= Sélecteur de design ================= */
   function modalThemes() {
+    var prem = Store.estPremium();
     var b = Theme.liste.map(function (t) {
-      return '<button type="button" class="dp" data-theme-pick="' + t.id + '" aria-pressed="' + (Theme.actuel() === t.id) + '" style="display:grid;grid-template-columns:150px 1fr;align-items:center">' +
-        '<span class="dp-prev p-' + t.id + '" style="height:90px;border-bottom:0"><i></i><i></i><i></i><i></i><i></i></span>' +
-        '<span class="dp-txt"><b>' + U.esc(t.nom) + '</b><span>' + U.esc(t.desc) + '</span></span></button>';
+      var bloque = t.premium && !prem;
+      return '<button type="button" class="dp' + (bloque ? ' dp-bloque' : '') + '" data-theme-pick="' + t.id + '" aria-pressed="' + (Theme.actuel() === t.id) + '">' +
+        '<span class="dp-prev p-' + t.id + '"><i></i><i></i><i></i><i></i><i></i></span>' +
+        '<span class="dp-txt"><b>' + U.esc(t.nom) + (t.premium ? ' <span class="chip chip-prem">' + I(bloque ? 'lock' : 'crown') + 'Exclusif</span>' : '') + '</b><span>' + U.esc(t.desc) + '</span></span></button>';
     }).join('');
-    Modal.ouvrir('<h2 id="modal-title">Choisis ton design</h2><p class="muted">Le contenu reste le même, seule l\'ambiance change.</p><div class="theme-opts">' + b + '</div>');
+    Modal.ouvrir('<h2 id="modal-title">Choisis ton design</h2><p class="muted">Le contenu reste le même, seule l\'ambiance change.' + (prem ? '' : ' Les designs exclusifs sont réservés aux abonnés.') + '</p><div class="theme-opts">' + b + '</div>');
   }
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-theme-pick]');
     if (!t) return;
+    if (Theme.premium(t.getAttribute('data-theme-pick')) && !Store.estPremium()) { Modal.fermer(); location.hash = '#/abonnement'; toast('Design exclusif : réservé aux abonnés.'); return; }
     Theme.appliquer(t.getAttribute('data-theme-pick'));
     U.$$('[data-theme-pick]').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-theme-pick') === Theme.actuel()); });
     toast('Design : ' + Theme.nom(Theme.actuel()));

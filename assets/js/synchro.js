@@ -1,7 +1,8 @@
 /* Math Everyday — synchronisation des comptes avec le nuage (Firebase).
    Quand le nuage est actif, les fonctions de compte de Store passent par Cloud, la progression est
-   envoyée en ligne quelques secondes après chaque changement et récupérée à la connexion. Le brouillon
-   (dessins) reste sur l'appareil. Expose window.Synchro. */
+   envoyée en ligne quelques secondes après chaque changement et récupérée à la connexion.
+   Cahier en ligne (abonnés) : les notes voyagent avec la progression et le brouillon (dessins) dans
+   cahiers/{uid}. Sans abonnement, notes et brouillon restent sur l'appareil. Expose window.Synchro. */
 (function () {
   'use strict';
   if (!window.Cloud || !Cloud.actif) { window.Synchro = { actif: false }; return; }
@@ -15,7 +16,23 @@
   function operation(p) { occupe = true; return p.then(function (v) { occupe = false; return v; }, function (e) { occupe = false; throw e; }); }
   var ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-  function sansBrouillon(d) { var c = Object.assign({}, d); delete c.brouillon; return c; }
+  function sansBrouillon(d) { var c = Object.assign({}, d); delete c.brouillon; if (!d.premium) delete c.notes; return c; }
+  var dernierCahier = null, cahierTropGros = false;
+  function pousserCahier(u, d) {
+    if (!d.premium || !d.brouillon) return Promise.resolve();
+    var json = JSON.stringify(d.brouillon);
+    if (json === dernierCahier) return Promise.resolve();
+    if (json.length > 900000) { if (!cahierTropGros) { cahierTropGros = true; toast('Brouillon trop lourd pour le cahier en ligne : supprime quelques pages pour le synchroniser.'); } return Promise.resolve(); }
+    cahierTropGros = false;
+    return Cloud.ecrire('cahiers/' + u.uid, { json: json, maj: Date.now() }).then(function () { dernierCahier = json; });
+  }
+  /* fusion des notes : on garde chaque note, dans sa version la plus récente */
+  function fusionNotes(a, b) {
+    var m = {};
+    (a || []).concat(b || []).forEach(function (n) { if (n && n.id && (!m[n.id] || (n.modif || '') > (m[n.id].modif || ''))) m[n.id] = n; });
+    return Object.keys(m).map(function (k) { return m[k]; });
+  }
+  function brouillonVide(b) { return !b || !b.pages || b.pages.every(function (p) { return !p.traits || !p.traits.length; }); }
   function lundi() { return Progres.semaine().lundi; }
   function profilPublic(d) {
     var faites = {};
@@ -34,7 +51,8 @@
     enCours = true;
     return Promise.all([
       Cloud.ecrire('users/' + u.uid, { json: JSON.stringify(sansBrouillon(d)), maj: d._maj || Date.now() }),
-      Cloud.ecrire('publics/' + u.uid, profilPublic(d), true)
+      Cloud.ecrire('publics/' + u.uid, profilPublic(d), true),
+      pousserCahier(u, d)
     ]).then(function () { enCours = false; etat('ok'); }, function (e) { enCours = false; etat('erreur', e); });
   }
   function planifier() { if (application) return; clearTimeout(timer); timer = setTimeout(pousser, 2500); etat('attente'); }
@@ -70,7 +88,12 @@
       if (doc && doc.json) {
         var distant = JSON.parse(doc.json);
         if (!forcer && loc && loc.uid === u.uid && (loc._maj || 0) > (doc.maj || 0)) data = loc;
-        else { data = distant; if (brouillon) data.brouillon = brouillon; }
+        else {
+          data = distant;
+          if (brouillon) data.brouillon = brouillon;
+          var memeCompte = loc && (!loc.uid || loc.uid === u.uid);
+          if (memeCompte && loc.notes) data.notes = distant.premium ? fusionNotes(distant.notes, loc.notes) : loc.notes;
+        }
       } else if (loc && (!loc.uid || loc.uid === u.uid)) data = loc;
       else data = Store._defaut();
       data.uid = u.uid;
@@ -79,8 +102,17 @@
       application = true;
       Store._activer(u.mail, data, { uid: u.uid });
       application = false;
-      return initialiserPublic(u.uid);
+      return Promise.all([initialiserPublic(u.uid), tirerCahier(u, data)]);
     });
+  }
+  /* Nouvel appareil : on récupère le brouillon en ligne si celui de l'appareil est vide. */
+  function tirerCahier(u, data) {
+    if (!data.premium || !brouillonVide(data.brouillon)) return Promise.resolve();
+    return Cloud.lire('cahiers/' + u.uid).then(function (doc) {
+      if (!doc || !doc.json) return;
+      var d = Store.get(); d.brouillon = JSON.parse(doc.json); dernierCahier = doc.json;
+      application = true; Store.save(true); application = false;
+    }).catch(function () { /* hors ligne : on réessaiera */ });
   }
 
   /* ---------------- Remplacement des fonctions de compte ---------------- */
@@ -111,7 +143,7 @@
   Store.supprimerCompte = function (mdp) {
     var u = Cloud.utilisateur(), d = Store.get();
     if (!u) { local.supprimerCompte(); return Promise.resolve(); }
-    var nettoyage = [Cloud.effacer('users/' + u.uid), Cloud.effacer('publics/' + u.uid)];
+    var nettoyage = [Cloud.effacer('users/' + u.uid), Cloud.effacer('publics/' + u.uid), Cloud.effacer('cahiers/' + u.uid)];
     if (d.codeAmi) nettoyage.push(Cloud.effacer('codes/' + d.codeAmi));
     return Cloud.appel('reauth', mdp).catch(function (e) { throw new Error(Cloud.message(e)); })
       .then(function () { return Promise.all(nettoyage.map(function (p) { return p.catch(function () { /* déjà absent */ }); })); })

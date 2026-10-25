@@ -20,6 +20,12 @@ service cloud.firestore {
       allow create, update: if moi(uid) && request.resource.data.keys().hasOnly(['json', 'maj']);
     }
 
+    // Cahier en ligne (abonnés) : pages du brouillon, visibles par l'élève seul.
+    match /cahiers/{uid} {
+      allow read, delete: if moi(uid);
+      allow create, update: if moi(uid) && request.resource.data.keys().hasOnly(['json', 'maj']);
+    }
+
     // Profil visible par les élèves connectés (prénom, niveau, XP, série…).
     match /publics/{uid} {
       allow read: if connecte();

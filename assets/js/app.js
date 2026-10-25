@@ -10,7 +10,7 @@
         .concat(window.Cloud && Cloud.actif ? [['amis', 'Amis', 'user']] : [['abonnement', Store.estPremium() ? 'Illimité' : 'Abonnement', 'crown']])
         .concat(st.prof ? [['prof', 'Prof', 'book']] : []).concat([['reglages', 'Réglages', 'gear']])
       : [['', 'Accueil', 'sun'], ['programme', 'Programme', 'list'], ['formulaire', 'Formulaire', 'book'], ['abonnement', 'Abonnement', 'crown'], ['compte/connexion', 'Se connecter', 'user']];
-    var groupe = { revisions: 'sentrainer', entrainement: 'sentrainer', examens: 'sentrainer', fiches: 'sentrainer', fiche: 'sentrainer', duel: 'amis', classes: 'amis', lecon: st.profil ? 'aujourdhui' : '' };
+    var groupe = { revisions: 'sentrainer', entrainement: 'sentrainer', examens: 'sentrainer', fiches: 'sentrainer', fiche: 'sentrainer', atelier: 'sentrainer', 'calcul-mental': 'sentrainer', sujets: 'sentrainer', plan: 'sentrainer', bilan: 'progres', nouveautes: 'abonnement', duel: 'amis', classes: 'amis', lecon: st.profil ? 'aujourdhui' : '' };
     var actif = groupe[route] != null ? groupe[route] : route;
     var nd = st.profil && window.Entrainement ? Entrainement.dues() : 0;
     document.getElementById('nav').innerHTML = items.map(function (it) {
@@ -29,6 +29,7 @@
     if (r === 'test' && !st.profil) { location.hash = '#/compte'; return; }
     main.onclick = null;
     document.onkeydown = null;
+    if (Theme.premium(Theme.actuel()) && !Store.estPremium()) Theme.appliquer('minimal');
     Modal.fermer();
     nav(r);
     switch (r) {
@@ -51,6 +52,12 @@
       case 'duel': Social.duel(main, parts[1]); break;
       case 'classes': Social.classes(main); break;
       case 'prof': Social.prof(main, parts[1]); break;
+      case 'atelier': Atelier.page(main); break;
+      case 'calcul-mental': CalculMental.page(main, parts[1]); break;
+      case 'sujets': Premium.sujets(main, parts[1]); break;
+      case 'plan': Premium.plan(main); break;
+      case 'bilan': Premium.bilan(main); break;
+      case 'nouveautes': Premium.nouveautes(main); break;
       default: Vues.accueil(main);
     }
     U.math(main);

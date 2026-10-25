@@ -181,8 +181,23 @@
     a.download = 'brouillon-page-' + (etat().cur + 1) + '.png';
     document.body.appendChild(a); a.click(); a.remove();
   }
+  /* image PNG d'une page, pour le cahier complet en PDF */
+  function imagePage(i) {
+    var page = etat().pages[i];
+    if (!page || !page.traits.length) return null;
+    var w = 0, h = 0;
+    page.traits.forEach(function (t) { (t.p || [t.a, t.b]).forEach(function (q) { w = Math.max(w, q[0]); h = Math.max(h, q[1]); }); if (t.t === 'compas') { var r = Math.hypot(t.b[0] - t.a[0], t.b[1] - t.a[1]); w = Math.max(w, t.a[0] + r); h = Math.max(h, t.a[1] + r); } });
+    var c = document.createElement('canvas'), ancien = ctx;
+    c.width = Math.ceil(Math.max(480, w + 30)); c.height = Math.ceil(Math.max(320, h + 30));
+    ctx = c.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height);
+    page.traits.forEach(trait);
+    ctx = ancien;
+    return c.toDataURL('image/png');
+  }
   var dejaEcoute = false;
   window.Brouillon = {
+    imagePage: imagePage,
+    nbPages: function () { return etat().pages.length; },
     monter: function (c) {
       monter(c);
       if (!dejaEcoute) {
