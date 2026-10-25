@@ -87,6 +87,8 @@
       return;
     }
     el.innerHTML = '<div class="notes"><aside class="nl" id="nl"></aside><section class="ne" id="ne"></section></div>';
+    /* liste des notes : largeur réglable */
+    Redim.activer(U.$('.notes', el), U.$('#nl', el), { nom: 'notes', cote: 'droite', min: 200, max: 480, defaut: 270 });
     var s = st();
     if (!courante || !s.notes.some(function (n) { return n.id === courante; })) {
       var tri = trier(s.notes.slice());

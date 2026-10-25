@@ -13,13 +13,44 @@
     var groupe = { revisions: 'sentrainer', entrainement: 'sentrainer', examens: 'sentrainer', fiches: 'sentrainer', fiche: 'sentrainer', atelier: 'sentrainer', 'calcul-mental': 'sentrainer', sujets: 'sentrainer', plan: 'sentrainer', bilan: 'progres', nouveautes: 'abonnement', duel: 'amis', classes: 'amis', lecon: st.profil ? 'aujourdhui' : '' };
     var actif = groupe[route] != null ? groupe[route] : route;
     var nd = st.profil && window.Entrainement ? Entrainement.dues() : 0;
-    /* beaucoup d'onglets : sur écran moyen, icônes seules (voir refonte.css) */
-    document.getElementById('nav').classList.toggle('nav-longue', items.length > 5);
     document.getElementById('nav').innerHTML = items.map(function (it) {
       var on = actif === it[0].split('/')[0];
       return '<a href="#/' + it[0] + '" title="' + it[1] + '"' + (on ? ' aria-current="page"' : '') + '>' + I(it[2]) + '<span class="nav-lbl">' + it[1] + '</span>' + (it[0] === 'sentrainer' && nd ? '<span class="nav-pastille">' + nd + '</span>' : '') + '</a>';
     }).join('');
+    ajusterNav();
   }
+
+  /* Menu « Plus » : les onglets qui ne tiennent pas dans la barre passent dans un menu déroulant
+     (la page active reste toujours visible). Recalculé quand la barre change de largeur. */
+  var navEl = document.getElementById('nav'), plusW = document.getElementById('nav-plus'),
+    plusB = document.getElementById('nav-plus-b'), menu = document.getElementById('nav-menu');
+  function fermerMenu() { menu.hidden = true; plusB.setAttribute('aria-expanded', 'false'); }
+  function ajusterNav() {
+    var liens = U.$$('a', navEl);
+    liens.forEach(function (a) { a.hidden = false; });
+    plusW.hidden = true; menu.innerHTML = '';
+    if (navEl.scrollWidth <= navEl.clientWidth + 1) { fermerMenu(); return; }
+    plusW.hidden = false;
+    var caches = [];
+    for (var i = liens.length - 1; i >= 0 && navEl.scrollWidth > navEl.clientWidth + 1; i--) {
+      if (liens[i].hasAttribute('aria-current')) continue;
+      liens[i].hidden = true; caches.unshift(liens[i]);
+    }
+    menu.innerHTML = caches.map(function (a) { return '<a href="' + a.getAttribute('href') + '">' + a.innerHTML + '</a>'; }).join('');
+    plusB.innerHTML = I('menu') + '<span>Plus</span>';
+  }
+  plusB.onclick = function (e) {
+    e.stopPropagation();
+    var ouvrir = menu.hidden;
+    menu.hidden = !ouvrir; plusB.setAttribute('aria-expanded', String(ouvrir));
+    if (ouvrir) { var p = menu.querySelector('a'); if (p) p.focus(); }
+  };
+  menu.addEventListener('click', fermerMenu);
+  document.addEventListener('click', function (e) { if (!menu.hidden && !e.target.closest('#nav-plus')) fermerMenu(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !menu.hidden) { fermerMenu(); plusB.focus(); } });
+  if (window.ResizeObserver) new ResizeObserver(function () { ajusterNav(); }).observe(document.querySelector('.top-in'));
+  else window.addEventListener('resize', ajusterNav);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajusterNav);
 
   function router() {
     var h = location.hash.replace(/^#\/?/, '');

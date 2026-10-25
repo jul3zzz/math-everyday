@@ -155,13 +155,8 @@
 @media (max-width:720px){.hub{grid-template-columns:1fr}.niv-carte{flex-direction:column;text-align:center}.ex-barre{top:104px}.masc{width:52px;height:52px}}
 .foot-liens{display:flex;align-items:center;gap:10px}
 .foot-liens a{color:inherit}
-/* navigation compacte : icônes seules (sauf la page active) quand la place manque */
-@media (max-width:1180px) and (min-width:721px){
-  .nav a:not([aria-current]) .nav-lbl{display:none}
-  .nav a{padding:8px 10px}
-  .theme-btn span{display:none}
-}
-@media (max-width:720px){.nav a .nav-lbl{display:inline}}
+/* la barre de navigation passe ses onglets en trop dans le menu « Plus » (app.js, refonte.css) */
+@media (max-width:1180px){.theme-btn span{display:none}}
 /* boutons flottants : icônes rondes, libellé au survol */
 .fab{gap:8px}
 .fab-b{width:48px;height:48px;padding:0;justify-content:center;position:relative}

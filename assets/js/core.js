@@ -78,7 +78,8 @@
     trash: '<path d="M4 6.5h16M9.5 6.5V4h5v2.5M6.5 6.5l1 14h9l1-14"/>',
     compass: '<circle cx="12" cy="4.5" r="2"/><path d="M11 6.3L5 21M13 6.3L19 21M7.2 15h9.6"/>',
     download: '<path d="M12 3.5v12M7 10.5l5 5 5-5M4 20.5h16"/>',
-    sparkle: '<path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 17v4M17 19h4"/>'
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    sparkle:'<path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 17v4M17 19h4"/>'
   };
   function I(name, cls) {
     return '<svg class="ic ' + (cls || '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (P[name] || '') + '</svg>';
@@ -391,6 +392,44 @@
     }
   };
   Affichage.appliquer();
+
+  /* ---------------- Panneaux latéraux redimensionnables ----------------
+     Redim.activer(conteneur, panneau, { nom, cote, min, max, defaut }) pose une poignée sur le bord
+     du panneau ; la largeur va dans la variable CSS --l-<nom> du conteneur et reste mémorisée.
+     Glisser, flèches gauche / droite au clavier, double-clic pour revenir à la taille d'origine. */
+  var CLE_TAILLES = 'mathEveryday.tailles';
+  function tailles() { try { return JSON.parse(localStorage.getItem(CLE_TAILLES) || '{}') || {}; } catch (e) { return {}; } }
+  var Redim = {
+    activer: function (conteneur, panneau, o) {
+      var v = '--l-' + o.nom, t = tailles();
+      function poser(w, garder) {
+        var max = Math.min(o.max, Math.max(o.min, conteneur.clientWidth - 320));
+        w = Math.round(Math.max(o.min, Math.min(max, w)));
+        conteneur.style.setProperty(v, w + 'px');
+        if (garder) { var tt = tailles(); tt[o.nom] = w; try { localStorage.setItem(CLE_TAILLES, JSON.stringify(tt)); } catch (e) { /* rien */ } }
+        window.dispatchEvent(new Event('resize'));
+        return w;
+      }
+      if (t[o.nom]) conteneur.style.setProperty(v, t[o.nom] + 'px');
+      var p = document.createElement('div');
+      p.className = 'redim-p ' + o.cote;
+      p.setAttribute('role', 'separator'); p.setAttribute('aria-orientation', 'vertical'); p.tabIndex = 0;
+      p.setAttribute('aria-label', 'Largeur du panneau (flèches gauche et droite)');
+      p.title = 'Glisser pour changer la largeur · double-clic : taille d\'origine';
+      panneau.appendChild(p);
+      var dep = null, sens = o.cote === 'droite' ? 1 : -1;
+      p.addEventListener('pointerdown', function (e) { e.preventDefault(); dep = { x: e.clientX, w: panneau.getBoundingClientRect().width }; p.setPointerCapture(e.pointerId); document.body.classList.add('redim'); });
+      p.addEventListener('pointermove', function (e) { if (dep) poser(dep.w + sens * (e.clientX - dep.x), false); });
+      p.addEventListener('pointerup', function () { if (!dep) return; poser(panneau.getBoundingClientRect().width, true); dep = null; document.body.classList.remove('redim'); });
+      p.addEventListener('dblclick', function () { poser(o.defaut, true); });
+      p.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        poser(panneau.getBoundingClientRect().width + (e.key === 'ArrowRight' ? 24 : -24) * sens, true);
+      });
+    }
+  };
+  window.Redim = Redim;
 
   /* ---------------- Modale & toast ---------------- */
   var dernierFocus = null;

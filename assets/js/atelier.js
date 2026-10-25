@@ -535,10 +535,14 @@
       '<button type="button" class="cb" id="at-ann">↶ Annuler</button><button type="button" class="cb" id="at-ref">↷</button><button type="button" class="cb" data-z="1.25">Zoom +</button><button type="button" class="cb" data-z="0.8">Zoom −</button><button type="button" class="cb" id="at-centre">Recentrer</button><button type="button" class="cb" id="at-tout">Tout effacer</button><button type="button" class="cb" id="at-png">Image</button></div></div>' +
       '<aside class="at-droite"><div class="seg" role="tablist"><button type="button" class="seg-b" data-pan="exo" aria-selected="true">Exercices</button><button type="button" class="seg-b" data-pan="calc" aria-selected="false">Calculatrice</button></div>' +
       '<div id="at-pan-exo"><div class="btn-row"><button class="btn btn-sm" type="button" id="at-exo-fig">' + I('target') + 'Sur ma figure</button></div>' +
-      '<div class="form-l" style="margin-top:10px"><label>Chapitre<select class="input" id="at-chap">' + NIVEAUX.map(function (n) { return '<optgroup label="' + esc(n.long) + '">' + LECONS.filter(function (l) { return l.niveau === n.id; }).map(function (l) { return '<option value="' + l.id + '"' + (l.niveau === Store.get().niveau && l.ordre === 1 ? ' selected' : '') + '>' + esc(l.titre) + '</option>'; }).join('') + '</optgroup>'; }).join('') + '</select></label><button class="btn btn-2 btn-sm" type="button" id="at-exo-chap">Générer</button></div>' +
+      '<div class="form-l" style="margin-top:10px"><label class="large">Chapitre<select class="input" id="at-chap">' + NIVEAUX.map(function (n) { return '<optgroup label="' + esc(n.long) + '">' + LECONS.filter(function (l) { return l.niveau === n.id; }).map(function (l) { return '<option value="' + l.id + '"' + (l.niveau === Store.get().niveau && l.ordre === 1 ? ' selected' : '') + '>' + esc(l.titre) + '</option>'; }).join('') + '</optgroup>'; }).join('') + '</select></label><button class="btn btn-2 btn-sm" type="button" id="at-exo-chap">Générer</button></div>' +
       '<div id="at-exo-zone" style="margin-top:12px"></div></div><div id="at-pan-calc" hidden></div></aside></section>';
     cv = U.$('#at-cv', main); ctx = cv.getContext('2d'); el = main;
     U.math(U.$('.at-aide', main));
+    /* colonnes de gauche (commandes) et de droite (exercices, calculatrice) : largeur réglable */
+    var sec = U.$('.atelier', main);
+    Redim.activer(sec, U.$('.at-algebre', main), { nom: 'at-g', cote: 'droite', min: 200, max: 560, defaut: 280 });
+    Redim.activer(sec, U.$('.at-droite', main), { nom: 'at-d', cote: 'gauche', min: 240, max: 620, defaut: 320 });
     aide(); taille(); lier(main);
     if (!g.objs.length) exemple();
   }

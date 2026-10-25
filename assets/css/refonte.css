@@ -123,11 +123,28 @@ html{--tuile-ic:var(--hover)}
 .nav{gap:6px}
 .nav a{padding:10px 14px;gap:9px;font-size:.95rem;border-color:transparent}
 .nav a svg{width:22px;height:22px;flex-shrink:0}
-/* navigation compacte (icônes seules sauf la page active) quand la place manque ou que le panneau d'outils est ouvert */
-@media (max-width:1520px) and (min-width:721px){.nav-longue a:not([aria-current]) .nav-lbl{display:none}.nav-longue a{padding:10px 12px}.theme-btn span{display:none}}
-@media (max-width:1180px) and (min-width:721px){.nav a:not([aria-current]) .nav-lbl{display:none}}
-body.outils-range .nav a:not([aria-current]) .nav-lbl,body.outils-range .theme-btn span{display:none}
-body.outils-range .nav a{padding:10px 12px}
+/* menu « Plus » : les onglets qui ne tiennent pas passent dans un menu déroulant */
+.nav{overflow:hidden;min-width:0;flex:0 1 auto;margin-left:auto}
+.nav a{flex-shrink:0}
+.nav-plus{position:relative;flex-shrink:0}
+.nav-plus-b{display:flex;align-items:center;gap:9px;padding:10px 14px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--ink-2);font-weight:600;font-size:.95rem;cursor:pointer;white-space:nowrap}
+.nav-plus-b:hover,.nav-plus-b[aria-expanded=true]{background:var(--hover);color:var(--ink)}
+.nav-plus-b svg{width:22px;height:22px}
+.nav-menu{position:absolute;right:0;top:calc(100% + 10px);z-index:60;min-width:240px;padding:8px;display:grid;gap:2px;background:var(--surface);color:var(--ink);border-radius:var(--r);box-shadow:0 24px 60px rgba(0,0,0,.2)}
+.nav-menu a{display:flex;align-items:center;gap:14px;padding:13px 14px;border-radius:var(--r-sm);text-decoration:none;font-weight:600;font-size:1rem;color:var(--ink)}
+.nav-menu a:hover,.nav-menu a:focus-visible{background:var(--hover)}
+.nav-menu a svg{width:22px;height:22px;flex-shrink:0}
+.nav-menu .nav-lbl{display:inline!important}
+html[data-theme=enfantin] .nav-menu{border:3px solid #1d1b4b;box-shadow:6px 6px 0 #1d1b4b}
+@media (max-width:720px){
+  .top-in{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"b t" "n p";gap:10px 8px}
+  .brand{grid-area:b}
+  .theme-btn{grid-area:t;margin:0}
+  .nav{grid-area:n;width:auto;margin:0;order:0}
+  .nav-plus{grid-area:p}
+  .nav a,.nav-plus-b{padding:10px 12px}
+  .nav-menu{right:0;min-width:min(280px,calc(100vw - 32px))}
+}
 .brand-name{font-size:1.2rem}
 .logo{width:40px;height:40px}
 .theme-btn{border:0;box-shadow:none;background:var(--hover);height:46px;padding:0 16px;border-radius:var(--r-sm)}
@@ -222,3 +239,61 @@ html[data-theme="minimal"] .k-mode.on,html[data-theme="minimal"] .k-2{background
 .outils-tab:not([aria-selected="true"]) span{display:none}
 .outils-tab:not([aria-selected="true"]){padding:9px 11px}
 .k{min-height:clamp(48px,6.4vh,62px)}
+
+/* ===================== Panneaux latéraux redimensionnables (Redim, core.js) ===================== */
+.atelier{grid-template-columns:var(--l-at-g,280px) minmax(0,1fr) var(--l-at-d,320px)}
+.notes{grid-template-columns:var(--l-notes,270px) minmax(0,1fr)}
+.notes.compact{grid-template-columns:1fr}
+.at-algebre,.at-droite,.nl{position:relative}
+.redim-p{position:absolute;top:0;bottom:0;width:14px;z-index:6;cursor:col-resize;touch-action:none}
+.redim-p.droite{right:0}
+.redim-p.gauche{left:0}
+.redim-p::after{content:"";position:absolute;top:50%;width:5px;height:48px;margin-top:-24px;border-radius:3px;background:var(--ink);opacity:.18;transition:opacity .15s,height .15s}
+.redim-p.droite::after{right:3px}
+.redim-p.gauche::after{left:3px}
+.redim-p:hover::after,.redim-p:focus-visible::after,body.redim .redim-p::after{opacity:.55;height:88px;margin-top:-44px}
+.redim-p:focus-visible{outline:none}
+.notes.compact .redim-p{display:none}
+@media (max-width:1100px){.atelier{grid-template-columns:var(--l-at-g,240px) minmax(0,1fr)}.at-droite .redim-p{display:none}}
+@media (max-width:720px){.atelier{grid-template-columns:1fr}.redim-p{display:none}}
+html[data-theme="enfantin"] .nav-plus-b,html[data-theme="enfantin"] .nav-menu a{font-family:"Fredoka",sans-serif;font-weight:600}
+html[data-theme="dore"] .nav-plus-b,html[data-theme="dore"] .nav-menu a{font-variant:small-caps;letter-spacing:.06em;font-weight:500}
+html[data-theme="tableau"] .nav-menu,html[data-theme="nuit"] .nav-menu{box-shadow:0 24px 60px rgba(0,0,0,.45)}
+
+/* ===================== Lisibilité sur téléphone ===================== */
+@media (max-width:720px){
+  html{font-size:106.25%}
+  html[data-taille="s"]{font-size:100%}
+  html[data-taille="l"]{font-size:118.75%}
+  html[data-taille="xl"]{font-size:131.25%}
+  body{line-height:1.65}
+  h1{font-size:clamp(1.9rem,8.4vw,2.4rem);line-height:1.12}
+  h2{font-size:clamp(1.45rem,6.4vw,1.8rem)}
+  .eyebrow{font-size:.82rem;letter-spacing:.06em}
+  .chip{font-size:.84rem;padding:4px 11px}
+  .small,.muted.small{font-size:.92rem}
+  .stat small,.dl-time,.hint,.video-meta,.nl-d,.nl-x,.n-tag,.at-d,.ch-e{font-size:.88rem}
+  .stat{flex:1 1 calc(50% - 10px)}
+  .stats{width:100%}
+  .btn{min-height:52px;font-size:1.02rem}
+  .btn-sm{min-height:46px;font-size:.98rem}
+  .btn-row .btn{flex:1 1 auto}
+  .choice{padding:14px 16px;font-size:1.04rem}
+  .input{min-height:52px;font-size:1.05rem;max-width:none}
+  .answer .input{flex:1 1 100%}
+  .answer .btn{flex:1 1 100%}
+  .cours{font-size:1.04rem}
+  .def,.prop,.methode,.attention,.ex-box{padding:14px 16px}
+  .katex{font-size:1.04em}
+  .lesson-outils .btn,.lesson-outils .cb{flex:1 1 calc(50% - 8px);justify-content:center}
+  .compare th,.compare td{padding:12px 6px}
+  .modal-box{padding:22px 18px;max-height:calc(100vh - 24px)}
+  .modal{padding:12px}
+  .toast{bottom:84px}
+}
+
+@media (max-width:720px){
+  .stat b{white-space:nowrap;font-size:1.25rem}
+  /* un seul bouton flottant : la calculatrice ouvre le panneau, les autres outils sont dans ses onglets */
+  .fab-b:not([data-outil="calc"]){display:none}
+}
