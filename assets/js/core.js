@@ -79,6 +79,8 @@
     compass: '<circle cx="12" cy="4.5" r="2"/><path d="M11 6.3L5 21M13 6.3L19 21M7.2 15h9.6"/>',
     download: '<path d="M12 3.5v12M7 10.5l5 5 5-5M4 20.5h16"/>',
     menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    chevron: '<path d="M7 10l5 5 5-5"/>',
+    calc: '<rect x="4.5" y="2.5" width="15" height="19" rx="2.5"/><rect x="7.5" y="5.5" width="9" height="4" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 16.5h.01M12 16.5h.01M16 16.5h.01M8 19.5h.01M12 19.5h4"/>',
     sparkle:'<path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 17v4M17 19h4"/>'
   };
   function I(name, cls) {

@@ -3,21 +3,108 @@
   'use strict';
   var main = document.getElementById('main');
 
+  /* ================= Navigation =================
+     Ordinateur : 4 onglets principaux en haut, le reste dans le menu du compte (avatar).
+     Téléphone : barre d'onglets en bas comme une appli (la calculatrice au centre), le reste dans la feuille « Menu ». */
+  var actifCourant = '';
+  function lien(it, actif, cls) {
+    var on = actif === it[0].split('/')[0];
+    return '<a href="#/' + it[0] + '"' + (cls ? ' class="' + cls + '"' : '') + (on ? ' aria-current="page"' : '') + '>' + I(it[2]) + '<span class="nav-lbl">' + it[1] + '</span>' + (it[3] ? '<span class="nav-pastille">' + it[3] + '</span>' : '') + '</a>';
+  }
+  /* éléments secondaires (menu du compte et feuille « Menu ») */
+  function secondaires(st) {
+    return (window.Cloud && Cloud.actif ? [['amis', 'Amis', 'user']] : [])
+      .concat(st.prof ? [['prof', 'Espace prof', 'book']] : [])
+      .concat([['abonnement', Store.estPremium() ? 'Mon abonnement' : 'Abonnement', 'crown'], ['reglages', 'Réglages', 'gear']]);
+  }
   function nav(route) {
     var st = Store.get();
-    var items = st.profil
-      ? [['aujourdhui', 'Aujourd\'hui', 'sun'], ['sentrainer', 'S\'entraîner', 'pencil'], ['programme', 'Programme', 'list'], ['progres', 'Progrès', 'star']]
-        .concat(window.Cloud && Cloud.actif ? [['amis', 'Amis', 'user']] : [['abonnement', Store.estPremium() ? 'Illimité' : 'Abonnement', 'crown']])
-        .concat(st.prof ? [['prof', 'Prof', 'book']] : []).concat([['reglages', 'Réglages', 'gear']])
-      : [['', 'Accueil', 'sun'], ['programme', 'Programme', 'list'], ['formulaire', 'Formulaire', 'book'], ['abonnement', 'Abonnement', 'crown'], ['compte/connexion', 'Se connecter', 'user']];
-    var groupe = { revisions: 'sentrainer', entrainement: 'sentrainer', examens: 'sentrainer', fiches: 'sentrainer', fiche: 'sentrainer', atelier: 'sentrainer', 'calcul-mental': 'sentrainer', sujets: 'sentrainer', plan: 'sentrainer', bilan: 'progres', nouveautes: 'abonnement', duel: 'amis', classes: 'amis', lecon: st.profil ? 'aujourdhui' : '' };
-    var actif = groupe[route] != null ? groupe[route] : route;
+    var groupe = { revisions: 'sentrainer', entrainement: 'sentrainer', examens: 'sentrainer', fiches: 'sentrainer', fiche: 'sentrainer', atelier: 'sentrainer', 'calcul-mental': 'sentrainer', sujets: 'sentrainer', plan: 'sentrainer', bilan: 'progres', nouveautes: 'abonnement', duel: 'amis', classes: 'amis', lecon: st.profil ? 'aujourdhui' : '', compte: 'compte' };
+    var actif = actifCourant = groupe[route] != null ? groupe[route] : route;
     var nd = st.profil && window.Entrainement ? Entrainement.dues() : 0;
-    document.getElementById('nav').innerHTML = items.map(function (it) {
-      var on = actif === it[0].split('/')[0];
-      return '<a href="#/' + it[0] + '" title="' + it[1] + '"' + (on ? ' aria-current="page"' : '') + '>' + I(it[2]) + '<span class="nav-lbl">' + it[1] + '</span>' + (it[0] === 'sentrainer' && nd ? '<span class="nav-pastille">' + nd + '</span>' : '') + '</a>';
-    }).join('');
+    var principaux = st.profil
+      ? [['aujourdhui', 'Aujourd\'hui', 'sun'], ['sentrainer', 'S\'entraîner', 'pencil', nd], ['programme', 'Programme', 'list'], ['progres', 'Progrès', 'star']]
+      : [['programme', 'Programme', 'list'], ['formulaire', 'Formulaire', 'book'], ['abonnement', 'Abonnement', 'crown']];
+    document.getElementById('nav').innerHTML = principaux.map(function (it) { return lien(it, actif); }).join('');
+    /* à droite : le compte (ordinateur) */
+    var ha = document.getElementById('haut-actions');
+    if (st.profil) {
+      var initiale = U.esc((st.profil.nom || '?').trim().charAt(0).toUpperCase() || '?');
+      var sec = secondaires(st);
+      ha.innerHTML = '<div class="compte-m"><button type="button" class="avatar-b' + (sec.some(function (x) { return x[0] === actif; }) ? ' on' : '') + '" id="avatar-b" aria-haspopup="true" aria-expanded="false" aria-controls="menu-compte" aria-label="Mon compte"><span class="avatar">' + initiale + '</span><span class="avatar-nom">' + U.esc(st.profil.nom) + '</span>' + I('chevron') + '</button>' +
+        '<div class="menu-d" id="menu-compte" hidden><div class="menu-tete"><span class="avatar avatar-l">' + initiale + '</span><span><b>' + U.esc(st.profil.nom) + '</b><small>' + U.esc(st.profil.mail || '') + '</small></span></div>' +
+        sec.map(function (it) { return lien(it, actif, 'menu-i'); }).join('') +
+        '<button type="button" class="menu-i" data-apparence>' + I('palette') + '<span class="nav-lbl">Apparence</span></button>' +
+        '<button type="button" class="menu-i menu-sortie" data-deco>' + I('arrow') + '<span class="nav-lbl">Se déconnecter</span></button></div></div>';
+    } else {
+      ha.innerHTML = '<a class="btn btn-ghost btn-sm" href="#/compte/connexion"' + (route === 'compte' ? ' aria-current="page"' : '') + '>Se connecter</a><a class="btn btn-sm" href="#/compte">Créer un compte</a>';
+    }
+    /* téléphone : barre du bas */
+    var bas = st.profil
+      ? lien(['aujourdhui', 'Aujourd\'hui', 'sun'], actif, 'bb') + lien(['sentrainer', 'S\'entraîner', 'pencil', nd], actif, 'bb') +
+        '<button type="button" class="bb bb-centre" data-outil="calc" aria-label="Calculatrice et outils">' + I('calc') + '<span class="nav-lbl">Outils</span></button>' +
+        lien(['progres', 'Progrès', 'star'], actif, 'bb') +
+        '<button type="button" class="bb' + (['programme'].concat(secondaires(st).map(function (x) { return x[0]; })).indexOf(actif) >= 0 ? ' on' : '') + '" data-ouvrir-feuille aria-haspopup="dialog">' + I('menu') + '<span class="nav-lbl">Menu</span></button>'
+      : lien(['', 'Accueil', 'sun'], actif, 'bb') + lien(['programme', 'Leçons', 'list'], actif, 'bb') + lien(['formulaire', 'Formules', 'book'], actif, 'bb') +
+        lien(['abonnement', 'Offres', 'crown'], actif, 'bb') + lien(['compte', 'Compte', 'user'], actif, 'bb');
+    document.getElementById('barre-bas').innerHTML = bas;
+    fermerTout();
     ajusterNav();
+  }
+
+  /* menu du compte (ordinateur) */
+  function menuCompte() { return document.getElementById('menu-compte'); }
+  function fermerTout() {
+    var m = menuCompte(); if (m) { m.hidden = true; var b = document.getElementById('avatar-b'); if (b) b.setAttribute('aria-expanded', 'false'); }
+    fermerFeuille();
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('#avatar-b');
+    if (b) {
+      e.stopPropagation();
+      var m = menuCompte(), ouvrir = m.hidden;
+      m.hidden = !ouvrir; b.setAttribute('aria-expanded', String(ouvrir));
+      if (ouvrir) { var p = m.querySelector('.menu-i'); if (p) p.focus(); }
+      return;
+    }
+    if (e.target.closest('[data-apparence]')) { fermerTout(); Vues.themes(); return; }
+    if (e.target.closest('[data-deco]')) { fermerTout(); Store.deconnexion(); if (window.Test) Test.recommencer(); location.hash = '#/'; toast('Tu es déconnecté. À bientôt !'); return; }
+    if (e.target.closest('[data-ouvrir-feuille]')) { ouvrirFeuille(); return; }
+    if (e.target.closest('[data-fermer-feuille]')) { fermerFeuille(); return; }
+    if (e.target.closest('.feuille a, .feuille [data-outil]')) { fermerFeuille(); return; }
+    var m2 = menuCompte();
+    if (m2 && !m2.hidden && !e.target.closest('.compte-m')) fermerTout();
+    if (m2 && !m2.hidden && e.target.closest('.menu-i')) fermerTout();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var m = menuCompte();
+    if (m && !m.hidden) { fermerTout(); document.getElementById('avatar-b').focus(); }
+    if (!document.getElementById('feuille').hidden) fermerFeuille();
+  });
+
+  /* feuille « Menu » (téléphone) : grandes tuiles */
+  function ouvrirFeuille() {
+    var st = Store.get(), f = document.getElementById('feuille'), boite = document.getElementById('feuille-boite');
+    var tuiles = [['programme', 'Programme', 'list']].concat(secondaires(st))
+      .concat([['formulaire', 'Formulaire', 'book'], ['atelier', 'Mode libre', 'compass'], ['calcul-mental', 'Calcul mental', 'target']]);
+    /* grille de 3 colonnes toujours pleine (+ 2 tuiles fixes : Notes et Apparence) */
+    var bonus = [['fiches', 'Fiches résumé', 'book'], ['examens', 'Examens blancs', 'clock'], ['sujets', 'Sujets type', 'star']];
+    while ((tuiles.length + 2) % 3 && bonus.length) tuiles.push(bonus.shift());
+    var N = window.Progres ? Progres.niveau(Progres.xp()) : null;
+    boite.innerHTML = '<div class="feuille-poignee" aria-hidden="true"></div>' +
+      '<div class="menu-tete"><span class="avatar avatar-l">' + U.esc((st.profil.nom || '?').charAt(0).toUpperCase()) + '</span><span><b>' + U.esc(st.profil.nom) + '</b><small>' + (N ? 'Niveau ' + N.n + ' · ' + U.esc(N.titre) : '') + '</small></span></div>' +
+      '<div class="feuille-grille">' + tuiles.map(function (it) { return lien(it, actifCourant, 'tuile'); }).join('') +
+      '<button type="button" class="tuile" data-outil="notes">' + I('pencil') + '<span class="nav-lbl">Notes</span></button>' +
+      '<button type="button" class="tuile" data-apparence>' + I('palette') + '<span class="nav-lbl">Apparence</span></button></div>' +
+      '<button type="button" class="feuille-sortie" data-deco>Se déconnecter</button>';
+    f.hidden = false;
+    document.body.classList.add('feuille-ouverte');
+    var p = boite.querySelector('a'); if (p) p.focus();
+  }
+  function fermerFeuille() {
+    var f = document.getElementById('feuille');
+    if (f && !f.hidden) { f.hidden = true; document.body.classList.remove('feuille-ouverte'); }
   }
 
   /* Menu « Plus » : les onglets qui ne tiennent pas dans la barre passent dans un menu déroulant

@@ -35,11 +35,16 @@
       <button class="nav-plus-b" id="nav-plus-b" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="nav-menu"><span>Plus</span></button>
       <div class="nav-menu" id="nav-menu" hidden></div>
     </div>
-    <button class="theme-btn" id="theme-btn" type="button" aria-haspopup="dialog" aria-label="Changer de design"></button>
+    <div class="haut-actions" id="haut-actions"></div>
+    <button class="theme-btn" id="theme-btn" type="button" aria-haspopup="dialog" aria-label="Apparence"></button>
   </div>
 </header>
 
 <main id="main" tabindex="-1"></main>
+
+<!-- Téléphone : barre d'onglets en bas et feuille « Menu » (app.js) -->
+<nav class="barre-bas" id="barre-bas" aria-label="Navigation"></nav>
+<div class="feuille" id="feuille" hidden><div class="feuille-fond" data-fermer-feuille></div><div class="feuille-boite" role="dialog" aria-modal="true" aria-label="Menu" id="feuille-boite"></div></div>
 
 <footer class="foot">
   <div class="foot-in">
