@@ -9,6 +9,41 @@
   ];
   window.PLANS = PLANS;
 
+  /* Paiement par carte : liens de paiement Stripe (config.js > paiement). La carte est saisie sur la page
+     sécurisée de Stripe, jamais sur Math Everyday. Stripe renvoie ensuite ici avec ?paiement=cs_…&offre=… */
+  var CLE_PAIEMENT = 'mathEveryday.paiement';
+  var Paiement = {
+    lien: function (id) { var c = window.ME_CONFIG && ME_CONFIG.paiement; return (c && c[id]) || ''; },
+    actif: function () { return !!(Paiement.lien('mensuel') || Paiement.lien('annuel') || Paiement.lien('vie')); },
+    portail: function () { return Paiement.lien('portail'); },
+    payer: function (p) {
+      var st = Store.get();
+      if (!st.profil) { Modal.fermer(); toast('Crée d\'abord ton compte gratuit.'); location.hash = '#/compte'; return; }
+      if (window.Synchro && Synchro.actif && !Synchro.verifie()) { Modal.fermer(); location.hash = '#/verifier'; return; }
+      var u = window.Cloud && Cloud.utilisateur(), url = Paiement.lien(p.id);
+      /* seul l'identifiant du compte part chez Stripe, pour relier le paiement au bon élève */
+      if (u && u.uid) url += (url.indexOf('?') < 0 ? '?' : '&') + 'client_reference_id=' + encodeURIComponent(u.uid);
+      location.href = url;
+    },
+    retour: function () {
+      var q = new URLSearchParams(location.search), s = q.get('paiement'), o = q.get('offre');
+      if (s) {
+        try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { /* rien */ }
+        if (/^cs_(test|live)_[A-Za-z0-9]+$/.test(s) && PLANS.some(function (p) { return p.id === o; })) {
+          try { sessionStorage.setItem(CLE_PAIEMENT, JSON.stringify({ plan: o, session: s })); } catch (e) { /* rien */ }
+        }
+      }
+      var att = null;
+      try { att = JSON.parse(sessionStorage.getItem(CLE_PAIEMENT) || 'null'); } catch (e) { att = null; }
+      if (!att || !Store.get().profil) return;
+      try { sessionStorage.removeItem(CLE_PAIEMENT); } catch (e) { /* rien */ }
+      Store.set({ premium: { plan: att.plan, depuis: U.today(), session: att.session } });
+      if (window.Synchro && Synchro.actif) Synchro.pousser();
+      setTimeout(function () { toast('Paiement reçu : abonnement ' + planNom(att.plan) + ' activé. Merci !'); }, 300);
+    }
+  };
+  window.Paiement = Paiement;
+
   function lecon(id) { for (var i = 0; i < LECONS.length; i++) if (LECONS[i].id === id) return LECONS[i]; return null; }
   function leconsDe(nid) { return LECONS.filter(function (l) { return l.niveau === nid; }); }
   function chipNiv(nid) { var n = niv(nid); return '<span class="chip chip-lvl lv-' + nid + '">' + (n ? n.nom : nid) + '</span>'; }
@@ -401,16 +436,22 @@
       faq('Que comprend l\'offre à vie ?', 'Un paiement unique de 49,99 € pour un accès permanent à toutes les leçons actuelles et futures, sans renouvellement.') +
       faq('Je peux continuer gratuitement ?', 'Bien sûr. Chaque jour, une leçon complète (cours, vidéo, 3 exercices) reste offerte.') +
       '</div>' +
-      '<p class="center small muted" style="margin-top:28px">Version démo : aucun paiement n\'est effectué, l\'abonnement est simulé sur cet appareil.</p>'
+      (Paiement.actif()
+        ? '<p class="center small muted" style="margin-top:28px">' + I('lock') + ' Paiement par carte sécurisé par Stripe. Compte avec e-mail vérifié requis.</p>'
+        : '<p class="center small muted" style="margin-top:28px">Version démo : aucun paiement n\'est effectué, l\'abonnement est simulé sur cet appareil.</p>')
     );
     main.onclick = function (e) {
       var b = e.target.closest('[data-plan]'); if (!b) return;
       var p = PLANS.filter(function (x) { return x.id === b.getAttribute('data-plan'); })[0];
       Modal.ouvrir('<h2 id="modal-title">Offre ' + p.nom.toLowerCase() + ' · ' + p.prix + ' ' + p.per + '</h2>' +
         '<p class="muted">' + p.note + '.</p>' +
-        '<div class="card card-flat" style="margin:16px 0"><b>Mode démo</b><p class="small muted" style="margin:6px 0 0">Le paiement sécurisé (Stripe) sera branché à la mise en ligne définitive. Ici, l\'abonnement est simulé : aucune carte n\'est demandée, rien n\'est débité.</p></div>' +
-        '<div class="btn-row"><button class="btn" type="button" id="m-ok" autofocus>' + I('crown') + 'Activer (démo)</button><button class="btn btn-2" type="button" data-close>Annuler</button></div>');
+        (Paiement.lien(p.id)
+          ? '<div class="card card-flat paie-sur" style="margin:16px 0">' + I('shield') + '<div><b>Paiement sécurisé par Stripe</b><p class="small muted" style="margin:6px 0 0">Tu saisis ta carte sur la page chiffrée de Stripe (3-D Secure de ta banque). Tes données bancaires ne passent jamais par Math Everyday. Reçu envoyé par e-mail.</p></div></div>' +
+            '<div class="btn-row"><button class="btn" type="button" id="m-ok" autofocus>' + I('lock') + 'Payer ' + p.prix + ' par carte</button><button class="btn btn-2" type="button" data-close>Annuler</button></div>'
+          : '<div class="card card-flat" style="margin:16px 0"><b>Mode démo</b><p class="small muted" style="margin:6px 0 0">Le paiement sécurisé (Stripe) sera branché à la mise en ligne définitive. Ici, l\'abonnement est simulé : aucune carte n\'est demandée, rien n\'est débité.</p></div>' +
+            '<div class="btn-row"><button class="btn" type="button" id="m-ok" autofocus>' + I('crown') + 'Activer (démo)</button><button class="btn btn-2" type="button" data-close>Annuler</button></div>'));
       U.$('#m-ok').onclick = function () {
+        if (Paiement.lien(p.id)) { Paiement.payer(p); return; }
         if (!Store.get().profil) { Modal.fermer(); toast('Crée d\'abord ton compte gratuit.'); location.hash = '#/compte'; return; }
         Store.set({ premium: { plan: p.id, depuis: U.today() } });
         Modal.fermer(); toast('Abonnement ' + p.nom.toLowerCase() + ' activé (démo).');
@@ -444,7 +485,10 @@
     }).join('');
     var nivOpts = NIVEAUX.map(function (n) { return '<option value="' + n.id + '"' + (n.id === st.niveau ? ' selected' : '') + '>' + U.esc(n.long) + '</option>'; }).join('');
     var ab = st.premium
-      ? '<p>Offre <b>' + U.esc(planNom(st.premium.plan)) + '</b> active depuis le ' + U.esc(st.premium.depuis) + '.</p><button class="btn btn-2" type="button" id="r-resil">Résilier (démo)</button>'
+      ? '<p>Offre <b>' + U.esc(planNom(st.premium.plan)) + '</b> active depuis le ' + U.esc(st.premium.depuis) + '.</p>' +
+        (Paiement.portail() ? '<a class="btn btn-2" href="' + U.esc(Paiement.portail()) + '" target="_blank" rel="noopener">' + I('gear') + 'Factures, carte et résiliation</a>'
+          : st.premium.session ? '<p class="small muted">Pour résilier ou obtenir une facture, réponds au reçu Stripe reçu par e-mail.</p>'
+          : '<button class="btn btn-2" type="button" id="r-resil">Résilier (démo)</button>')
       : '<p class="muted">Formule gratuite : 1 leçon complète par jour.</p><a class="btn" href="#/abonnement">' + I('crown') + 'Voir les offres</a>';
     main.innerHTML = page(
       '<span class="eyebrow">Réglages</span><h1>Ton espace</h1>' +
@@ -662,6 +706,7 @@
       var bouton = f.querySelector('[type="submit"]'); bouton.disabled = true;
       Store.creerCompte({ nom: nom, mail: mail, mdp: f['c-mdp'].value, classe: f.classe.value || null, notif: { actif: f.notif.checked, heure: f.heure.value } }).then(function () {
         Test.recommencer();
+        if (window.Synchro && Synchro.actif && !Synchro.verifie()) { location.hash = '#/verifier'; toast('Compte créé. Ouvre le mail qu\'on vient de t\'envoyer pour l\'activer.'); return; }
         location.hash = '#/test';
         toast('Compte créé. Bienvenue ' + nom + ' ! Place au test de niveau.');
       }, function (x) { bouton.disabled = false; err.textContent = (x && x.message && x.message !== 'existe') ? x.message : 'Impossible de créer le compte.'; });

@@ -149,6 +149,11 @@
     if (r === '' && st.profil && location.hash !== '#/') r = 'aujourdhui';
     /* Le test de niveau se passe une fois le compte créé. */
     if (r === 'test' && !st.profil) { location.hash = '#/compte'; return; }
+    /* compte en ligne pas encore vérifié : on attend le clic dans l'e-mail */
+    if (st.profil && window.Synchro && Synchro.actif && !Synchro.verifie() && ['verifier', 'compte', 'installer'].indexOf(r) < 0) { location.hash = '#/verifier'; return; }
+    if (r !== 'verifier' && window.Verification) Verification.arreter();
+    /* retour de la page de paiement Stripe (?paiement=cs_…&offre=…) */
+    if (window.Paiement) Paiement.retour();
     main.onclick = null;
     document.onkeydown = null;
     if (Theme.premium(Theme.actuel()) && !Store.estPremium()) Theme.appliquer('minimal');
@@ -181,6 +186,7 @@
       case 'bilan': Premium.bilan(main); break;
       case 'nouveautes': Premium.nouveautes(main); break;
       case 'installer': Installer.page(main); break;
+      case 'verifier': Verification.page(main); break;
       default: Vues.accueil(main);
     }
     U.math(main);

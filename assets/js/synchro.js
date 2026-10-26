@@ -47,7 +47,8 @@
   function pousser() {
     clearTimeout(timer); timer = null;
     var u = Cloud.utilisateur(), d = Store.get();
-    if (!u || !d.uid || d.uid !== u.uid || enCours) return Promise.resolve();
+    /* rien n'est écrit en ligne tant que l'adresse e-mail n'est pas vérifiée (règles Firestore) */
+    if (!u || !d.uid || d.uid !== u.uid || enCours || !Cloud.verifie()) return Promise.resolve();
     enCours = true;
     return Promise.all([
       Cloud.ecrire('users/' + u.uid, { json: JSON.stringify(sansBrouillon(d)), maj: d._maj || Date.now() }),
@@ -81,7 +82,8 @@
   }
   /* Récupère les données en ligne et les applique si elles sont plus récentes que celles de l'appareil. */
   function tirer(u, forcer) {
-    return Cloud.lire('users/' + u.uid).then(function (doc) {
+    var lecture = u.verifie === false ? Promise.resolve(null) : Cloud.lire('users/' + u.uid);
+    return lecture.then(function (doc) {
       var loc = Store._local(u.mail);
       var brouillon = loc && loc.brouillon;
       var data;
@@ -102,6 +104,7 @@
       application = true;
       Store._activer(u.mail, data, { uid: u.uid });
       application = false;
+      if (u.verifie === false) return null; /* la suite attend la vérification de l'adresse */
       return Promise.all([initialiserPublic(u.uid), tirerCahier(u, data)]);
     });
   }
@@ -122,11 +125,12 @@
       var d = Store._defaut();
       d.uid = u.uid; d.profil = { nom: infos.nom, mail: mail, cree: U.today() }; d.classe = infos.classe; d.notif = infos.notif;
       application = true; Store._activer(mail, d, { uid: u.uid }); application = false;
-      return initialiserPublic(u.uid);
+      /* le profil public et le code ami seront créés après la vérification de l'adresse */
+      return u.verifie === false ? null : initialiserPublic(u.uid);
     }, function (e) { throw new Error(Cloud.message(e)); }));
   };
   Store.connexion = function (mail, mdp) {
-    return operation(Cloud.connexion(mail.trim().toLowerCase(), mdp).then(function (u) { return tirer(u, true); }, function (e) { var x = new Error(Cloud.message(e)); x.cloud = true; throw x; }));
+    return operation(Cloud.connexion(mail.trim().toLowerCase(), mdp).then(function (u) { if (u.verifie === false) Cloud.envoyerVerification().catch(function () { /* déjà envoyé récemment */ }); return tirer(u, true); }, function (e) { var x = new Error(Cloud.message(e)); x.cloud = true; throw x; }));
   };
   Store.deconnexion = function () {
     pousser();
@@ -171,5 +175,21 @@
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden' && timer) pousser(); });
   window.addEventListener('pagehide', function () { if (timer) pousser(); });
 
-  window.Synchro = { actif: true, pousser: pousser, tirer: tirer, etat: function () { return dernierEtat; }, profilPublic: profilPublic };
+  /* appelée quand l'adresse vient d'être vérifiée : le compte passe en ligne */
+  function apresVerification() {
+    var u = Cloud.utilisateur(); if (!u) return Promise.resolve();
+    return initialiserPublic(u.uid).catch(function (e) { etat('erreur', e); });
+  }
+  /* 26/10/2026 : tous les comptes ont été effacés ; une session ouverte avant est fermée une fois */
+  var CLE_REINIT = 'mathEveryday.reinit';
+  var reinitVue = false;
+  Cloud.surEtat(function (u) {
+    if (reinitVue) return; reinitVue = true;
+    var deja = null; try { deja = localStorage.getItem(CLE_REINIT); } catch (e) { /* rien */ }
+    if (deja === '2026-10-26') return;
+    try { localStorage.setItem(CLE_REINIT, '2026-10-26'); } catch (e) { /* rien */ }
+    if (u) Cloud.deconnexion().catch(function () { /* déjà fermée */ });
+  });
+
+  window.Synchro = { actif: true, verifie: function () { return Cloud.verifie(); }, apresVerification: apresVerification, pousser: pousser, tirer: tirer, etat: function () { return dernierEtat; }, profilPublic: profilPublic };
 })();

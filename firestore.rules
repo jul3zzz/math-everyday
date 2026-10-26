@@ -4,7 +4,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
 
-    function connecte() { return request.auth != null; }
+    function connecte() { return request.auth != null && request.auth.token.email_verified == true; }
     function moi(uid) { return connecte() && request.auth.uid == uid; }
     // La seule différence entre l'ancienne et la nouvelle liste est l'utilisateur lui-même (ajout ou retrait).
     function seulMoiChange(champ) {

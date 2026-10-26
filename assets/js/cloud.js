@@ -22,17 +22,32 @@
       var db = F.getFirestore(app);
       function ref(chemin) { return F.doc.apply(null, [db].concat(chemin.split('/'))); }
       function donnees(s) { var d = s.data(); d.id = s.id; return d; }
+      /* lien de vérification : retour sur la page #/verifier du site */
+      function acs() { return { url: location.origin + location.pathname + '#/verifier', handleCodeInApp: false }; }
       return {
         nom: 'firebase',
-        inscrire: function (mail, mdp, nom) { return Au.createUserWithEmailAndPassword(auth, mail, mdp).then(function (c) { return Au.updateProfile(c.user, { displayName: nom }).then(function () { return { uid: c.user.uid, mail: c.user.email }; }); }); },
-        connexion: function (mail, mdp) { return Au.signInWithEmailAndPassword(auth, mail, mdp).then(function (c) { return { uid: c.user.uid, mail: c.user.email }; }); },
+        inscrire: function (mail, mdp, nom) {
+          return Au.createUserWithEmailAndPassword(auth, mail, mdp).then(function (c) {
+            Au.useDeviceLanguage(auth);
+            return Au.updateProfile(c.user, { displayName: nom })
+              .then(function () { return Au.sendEmailVerification(c.user, acs()); })
+              .then(function () { return { uid: c.user.uid, mail: c.user.email, verifie: false }; });
+          });
+        },
+        connexion: function (mail, mdp) { return Au.signInWithEmailAndPassword(auth, mail, mdp).then(function (c) { return { uid: c.user.uid, mail: c.user.email, verifie: c.user.emailVerified }; }); },
+        envoyerVerification: function () { Au.useDeviceLanguage(auth); return auth.currentUser ? Au.sendEmailVerification(auth.currentUser, acs()) : Promise.reject(new Error('auth/no-current-user')); },
+        /* relit le compte : vrai quand l'adresse vient d'être vérifiée (le jeton est alors renouvelé pour les règles) */
+        actualiser: function () {
+          var u = auth.currentUser; if (!u) return Promise.resolve(false);
+          return u.reload().then(function () { var v = auth.currentUser.emailVerified; return v ? auth.currentUser.getIdToken(true).then(function () { return true; }) : false; });
+        },
         deconnexion: function () { return Au.signOut(auth); },
         reinitialiser: function (mail) { return Au.sendPasswordResetEmail(auth, mail); },
         reauth: function (mdp) { return Au.reauthenticateWithCredential(auth.currentUser, Au.EmailAuthProvider.credential(auth.currentUser.email, mdp)); },
         changerMdp: function (ancien, nouveau) { var self = this; return self.reauth(ancien).then(function () { return Au.updatePassword(auth.currentUser, nouveau); }); },
         changerMail: function (nouveau) { return Au.verifyBeforeUpdateEmail(auth.currentUser, nouveau); },
         supprimerCompte: function (mdp) { var self = this; return self.reauth(mdp).then(function () { return Au.deleteUser(auth.currentUser); }); },
-        surEtat: function (cb) { Au.onAuthStateChanged(auth, function (u) { cb(u ? { uid: u.uid, mail: u.email, nom: u.displayName } : null); }); },
+        surEtat: function (cb) { Au.onAuthStateChanged(auth, function (u) { cb(u ? { uid: u.uid, mail: u.email, nom: u.displayName, verifie: u.emailVerified } : null); }); },
         lire: function (chemin) { return F.getDoc(ref(chemin)).then(function (s) { return s.exists() ? donnees(s) : null; }); },
         ecrire: function (chemin, obj, fusion) { return F.setDoc(ref(chemin), obj, fusion ? { merge: true } : undefined); },
         creer: function (chemin, obj) { return F.runTransaction(db, function (t) { return t.get(ref(chemin)).then(function (s) { if (s.exists()) throw new Error('existe'); t.set(ref(chemin), obj); }); }); },
@@ -53,7 +68,7 @@
 
   /* ---------------- Faux nuage local (tests) ---------------- */
   function moteurFaux() {
-    var K = 'mathEveryday.fauxcloud';
+    var K = 'mathEveryday.fauxcloud.v2';
     function lireTout() { try { return JSON.parse(localStorage.getItem(K)) || { comptes: {}, docs: {}, session: null }; } catch (e) { return { comptes: {}, docs: {}, session: null }; } }
     function ecrireTout(x) { localStorage.setItem(K, JSON.stringify(x)); }
     function delai(v) { return new Promise(function (res) { setTimeout(function () { res(v); }, 30); }); }
@@ -62,7 +77,7 @@
     function moi() { return lireTout().session; }
     function acces(chemin, ecriture) {
       /* imitation simplifiée des règles : on ne peut écrire users/{uid} que pour soi */
-      var s = moi(); if (!s) return false;
+      var s = moi(); if (!s || !s.verifie) return false;
       var p = chemin.split('/');
       if (p[0] === 'users') return p[1] === s.uid;
       return true;
@@ -74,18 +89,22 @@
         if (x.comptes[mail]) return err('auth/email-already-in-use');
         if (mdp.length < 6) return err('auth/weak-password');
         var uid = 'u' + Math.random().toString(36).slice(2, 12);
-        x.comptes[mail] = { uid: uid, mdp: mdp, nom: nom }; x.session = { uid: uid, mail: mail, nom: nom }; ecrireTout(x);
+        x.comptes[mail] = { uid: uid, mdp: mdp, nom: nom, verifie: false }; x.session = { uid: uid, mail: mail, nom: nom, verifie: false }; ecrireTout(x);
         if (ecoute) ecoute(x.session);
-        return delai({ uid: uid, mail: mail });
+        return delai({ uid: uid, mail: mail, verifie: false });
       },
       connexion: function (mail, mdp) {
         var x = lireTout(), c = x.comptes[mail.toLowerCase()];
         if (!c || c.mdp !== mdp) return err('auth/invalid-credential');
-        x.session = { uid: c.uid, mail: mail.toLowerCase(), nom: c.nom }; ecrireTout(x);
+        x.session = { uid: c.uid, mail: mail.toLowerCase(), nom: c.nom, verifie: !!c.verifie }; ecrireTout(x);
         if (ecoute) ecoute(x.session);
-        return delai({ uid: c.uid, mail: mail.toLowerCase() });
+        return delai({ uid: c.uid, mail: mail.toLowerCase(), verifie: !!c.verifie });
       },
       deconnexion: function () { var x = lireTout(); x.session = null; ecrireTout(x); if (ecoute) ecoute(null); return delai(); },
+      envoyerVerification: function () { return delai(); },
+      actualiser: function () { var x = lireTout(), s = x.session, c = s && x.comptes[s.mail]; if (c && c.verifie) { s.verifie = true; ecrireTout(x); } return delai(!!(c && c.verifie)); },
+      /* test local : imite le clic sur le lien reçu par e-mail */
+      validerFaux: function () { var x = lireTout(), s = x.session, c = s && x.comptes[s.mail]; if (c) { c.verifie = true; ecrireTout(x); } return delai(); },
       reinitialiser: function (mail) { return lireTout().comptes[mail.toLowerCase()] ? delai() : delai(); },
       changerMdp: function (ancien, nouveau) { var x = lireTout(), s = x.session, c = s && x.comptes[s.mail]; if (!c || c.mdp !== ancien) return err('auth/invalid-credential'); c.mdp = nouveau; ecrireTout(x); return delai(); },
       changerMail: function () { return delai(); },
@@ -127,6 +146,7 @@
     'auth/too-many-requests': 'Trop d\'essais. Réessaie dans quelques minutes.',
     'auth/network-request-failed': 'Pas de connexion internet.',
     'auth/requires-recent-login': 'Reconnecte-toi puis réessaie.',
+    'auth/unauthorized-continue-uri': 'Le lien de retour n\'est pas autorisé dans Firebase (domaines autorisés).',
     'auth/unauthorized-domain': 'Ce site n\'est pas encore autorisé dans Firebase (domaines autorisés).',
     'permission-denied': 'Accès refusé par les règles de sécurité.'
   };
@@ -145,11 +165,14 @@
     },
     moteur: function () { return moteur; },
     utilisateur: function () { return utilisateur; },
+    /* adresse vérifiée ? (vrai tant que l'état n'est pas encore connu) */
+    verifie: function () { return !utilisateur || utilisateur.verifie !== false; },
+    actualiser: function () { return Cloud.appel('actualiser').then(function (v) { if (v && utilisateur) utilisateur.verifie = true; return v; }); },
     surEtat: function (cb) { abonnes.push(cb); if (moteur) cb(utilisateur); },
     /* raccourcis qui attendent le chargement */
     appel: function (nom) { var args = [].slice.call(arguments, 1); return Cloud.pret().then(function (m) { return m[nom].apply(m, args); }); }
   };
-  ['inscrire', 'connexion', 'deconnexion', 'reinitialiser', 'changerMdp', 'changerMail', 'supprimerCompte', 'lire', 'ecrire', 'creer', 'maj', 'effacer', 'ajouterA', 'retirerDe', 'requete'].forEach(function (n) {
+  ['inscrire', 'connexion', 'deconnexion', 'reinitialiser', 'envoyerVerification', 'validerFaux', 'changerMdp', 'changerMail', 'supprimerCompte', 'lire', 'ecrire', 'creer', 'maj', 'effacer', 'ajouterA', 'retirerDe', 'requete'].forEach(function (n) {
     Cloud[n] = function () { return Cloud.appel.apply(null, [n].concat([].slice.call(arguments))); };
   });
   Cloud.nouvelId = function (col) { return moteur ? moteur.nouvelId(col) : 'd' + Date.now().toString(36); };
