@@ -1,7 +1,7 @@
 {
   "name": "Math Everyday",
   "short_name": "Math Everyday",
-  "description": "Les maths, 30 minutes par jour. De la 6e à la prépa MPSI.",
+  "description": "Les maths, 30 minutes par jour, de la 6e à la prépa : une leçon claire, une vidéo et 3 exercices corrigés chaque jour. Calculatrice, notes et mode libre inclus.",
   "id": "./",
   "start_url": "./#/aujourdhui",
   "scope": "./",
@@ -10,16 +10,113 @@
   "background_color": "#ffffff",
   "theme_color": "#0a0a0a",
   "lang": "fr",
-  "categories": ["education"],
+  "categories": [
+    "education"
+  ],
   "icons": [
-    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icone-masque-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    {
+      "src": "icone-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-masque-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
   ],
   "shortcuts": [
-    { "name": "Mes leçons du jour", "url": "./#/aujourdhui" },
-    { "name": "Réviser mes cartes", "url": "./#/revisions" },
-    { "name": "Formulaire", "url": "./#/formulaire" }
+    {
+      "name": "Mes leçons du jour",
+      "short_name": "Aujourd'hui",
+      "url": "./#/aujourdhui",
+      "icons": [
+        {
+          "src": "icone-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "S'entraîner",
+      "url": "./#/sentrainer",
+      "icons": [
+        {
+          "src": "icone-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Réviser mes cartes",
+      "url": "./#/revisions",
+      "icons": [
+        {
+          "src": "icone-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Formulaire",
+      "url": "./#/formulaire",
+      "icons": [
+        {
+          "src": "icone-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "screenshots": [
+    {
+      "src": "captures/large-1.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Tes leçons du jour"
+    },
+    {
+      "src": "captures/large-2.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Une leçon : cours, vidéo et exercices"
+    },
+    {
+      "src": "captures/etroite-1.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Sur téléphone"
+    },
+    {
+      "src": "captures/etroite-2.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "S'entraîner"
+    }
   ]
 }

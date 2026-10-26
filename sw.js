@@ -3,7 +3,7 @@
    Bibliothèques et polices (cdnjs, Google Fonts) : copie locale d'abord.
    Abonnés : « tout télécharger » range aussi les polices KaTeX, le SDK Firebase et les miniatures
    des vidéos dans un cache à part, conservé d'une version à l'autre. */
-var VERSION = 'me-v8';
+var VERSION = 'me-v9';
 var HORS_LIGNE = 'me-hors-ligne';
 var FICHIERS = [
   '', 'index.html', 'manifest.json', 'favicon.svg', 'icone-192.png', 'icone-512.png', 'icone-masque-512.png',
@@ -12,7 +12,7 @@ var FICHIERS = [
   'assets/js/calc-moteur.js', 'assets/js/calculatrice.js', 'assets/js/notes.js', 'assets/js/entrainement.js',
   'assets/js/fiches.js', 'assets/js/brouillon.js', 'assets/js/geometrie.js', 'assets/js/formulaire.js',
   'assets/js/ia.js', 'assets/js/cloud.js', 'assets/js/synchro.js', 'assets/js/social.js',
-  'assets/js/calcmental.js', 'assets/js/atelier.js', 'assets/js/premium.js', 'assets/js/outils.js', 'assets/js/app.js',
+  'assets/js/calcmental.js', 'assets/js/atelier.js', 'assets/js/premium.js', 'assets/js/outils.js', 'assets/js/installer.js', 'assets/js/app.js',
   'assets/js/data/niveaux.js', 'assets/js/data/placement.js', 'assets/js/data/videos.js', 'assets/js/data/generateurs.js', 'assets/js/data/sujets.js',
   'assets/js/data/lecons-6e.js', 'assets/js/data/lecons-5e.js', 'assets/js/data/lecons-4e.js', 'assets/js/data/lecons-3e.js',
   'assets/js/data/lecons-2nde.js', 'assets/js/data/lecons-1re.js', 'assets/js/data/lecons-tle.js', 'assets/js/data/lecons-mpsi.js'

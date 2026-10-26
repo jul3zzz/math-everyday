@@ -161,7 +161,8 @@
       '<h1>Les maths, <em>30 minutes</em> par jour.</h1>' +
       '<p class="hero-lead">Un test pour connaître ton niveau, puis chaque jour une leçon claire, une vidéo choisie avec soin et 3 exercices corrigés. Sans te noyer, sans rien rater.</p>' +
       '<div class="btn-row">' + cta + '</div>' +
-      '<div class="hero-meta"><span>' + I('book') + nb + ' leçons</span><span>' + I('playline') + 'Une vidéo par leçon</span><span>' + I('sun') + '1 leçon gratuite par jour</span></div></div>' +
+      '<div class="hero-meta"><span>' + I('book') + nb + ' leçons</span><span>' + I('playline') + 'Une vidéo par leçon</span><span>' + I('sun') + '1 leçon gratuite par jour</span></div>' +
+      (window.Installer && Installer.installee() ? '' : '<a class="inst-lien" href="#/installer">' + I('download') + '<span>Sur le web ou en appli : <b>installe-la sur ton ordinateur ou ton téléphone</b></span>' + I('arrow') + '</a>') + '</div>' +
       '<div class="hero-art">' + rectangleOr(323.6) + '</div>' +
       '</div></section>' +
 

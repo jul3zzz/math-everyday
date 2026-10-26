@@ -35,6 +35,7 @@
         '<div class="menu-d" id="menu-compte" hidden><div class="menu-tete"><span class="avatar avatar-l">' + initiale + '</span><span><b>' + U.esc(st.profil.nom) + '</b><small>' + U.esc(st.profil.mail || '') + '</small></span></div>' +
         sec.map(function (it) { return lien(it, actif, 'menu-i'); }).join('') +
         '<button type="button" class="menu-i" data-apparence>' + I('palette') + '<span class="nav-lbl">Apparence</span></button>' +
+        (Installer.installee() ? '' : lien(['installer', 'Installer l\'appli', 'download'], actif, 'menu-i')) +
         '<button type="button" class="menu-i menu-sortie" data-deco>' + I('arrow') + '<span class="nav-lbl">Se déconnecter</span></button></div></div>';
     } else {
       ha.innerHTML = '<a class="btn btn-ghost btn-sm" href="#/compte/connexion"' + (route === 'compte' ? ' aria-current="page"' : '') + '>Se connecter</a><a class="btn btn-sm" href="#/compte">Créer un compte</a>';
@@ -89,6 +90,7 @@
     var tuiles = [['programme', 'Programme', 'list']].concat(secondaires(st))
       .concat([['formulaire', 'Formulaire', 'book'], ['atelier', 'Mode libre', 'compass'], ['calcul-mental', 'Calcul mental', 'target']]);
     /* grille de 3 colonnes toujours pleine (+ 2 tuiles fixes : Notes et Apparence) */
+    if (!Installer.installee()) tuiles.push(['installer', 'Installer l\'appli', 'download']);
     var bonus = [['fiches', 'Fiches résumé', 'book'], ['examens', 'Examens blancs', 'clock'], ['sujets', 'Sujets type', 'star']];
     while ((tuiles.length + 2) % 3 && bonus.length) tuiles.push(bonus.shift());
     var N = window.Progres ? Progres.niveau(Progres.xp()) : null;
@@ -178,6 +180,7 @@
       case 'plan': Premium.plan(main); break;
       case 'bilan': Premium.bilan(main); break;
       case 'nouveautes': Premium.nouveautes(main); break;
+      case 'installer': Installer.page(main); break;
       default: Vues.accueil(main);
     }
     U.math(main);
@@ -218,12 +221,5 @@
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () { /* hors ligne indisponible */ }); });
   }
-  var invite = null;
-  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); invite = e; var b = document.getElementById('installer'); if (b) b.hidden = false; });
-  window.installerAppli = function () {
-    if (invite) { invite.prompt(); invite = null; return; }
-    Modal.ouvrir('<h2 id="modal-title">Installer Math Everyday</h2><p class="muted">Sur iPhone / iPad : bouton <b>Partager</b> de Safari, puis <b>Sur l\'écran d\'accueil</b>.</p><p class="muted">Sur Android : menu <b>⋮</b> de Chrome, puis <b>Installer l\'application</b>.</p><p class="muted">Sur ordinateur : icône d\'installation à droite de la barre d\'adresse de Chrome ou Edge.</p><p class="small muted">Une fois installée, les leçons déjà ouvertes restent consultables sans connexion.</p><div class="btn-row"><button class="btn" type="button" data-close>Compris</button></div>');
-  };
-  var ib = document.getElementById('installer');
-  if (ib) ib.onclick = window.installerAppli;
+  /* installation : voir installer.js et la page #/installer */
 })();

@@ -369,3 +369,33 @@ html[data-theme="tableau"] .menu-d,html[data-theme="nuit"] .menu-d{box-shadow:0 
 /* lisibilité : texte de base un peu plus grand pour Minimaliste et Nuit */
 html[data-theme="minimal"],html[data-theme="nuit"]{--fs-body:17px}
 @media (max-width:1000px){.avatar-nom{display:none}.avatar-b{padding:0 10px 0 5px}}
+
+/* ===================== Installer (web ou appli) ===================== */
+.inst-lien{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:12px 16px;border-radius:999px;background:var(--hover);color:var(--ink);text-decoration:none;font-size:.95rem;transition:background .15s}
+.inst-lien:hover{background:var(--tuile-ic);filter:brightness(.97)}
+.inst-lien svg{width:20px;height:20px;flex-shrink:0}
+.inst-intro{font-size:1.1rem;max-width:40em}
+.inst-choix{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(20px * var(--esp));margin:calc(28px * var(--esp)) 0}
+.inst-c{display:flex;flex-direction:column;gap:12px;position:relative}
+.inst-c h2{margin:0;font-size:1.5rem}
+.inst-c p{margin:0}
+.inst-c .btn-row{margin-top:auto;padding-top:8px}
+.inst-ic{width:64px;height:64px;border-radius:20px;background:var(--tuile-ic);display:grid;place-items:center;color:var(--stat-ic)}
+.inst-ic svg{width:32px;height:32px}
+.inst-reco{box-shadow:var(--shadow-strong)}
+.inst-tag{position:absolute;top:22px;right:22px;background:var(--nav-on-bg)!important;color:var(--nav-on-ink)!important}
+.inst-l{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.inst-l li{display:flex;gap:10px;align-items:flex-start}
+.inst-l svg{width:20px;height:20px;color:var(--ok);flex-shrink:0;margin-top:3px}
+.inst-ok{display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:0 20px;border-radius:999px;background:var(--ok-bg);color:var(--ok);font-weight:700}
+.inst-ok svg{width:22px;height:22px}
+.inst-note{display:flex;gap:10px;align-items:flex-start;margin-top:6px!important;padding:12px 14px;border-radius:var(--r-sm);background:var(--box-bg);font-size:.92rem}
+.inst-note svg{width:20px;height:20px;flex-shrink:0;margin-top:2px}
+.inst-etapes h2{font-size:1.35rem}
+.inst-etapes .tabs{margin:14px 0 18px}
+.inst-pas{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:12px}
+.inst-pas li{display:flex;gap:14px;align-items:flex-start;font-size:1.02rem}
+.inst-n{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;background:var(--nav-on-bg);color:var(--nav-on-ink);font-weight:800}
+@media (max-width:720px){.inst-choix{grid-template-columns:1fr}.inst-lien{border-radius:18px}.inst-tag{top:18px;right:18px}}
+.inst-etapes{scroll-margin-top:96px}
+@media (max-width:720px){.inst-reco{order:-1}}
