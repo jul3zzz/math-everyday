@@ -33,6 +33,13 @@ service cloud.firestore {
       allow update: if moi(uid) || (connecte() && seulMoiChange('amis'));
     }
 
+    // Clés d'abonnement : chaque clé ne sert qu'une fois (le document existe = clé déjà utilisée).
+    match /clesUtilisees/{id} {
+      allow read: if connecte();
+      allow create: if connecte() && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid', 'date']);
+    }
+
     // Codes amis : PHI-XXXXX -> uid. Création unique, jamais modifiés.
     match /codes/{code} {
       allow read: if connecte();

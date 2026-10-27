@@ -44,6 +44,74 @@
   };
   window.Paiement = Paiement;
 
+  /* Clés d'abonnement (ME-XXXX-XXXX-XXXX) : seules leurs empreintes SHA-256 sont ici, les clés elles-mêmes
+     restent hors du site. Une clé ne sert qu'une fois : en ligne, son usage est noté dans clesUtilisees/{empreinte 2}
+     (création refusée si le document existe déjà) ; en démo, sur l'appareil. */
+  var CLES = {
+    '96741c4658591980877a35b4e267d2de874e4e9b84a47903cc94ffc6c762a7ea': 'vie',
+    '077747d77028d292e4234caa315718ad9ed668cb44349df7b14758888a596507': 'vie',
+    '2f7d7a7301bc9ef2c355321909dafab95e9eb52dd809098e5032bb8c1a93d43a': 'vie',
+    'a54cd961adcc8c42c3b7fe124f6303ba3ecbf27e8976ff3affd8e14bc7f5f3d6': 'vie',
+    '0b171596cb369d6115fc57dd611418419e4d5806fcbc73d200d5fee1a9a25733': 'vie'
+  };
+  var CLE_LOCALES = 'mathEveryday.clesUtilisees';
+  function sha256(txt) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt)).then(function (b) {
+      return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+    });
+  }
+  var Cles = {
+    normaliser: function (s) {
+      var c = String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (c.indexOf('ME') === 0) c = c.slice(2);
+      return c.length === 12 ? 'ME-' + c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8) : '';
+    },
+    utiliser: function (saisie) {
+      var st = Store.get(), cle = Cles.normaliser(saisie);
+      if (!st.profil) return Promise.reject(new Error('Crée d\'abord ton compte gratuit, puis entre ta clé.'));
+      if (window.Synchro && Synchro.actif && !Synchro.verifie()) return Promise.reject(new Error('Vérifie d\'abord ton adresse e-mail.'));
+      if (!cle || !(window.crypto && crypto.subtle)) return Promise.reject(new Error('Clé invalide. Elle ressemble à ME-XXXX-XXXX-XXXX.'));
+      return Promise.all([sha256('me-cle:' + cle), sha256('me-utilisee:' + cle)]).then(function (h) {
+        var plan = CLES[h[0]];
+        if (!plan) throw new Error('Cette clé n\'existe pas. Vérifie les lettres et les chiffres.');
+        var u = window.Cloud && Cloud.actif && Cloud.utilisateur();
+        if (u && u.uid) {
+          return Cloud.creer('clesUtilisees/' + h[1], { uid: u.uid, date: U.today() }).then(function () { return plan; }, function () {
+            throw new Error('Cette clé a déjà été utilisée.');
+          });
+        }
+        var deja = [];
+        try { deja = JSON.parse(localStorage.getItem(CLE_LOCALES) || '[]'); } catch (e) { deja = []; }
+        if (deja.indexOf(h[1]) >= 0) throw new Error('Cette clé a déjà été utilisée.');
+        deja.push(h[1]);
+        try { localStorage.setItem(CLE_LOCALES, JSON.stringify(deja)); } catch (e) { /* rien */ }
+        return plan;
+      }).then(function (plan) {
+        Store.set({ premium: { plan: plan, depuis: U.today(), cle: true } });
+        if (window.Synchro && Synchro.actif) Synchro.pousser();
+        return plan;
+      });
+    },
+    bloc: function () {
+      return '<form class="card cle" id="cle-f" novalidate><div class="cle-t">' + I('lock') + '<div><b>Tu as une clé d\'abonnement ?</b><span class="small muted">Entre-la ici pour débloquer ton offre sans payer.</span></div></div>' +
+        '<div class="cle-l"><label class="sr" for="cle-i">Clé d\'abonnement</label><input class="input" id="cle-i" name="cle" placeholder="ME-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24">' +
+        '<button class="btn" type="submit">Activer</button></div><p class="cle-err small" id="cle-err" role="alert"></p></form>';
+    },
+    brancher: function (main, apres) {
+      var f = U.$('#cle-f', main); if (!f) return;
+      f.onsubmit = function (e) {
+        e.preventDefault();
+        var b = f.querySelector('[type="submit"]'), err = U.$('#cle-err', f);
+        err.textContent = ''; b.disabled = true;
+        Cles.utiliser(f.cle.value).then(function (plan) {
+          toast('Clé acceptée : abonnement ' + planNom(plan) + ' activé !');
+          if (apres) apres(); else location.hash = '#/aujourdhui';
+        }, function (x) { b.disabled = false; err.textContent = x.message; if (/compte gratuit/.test(x.message)) location.hash = '#/compte'; });
+      };
+    }
+  };
+  window.Cles = Cles;
+
   function lecon(id) { for (var i = 0; i < LECONS.length; i++) if (LECONS[i].id === id) return LECONS[i]; return null; }
   function leconsDe(nid) { return LECONS.filter(function (l) { return l.niveau === nid; }); }
   function chipNiv(nid) { var n = niv(nid); return '<span class="chip chip-lvl lv-' + nid + '">' + (n ? n.nom : nid) + '</span>'; }
@@ -403,7 +471,7 @@
     main.innerHTML = page(
       '<div class="center" style="max-width:640px;margin:0 auto 34px"><span class="eyebrow">Abonnement</span><h1>Toutes les maths, sans limite.</h1>' +
       '<p class="muted" style="font-size:1.08rem">Gratuitement, tu as une leçon complète par jour. Avec l\'abonnement, tu fais les 3 leçons du jour et tu as accès à tout le programme, de la 6e à la prépa, quand tu veux.</p></div>' +
-      '<div class="plans">' + cartes + '</div>' +
+      '<div class="plans">' + cartes + '</div>' + (st.premium ? '' : Cles.bloc()) +
       '<h2 class="center" style="margin-top:48px">Tout ce que tu débloques</h2>' +
       '<div class="perks">' + AVANTAGES.map(function (a) { return '<a class="perk" href="' + a[3] + '">' + I(a[0]) + '<b>' + a[1] + '</b><span>' + a[2] + '</span></a>'; }).join('') + '</div>' +
       '<div class="card" style="margin-top:34px;overflow-x:auto"><table class="compare"><thead><tr><th>Ce qui est inclus</th><th>Gratuit</th><th>Abonné</th></tr></thead><tbody>' +
@@ -440,6 +508,7 @@
         ? '<p class="center small muted" style="margin-top:28px">' + I('lock') + ' Paiement par carte sécurisé par Stripe. Compte avec e-mail vérifié requis.</p>'
         : '<p class="center small muted" style="margin-top:28px">Version démo : aucun paiement n\'est effectué, l\'abonnement est simulé sur cet appareil.</p>')
     );
+    Cles.brancher(main);
     main.onclick = function (e) {
       var b = e.target.closest('[data-plan]'); if (!b) return;
       var p = PLANS.filter(function (x) { return x.id === b.getAttribute('data-plan'); })[0];
@@ -486,10 +555,11 @@
     var nivOpts = NIVEAUX.map(function (n) { return '<option value="' + n.id + '"' + (n.id === st.niveau ? ' selected' : '') + '>' + U.esc(n.long) + '</option>'; }).join('');
     var ab = st.premium
       ? '<p>Offre <b>' + U.esc(planNom(st.premium.plan)) + '</b> active depuis le ' + U.esc(st.premium.depuis) + '.</p>' +
-        (Paiement.portail() ? '<a class="btn btn-2" href="' + U.esc(Paiement.portail()) + '" target="_blank" rel="noopener">' + I('gear') + 'Factures, carte et résiliation</a>'
+        (st.premium.cle ? '<p class="small muted">Offre activée avec une clé d\'abonnement.</p>'
+          : Paiement.portail() ?'<a class="btn btn-2" href="' + U.esc(Paiement.portail()) + '" target="_blank" rel="noopener">' + I('gear') + 'Factures, carte et résiliation</a>'
           : st.premium.session ? '<p class="small muted">Pour résilier ou obtenir une facture, réponds au reçu Stripe reçu par e-mail.</p>'
           : '<button class="btn btn-2" type="button" id="r-resil">Résilier (démo)</button>')
-      : '<p class="muted">Formule gratuite : 1 leçon complète par jour.</p><a class="btn" href="#/abonnement">' + I('crown') + 'Voir les offres</a>';
+      : '<p class="muted">Formule gratuite : 1 leçon complète par jour.</p><a class="btn" href="#/abonnement">' + I('crown') + 'Voir les offres</a>' + Cles.bloc();
     main.innerHTML = page(
       '<span class="eyebrow">Réglages</span><h1>Ton espace</h1>' +
       '<div class="set-grid" style="margin-top:24px">' +
@@ -545,6 +615,7 @@
     U.$('#r-test', main).onclick = function () { Test.recommencer(); location.hash = '#/test'; };
     var rs = U.$('#r-resil', main);
     if (rs) rs.onclick = function () { Store.set({ premium: null }); if (Theme.premium(Theme.actuel())) Theme.appliquer('minimal'); toast('Abonnement résilié (démo).'); vReglages(main); };
+    Cles.brancher(main, function () { vReglages(main); });
     U.$('#r-masc', main).onclick = Premium.editeurMascotte;
     U.$('#r-cahier', main).onclick = function () { Notes.imprimerCahier(); };
     U.$('#r-horsligne', main).onclick = function () { Premium.toutTelecharger(this); };

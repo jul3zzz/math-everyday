@@ -3,7 +3,7 @@
    Bibliothèques et polices (cdnjs, Google Fonts) : copie locale d'abord.
    Abonnés : « tout télécharger » range aussi les polices KaTeX, le SDK Firebase et les miniatures
    des vidéos dans un cache à part, conservé d'une version à l'autre. */
-var VERSION = 'me-v10';
+var VERSION = 'me-v11';
 var HORS_LIGNE = 'me-hors-ligne';
 var FICHIERS = [
   '', 'index.html', 'manifest.json', 'favicon.svg', 'icone-192.png', 'icone-512.png', 'icone-masque-512.png',
