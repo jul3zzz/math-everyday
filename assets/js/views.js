@@ -269,6 +269,9 @@
       '<div class="hero-art">' + rectangleOr(323.6) + '</div>' +
       '</div></section>' +
 
+      '<section class="section"><div class="wrap"><div class="section-h"><h2>Math Everyday en 30 secondes</h2></div>' +
+      '<div class="pub"><video controls playsinline preload="none" poster="assets/video/pub-apercu.jpg" src="assets/video/pub-math-everyday.mp4" aria-label="Vidéo de présentation de Math Everyday, 30 secondes"></video></div></div></section>' +
+
       '<section class="section"><div class="wrap"><div class="section-h"><h2>Comment ça marche</h2></div><div class="steps">' + steps + '</div></div></section>' +
 
       '<section class="section"><div class="wrap"><div class="section-h"><h2>Tout le programme</h2><a class="btn btn-2 btn-sm" href="#/programme">Parcourir ' + I('arrow') + '</a></div>' +
