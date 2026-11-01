@@ -122,9 +122,9 @@
   /* ---------------- Stockage local ---------------- */
   /* Plusieurs comptes par appareil : racine = { theme, comptes: { mail: { hash, sel, data } }, actif }.
      Store.get() renvoie les données du compte connecté (ou d'un invité, non sauvegardé). */
-  /* 26/10/2026 : nouveau départ, tous les comptes existants sont effacés (vérification par e-mail obligatoire) */
-  ['mathEveryday.v1', 'mathEveryday.v2', 'mathEveryday.fauxcloud'].forEach(function (k) { try { localStorage.removeItem(k); } catch (e) { /* rien */ } });
-  var KEY = 'mathEveryday.v3';
+  /* 01/11/2026 : nouveau départ, tous les comptes existants sont effacés (ceux du 26/10 aussi, la vérification par e-mail reste obligatoire) */
+  ['mathEveryday.v1', 'mathEveryday.v2', 'mathEveryday.v3', 'mathEveryday.fauxcloud', 'mathEveryday.fauxcloud.v2', 'mathEveryday.clesUtilisees'].forEach(function (k) { try { localStorage.removeItem(k); } catch (e) { /* rien */ } });
+  var KEY = 'mathEveryday.v4';
   var defaut = function () {
     return {
       profil: null, niveau: null, placement: null, classe: null,

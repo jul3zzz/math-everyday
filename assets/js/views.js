@@ -558,7 +558,8 @@
     var nivOpts = NIVEAUX.map(function (n) { return '<option value="' + n.id + '"' + (n.id === st.niveau ? ' selected' : '') + '>' + U.esc(n.long) + '</option>'; }).join('');
     var ab = st.premium
       ? '<p>Offre <b>' + U.esc(planNom(st.premium.plan)) + '</b> active depuis le ' + U.esc(st.premium.depuis) + '.</p>' +
-        (st.premium.cle ? '<p class="small muted">Offre activée avec une clé d\'abonnement.</p>'
+        (st.premium.offert ? '<p class="small muted">Abonnement offert par Math Everyday' + (st.premium.fin ? ', jusqu\'au ' + U.esc(st.premium.fin) : '') + '.</p>'
+          : st.premium.cle ? '<p class="small muted">Offre activée avec une clé d\'abonnement.</p>'
           : Paiement.portail() ?'<a class="btn btn-2" href="' + U.esc(Paiement.portail()) + '" target="_blank" rel="noopener">' + I('gear') + 'Factures, carte et résiliation</a>'
           : st.premium.session ? '<p class="small muted">Pour résilier ou obtenir une facture, réponds au reçu Stripe reçu par e-mail.</p>'
           : '<button class="btn btn-2" type="button" id="r-resil">Résilier (démo)</button>')

@@ -105,8 +105,33 @@
       Store._activer(u.mail, data, { uid: u.uid });
       application = false;
       if (u.verifie === false) return null; /* la suite attend la vérification de l'adresse */
-      return Promise.all([initialiserPublic(u.uid), tirerCahier(u, data)]);
+      return Promise.all([initialiserPublic(u.uid), tirerCahier(u, data), lireAdmin(u)]);
     });
+  }
+  /* Décisions prises dans l'outil d'administration (admin/{uid}, que seul l'administrateur peut écrire) :
+     compte suspendu, abonnement offert (avec ou sans date de fin) ou retiré. */
+  function lireAdmin(u) {
+    return Cloud.lire('admin/' + u.uid).then(function (a) {
+      var d = Store.get();
+      if (!d.uid || d.uid !== u.uid) return;
+      if (a && a.banni) {
+        Store.deconnexion();
+        location.hash = '#/compte/connexion';
+        toast('Ce compte a été suspendu. Écris-nous si tu penses que c\'est une erreur.');
+        return;
+      }
+      var change = false;
+      if (a && a.maj && a.maj > (d.adminMaj || 0)) {
+        if (a.abonnement === 'retire') d.premium = null;
+        else if (a.abonnement && a.abonnement.plan) d.premium = { plan: a.abonnement.plan, depuis: a.abonnement.depuis || U.today(), offert: true, fin: a.abonnement.fin || null };
+        d.adminMaj = a.maj; change = true;
+      }
+      if (d.premium && d.premium.fin && d.premium.fin < U.today()) { d.premium = null; change = true; }
+      if (!change) return;
+      Store.save();
+      if (Theme.premium(Theme.actuel()) && !Store.estPremium()) Theme.appliquer('minimal');
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    }).catch(function () { /* hors ligne : on relira plus tard */ });
   }
   /* Nouvel appareil : on récupère le brouillon en ligne si celui de l'appareil est vide. */
   function tirerCahier(u, data) {
@@ -172,22 +197,26 @@
     premier = false;
   });
   Cloud.pret().catch(function (e) { etat('erreur', e); });
-  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden' && timer) pousser(); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden' && timer) pousser();
+    var u = Cloud.utilisateur();
+    if (document.visibilityState === 'visible' && u && Cloud.verifie() && Store.connecte()) lireAdmin(u);
+  });
   window.addEventListener('pagehide', function () { if (timer) pousser(); });
 
   /* appelée quand l'adresse vient d'être vérifiée : le compte passe en ligne */
   function apresVerification() {
     var u = Cloud.utilisateur(); if (!u) return Promise.resolve();
-    return initialiserPublic(u.uid).catch(function (e) { etat('erreur', e); });
+    return Promise.all([initialiserPublic(u.uid), lireAdmin(u)]).catch(function (e) { etat('erreur', e); });
   }
-  /* 26/10/2026 : tous les comptes ont été effacés ; une session ouverte avant est fermée une fois */
+  /* 01/11/2026 : tous les comptes ont de nouveau été effacés ; une session ouverte avant est fermée une fois */
   var CLE_REINIT = 'mathEveryday.reinit';
   var reinitVue = false;
   Cloud.surEtat(function (u) {
     if (reinitVue) return; reinitVue = true;
     var deja = null; try { deja = localStorage.getItem(CLE_REINIT); } catch (e) { /* rien */ }
-    if (deja === '2026-10-26') return;
-    try { localStorage.setItem(CLE_REINIT, '2026-10-26'); } catch (e) { /* rien */ }
+    if (deja === '2026-11-01') return;
+    try { localStorage.setItem(CLE_REINIT, '2026-11-01'); } catch (e) { /* rien */ }
     if (u) Cloud.deconnexion().catch(function () { /* déjà fermée */ });
   });
 

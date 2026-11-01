@@ -68,7 +68,7 @@
 
   /* ---------------- Faux nuage local (tests) ---------------- */
   function moteurFaux() {
-    var K = 'mathEveryday.fauxcloud.v2';
+    var K = 'mathEveryday.fauxcloud.v3';
     function lireTout() { try { return JSON.parse(localStorage.getItem(K)) || { comptes: {}, docs: {}, session: null }; } catch (e) { return { comptes: {}, docs: {}, session: null }; } }
     function ecrireTout(x) { localStorage.setItem(K, JSON.stringify(x)); }
     function delai(v) { return new Promise(function (res) { setTimeout(function () { res(v); }, 30); }); }

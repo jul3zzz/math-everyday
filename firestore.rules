@@ -33,6 +33,12 @@ service cloud.firestore {
       allow update: if moi(uid) || (connecte() && seulMoiChange('amis'));
     }
 
+    // Décisions de l'administrateur (suspension, abonnement offert) : écrites seulement par l'outil
+    // d'administration (compte de service, qui passe outre ces règles). L'élève peut les lire.
+    match /admin/{uid} {
+      allow read: if moi(uid);
+    }
+
     // Clés d'abonnement : chaque clé ne sert qu'une fois (le document existe = clé déjà utilisée).
     match /clesUtilisees/{id} {
       allow read: if connecte();
