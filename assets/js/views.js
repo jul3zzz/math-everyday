@@ -572,9 +572,10 @@
       '<div class="field"><label for="r-mail">E-mail</label><input class="input" id="r-mail" name="mail" type="email" value="' + U.esc(st.profil.mail) + '" maxlength="120"></div>' +
       '<div><button class="btn btn-sm" type="submit">Enregistrer</button></div></form></div>' +
 
-      '<div class="card"><h2>' + I('bell') + 'Mail quotidien</h2><div class="form">' +
-      '<label class="switch"><input type="checkbox" id="r-notif"' + (st.notif.actif ? ' checked' : '') + '> Recevoir le mail des leçons du jour</label>' +
-      '<div class="field"><label for="r-heure">Heure d\'envoi</label><select class="input" id="r-heure">' + heures.map(function (h) { return '<option' + (h === st.notif.heure ? ' selected' : '') + '>' + h + '</option>'; }).join('') + '</select></div>' +
+      '<div class="card"><h2>' + I('bell') + 'Rappel quotidien</h2><div class="form">' +
+      '<label class="switch"><input type="checkbox" id="r-notif"' + (st.notif.actif ? ' checked' : '') + '> Me rappeler mes leçons du jour (mail et notification)</label>' +
+      (window.Rappels ? Rappels.blocReglages() : '') +
+      '<div class="field"><label for="r-heure">Heure du rappel</label><select class="input" id="r-heure">' + heures.map(function (h) { return '<option' + (h === st.notif.heure ? ' selected' : '') + '>' + h + '</option>'; }).join('') + '</select></div>' +
       '<div><button class="btn btn-2 btn-sm" type="button" id="r-apercu">' + I('mail') + 'Aperçu du mail</button></div>' +
       '<p class="small muted" style="margin:0">Démo : l\'envoi réel sera activé à la mise en ligne avec le service d\'e-mails.</p></div></div>' +
 
@@ -612,7 +613,8 @@
       if (!Store.changerMail(mail)) { toast('Un autre compte utilise déjà cet e-mail.'); return; }
       st.profil.nom = nom; Store.save(); toast('Profil enregistré.');
     };
-    U.$('#r-notif', main).onchange = function () { st.notif.actif = this.checked; Store.save(); toast(this.checked ? 'Mail quotidien activé.' : 'Mail quotidien désactivé.'); };
+    U.$('#r-notif', main).onchange = function () { st.notif.actif = this.checked; Store.save(); toast(this.checked ? 'Rappel quotidien activé.' : 'Rappel quotidien désactivé.'); };
+    if (window.Rappels) Rappels.brancher(main, function () { vReglages(main); });
     U.$('#r-heure', main).onchange = function () { st.notif.heure = this.value; Store.save(); toast('Rappel à ' + this.value + '.'); };
     U.$('#r-niv', main).onchange = function () { Store.set({ niveau: this.value, jour: null }); toast('Niveau changé : ' + niv(this.value).long + '. Tes leçons du jour sont mises à jour.'); };
     U.$('#r-apercu', main).onclick = function () { if (!st.niveau) { toast('Passe d\'abord le test de niveau.'); return; } Modal.ouvrir(apercuMail(), { large: true }); };

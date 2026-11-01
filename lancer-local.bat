@@ -23,11 +23,11 @@ echo  Pour arreter le site : ferme cette fenetre.
 echo.
 
 rem ouvre le navigateur 2 secondes plus tard, le temps que le serveur demarre
-start "" /b powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 2; Start-Process 'http://localhost:4182/?fauxcloud=1&debloque=1#/aujourdhui'"
+start "" /b powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 2; Start-Process 'http://localhost:4182/?fauxcloud=1&debloque=1&appli=1#/aujourdhui'"
 node _serve.js
 
 echo.
 echo  Le serveur s'est arrete. Si le message parle de EADDRINUSE, le site tourne deja :
-echo  ouvre simplement http://localhost:4182/?fauxcloud=1^&debloque=1
+echo  ouvre simplement http://localhost:4182/?fauxcloud=1^&debloque=1^&appli=1
 echo.
 pause

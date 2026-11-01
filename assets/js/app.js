@@ -146,6 +146,19 @@
     var parts = h.split('/');
     var r = parts[0] || '';
     var st = Store.get();
+    main.removeAttribute('data-inst-vue');
+    /* Math Everyday s'utilise seulement installée : dans un onglet de navigateur, page de téléchargement.
+       Le retour de paiement passe quand même (sur Android et ordinateur, l'appli partage le compte du navigateur). */
+    if (window.Installer && !Installer.appli()) {
+      if (window.Paiement) Paiement.retour();
+      if (window.Verification) Verification.arreter();
+      main.onclick = null; Modal.fermer();
+      document.body.classList.add('porte');
+      Installer.porte(main, r);
+      window.scrollTo(0, 0);
+      return;
+    }
+    document.body.classList.remove('porte');
     if (r === '' && st.profil && location.hash !== '#/') r = 'aujourdhui';
     /* Le test de niveau se passe une fois le compte créé. */
     if (r === 'test' && !st.profil) { location.hash = '#/compte'; return; }
@@ -191,6 +204,7 @@
     }
     U.math(main);
     if (window.Outils) Outils.route(r, parts[1]);
+    if (r === 'aujourdhui' && window.Rappels) Rappels.proposer();
     if (!window.__premier) window.scrollTo(0, 0);
     window.__premier = false;
   }

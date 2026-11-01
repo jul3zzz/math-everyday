@@ -436,3 +436,31 @@ html[data-theme="minimal"],html[data-theme="nuit"]{--fs-body:17px}
 /* Vidéo de présentation (accueil) */
 .pub{max-width:960px;aspect-ratio:16/9;border-radius:var(--r);overflow:hidden;background:#0b0b0b}
 .pub video{display:block;width:100%;height:100%;object-fit:cover}
+
+/* Porte : dans un onglet de navigateur, seulement la page de téléchargement (installer.js) */
+body.porte .nav,body.porte .nav-plus,body.porte .haut-actions,body.porte .theme-btn,body.porte .barre-bas,body.porte .feuille,body.porte .fab,body.porte .outils,body.porte .foot-liens{display:none!important}
+body.porte .brand{pointer-events:none}
+.porte-hero{text-align:center}
+.porte-hero .wrap{max-width:860px}
+.logo.porte-logo{display:block;width:84px;height:84px;margin:0 auto 20px}
+.porte-logo svg{width:100%;height:100%}
+.porte-hero .hero-lead{margin-left:auto;margin-right:auto}
+.porte-hero .inst-note{text-align:left;max-width:36em;margin:0 auto 18px!important}
+.porte-cta{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:6px}
+.inst-meta{font-size:.9rem;color:var(--ink-2)}
+.porte-deja{margin:18px 0 0}
+.inst-ok-note{background:var(--ok-bg)!important;color:var(--ok)}
+.porte-atouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:calc(16px * var(--esp))}
+.porte-atouts .card h3{margin:14px 0 6px;font-size:1.12rem}
+.porte-atouts .card p{margin:0}
+.inst-picto{width:1.3em;height:1.3em;vertical-align:-.3em;display:inline-block}
+.inst-etapes .tabs{flex-wrap:wrap}
+/* rappels (rappels.js) */
+.rap-modal{text-align:center}
+.rap-ic{width:72px;height:72px;border-radius:22px;background:var(--tuile-ic);display:grid;place-items:center;margin:0 auto 14px}
+.rap-ic svg{width:36px;height:36px}
+.rap-modal .btn-row{justify-content:center}
+.rap-etat{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rap-on{display:inline-flex;gap:6px;align-items:center;color:var(--ok);font-weight:600}
+.rap-on svg{width:18px;height:18px}
+@media (max-width:720px){.porte-atouts{grid-template-columns:1fr}.porte-cta .btn{width:100%}}

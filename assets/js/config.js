@@ -9,6 +9,8 @@
 window.ME_CONFIG = {
   ia: { endpoint: '', limiteGratuite: 3 },
   paiement: { mensuel: '', annuel: '', vie: '', portail: '' },
+  /* appli Windows : installateur publié dans les « Releases » du dépôt GitHub */
+  telechargement: { windows: 'https://github.com/jul3zzz/math-everyday/releases/latest/download/Math-Everyday-Setup.exe' },
   firebase: {
     apiKey: 'AIzaSyBaiYBwB8m7lgAHXFBQClUTx__V1E6S7lc',
     authDomain: 'math-everyday-b8137.firebaseapp.com',
