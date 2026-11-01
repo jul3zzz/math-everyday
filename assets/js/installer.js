@@ -99,7 +99,7 @@
   /* bouton principal, adapté à l'appareil */
   function boutonPrincipal(a) {
     var win = lienWindows();
-    if (a.sys === 'windows' && win) return '<a class="btn btn-lg" href="' + esc(win) + '" id="inst-dl">' + I('download') + 'Télécharger pour Windows</a><span class="inst-meta">Windows 10 et 11 · gratuit · environ 90 Mo</span>';
+    if (a.sys === 'windows' && win) return '<a class="btn btn-lg" href="' + esc(win) + '" id="inst-dl">' + I('download') + 'Télécharger pour Windows</a><span class="inst-meta">Windows 10 et 11 · gratuit · environ 120 Mo</span>';
     if (invite) return '<button class="btn btn-lg" type="button" id="inst-go">' + I('download') + 'Installer l\'appli</button><span class="inst-meta">Gratuit · moins de 5 Mo · sans store</span>';
     return '<button class="btn btn-lg" type="button" id="inst-voir">' + I('download') + 'Voir comment l\'installer</button><span class="inst-meta">Gratuit · 1 minute · sans store</span>';
   }
