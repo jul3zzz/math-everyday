@@ -478,6 +478,77 @@
       if (Math.random() < 0.5) { var a = int(-3, 3), n = int(2, 7); return { q: 'Quel est le reste de la division euclidienne de $X^{' + n + '}$ par $' + (a === 0 ? 'X' : 'X ' + S(-a)) + '$ ?', type: 'num', rep: Math.pow(a, n), corr: 'Le reste de $P$ par $X - a$ est $P(a) = ' + P(a) + '^{' + n + '} = ' + Math.pow(a, n) + '$.' }; }
       var x1 = nz(-4, 4), x2 = nz(-4, 4), x3 = nz(-4, 4), s = x1 + x2 + x3, s2 = x1 * x2 + x1 * x3 + x2 * x3, pr = x1 * x2 * x3;
       return { q: 'Quelle est la somme des racines de $X^3 ' + T(-s, 'X^2') + ' ' + T(s2, 'X') + Cst(-pr) + '$ ?', type: 'num', rep: s, corr: '$\\sigma_1 = -\\dfrac{a_2}{a_3} = ' + s + '$ (racines $' + x1 + '$, $' + x2 + '$, $' + x3 + '$).' };
+    },
+    /* ===================== nouvelles leçons (novembre 2026) ===================== */
+    '6e-solides': function () {
+      if (Math.random() < 0.5) { var L = int(3, 12), l = int(2, 9), h = int(2, 8); return { q: 'Volume (en cm³) d\'un pavé droit de $' + L + '$ cm sur $' + l + '$ cm sur $' + h + '$ cm ?', type: 'num', rep: L * l * h, corr: '$V = ' + L + r` \times ` + l + r` \times ` + h + ' = ' + L * l * h + r`\ \text{cm}^3$.` }; }
+      var a = int(2, 9); return { q: 'Volume (en cm³) d\'un cube d\'arête $' + a + '$ cm ?', type: 'num', rep: a * a * a, corr: '$V = ' + a + '^3 = ' + a * a * a + r`\ \text{cm}^3$.` };
+    },
+    '6e-durees': function () {
+      var h1 = int(7, 15), m1 = int(5, 55), d = int(40, 200), t = h1 * 60 + m1 + d, h2 = Math.floor(t / 60), m2 = t % 60;
+      function hm(h, m) { return h + r`\text{h}` + String(m).padStart(2, '0'); }
+      if (Math.random() < 0.5) return { q: 'Un trajet commence à $' + hm(h1, m1) + '$ et se termine à $' + hm(h2, m2) + '$. Combien de minutes dure-t-il ?', type: 'num', rep: d, corr: 'De $' + hm(h1, m1) + '$ à $' + hm(h2, m2) + '$ : $' + d + '$ min, soit $' + Math.floor(d / 60) + '$ h $' + d % 60 + '$ min.' };
+      var x = pick([0.25, 0.5, 0.75, 1.25, 1.5, 2.25, 2.5, 3.75]); return { q: 'Combien de minutes représentent $' + N(x) + '$ h ?', type: 'num', rep: x * 60, corr: '$' + N(x) + r` \times 60 = ` + x * 60 + '$ min.' };
+    },
+    '5e-reperage': function () {
+      var y = nz(-9, 9), a = int(-9, 5), b = a + int(2, 12);
+      return { q: 'Quelle est la distance entre $A(' + a + r`\,;\,` + y + ')$ et $B(' + b + r`\,;\,` + y + ')$ ?', type: 'num', rep: b - a, corr: 'Même ordonnée : $' + b + ' - ' + P(a) + ' = ' + (b - a) + '$ unités.' };
+    },
+    '5e-prismes': function () {
+      if (Math.random() < 0.5) { var a = 2 * int(1, 5), b = int(2, 9), h = int(3, 15); return { q: 'Un prisme droit a pour base un triangle rectangle dont les côtés de l\'angle droit mesurent $' + a + '$ cm et $' + b + '$ cm, et une hauteur de $' + h + '$ cm. Volume en cm³ ?', type: 'num', rep: a * b / 2 * h, corr: r`$\mathcal{A}_{\text{base}} = \dfrac{` + a + r` \times ` + b + '}{2} = ' + a * b / 2 + '$, donc $V = ' + a * b / 2 + r` \times ` + h + ' = ' + a * b / 2 * h + r`\ \text{cm}^3$.` }; }
+      var rr = int(1, 6), hh = int(2, 10), v = Math.round(Math.PI * rr * rr * hh);
+      return { q: 'Volume d\'un cylindre de rayon $' + rr + '$ cm et de hauteur $' + hh + '$ cm, arrondi au cm³ ?', type: 'num', rep: v, tol: 0.6, corr: r`$V = \pi \times ` + rr + r`^2 \times ` + hh + ' = ' + rr * rr * hh + r`\pi \approx ` + v + r`\ \text{cm}^3$.` };
+    },
+    '4e-ecriture-scientifique': function () {
+      var a = int(11, 99) / 10, n = nz(-6, 8), x = a * Math.pow(10, n);
+      var dec = N(arr(x, 10));
+      return { q: 'Écris $' + dec + r`$ en écriture scientifique $a \times 10^n$. Quel est l'exposant $n$ ?`, type: 'num', rep: n, corr: '$' + dec + ' = ' + N(a) + r` \times 10^{` + n + '}$.' };
+    },
+    '4e-cosinus': function () {
+      var ang = pick([20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70]), hyp = int(4, 15), adj = arr(hyp * Math.cos(ang * Math.PI / 180), 1);
+      return { q: r`Triangle $ABC$ rectangle en $B$ avec $\widehat{A} = ` + ang + '°$ et $AC = ' + hyp + '$ cm. Calcule $AB$ au dixième.', type: 'num', rep: adj, tol: 0.06, corr: r`$AB = AC \times \cos \widehat{A} = ` + hyp + r` \times \cos ` + ang + r`° \approx ` + N(adj) + '$ cm.' };
+    },
+    '3e-racines': function () {
+      var c = pick([2, 3, 5, 6, 7]), k = int(2, 9);
+      return { q: r`Simplifie $\sqrt{` + k * k * c + r`}$ sous la forme $a\sqrt{` + c + '}$. Donne $a$.', type: 'num', rep: k, corr: r`$\sqrt{` + k * k * c + r`} = \sqrt{` + k * k + r` \times ` + c + r`} = ` + k + r`\sqrt{` + c + '}$.' };
+    },
+    '3e-transformations': function () {
+      var ax = int(-5, 5), ay = int(-5, 5), dx = nz(-6, 6), dy = nz(-6, 6), cx = int(-5, 5), cy = int(-5, 5);
+      return { q: 'La translation transforme $A(' + ax + r`\,;\,` + ay + ')$ en $B(' + (ax + dx) + r`\,;\,` + (ay + dy) + ')$. Quelle est l\'ordonnée de l\'image de $C(' + cx + r`\,;\,` + cy + ')$ ?', type: 'num', rep: cy + dy, corr: 'Le déplacement est $(' + dx + r`\,;\,` + dy + ')$, donc l\'image est $(' + (cx + dx) + r`\,;\,` + (cy + dy) + ')$.' };
+    },
+    '2nde-statistiques': function () {
+      var v = [int(2, 9), int(2, 9), int(10, 15)], c = [int(1, 3), int(1, 3), int(1, 3)], s = v[0] * c[0] + v[1] * c[1] + v[2] * c[2], n = c[0] + c[1] + c[2];
+      return { q: 'Notes $' + v[0] + '$ (coef. $' + c[0] + '$), $' + v[1] + '$ (coef. $' + c[1] + '$) et $' + v[2] + '$ (coef. $' + c[2] + '$). Quelle est la moyenne (arrondie au centième si besoin) ?', type: 'num', rep: arr(s / n, 2), tol: 0.006, corr: r`$\dfrac{` + s + '}{' + n + r`} \approx ` + N(arr(s / n, 2)) + '$.' };
+    },
+    '2nde-echantillonnage': function () {
+      var k = pick([10, 20, 25, 40, 50, 100]), n = k * k;
+      return { q: 'On observe un échantillon de taille $n = ' + n + r`$. Que vaut la marge $\dfrac{1}{\sqrt{n}}$ ?`, type: 'num', rep: 1 / k, corr: r`$\sqrt{` + n + '} = ' + k + r`$, donc $\dfrac{1}{` + k + '} = ' + N(1 / k) + '$.' };
+    },
+    '1re-cercles': function () {
+      var a = int(-6, 6), b = int(-6, 6), rr = int(1, 9), d = a * a + b * b - rr * rr;
+      return { q: 'Quel est le rayon du cercle d\'équation $x^2 + y^2 ' + T(-2 * a, 'x') + ' ' + T(-2 * b, 'y') + Cst(d) + ' = 0$ ?', type: 'num', rep: rr, corr: '$' + (a === 0 ? 'x^2' : '(x ' + S(-a) + ')^2') + ' + ' + (b === 0 ? 'y^2' : '(y ' + S(-b) + ')^2') + ' = ' + rr * rr + r`$ : centre $(` + a + r`\,;\,` + b + ')$ et rayon $' + rr + '$.' };
+    },
+    '1re-seuils': function () {
+      var u0 = int(1, 20), rr = int(3, 12), Sx = int(60, 300), n = Math.floor((Sx - u0) / rr) + 1;
+      return { q: '$u_n = ' + u0 + ' + ' + rr + r`n$. Quel est le plus petit entier $n$ tel que $u_n \gt ` + Sx + '$ ?', type: 'num', rep: n, corr: '$' + u0 + ' + ' + rr + r`n \gt ` + Sx + r` \iff n \gt \dfrac{` + (Sx - u0) + '}{' + rr + '}$, donc $n = ' + n + '$ ($u_{' + n + '} = ' + (u0 + rr * n) + '$).' };
+    },
+    'tle-grands-nombres': function () {
+      var a = nz(-5, 5), b = nz(-9, 9), v = int(1, 9);
+      return { q: '$V(X) = ' + v + '$. Calcule $V(' + M(a, 'X') + Cst(b) + ')$.', type: 'num', rep: a * a * v, corr: '$V(aX + b) = a^2 V(X) = ' + a * a + r` \times ` + v + ' = ' + a * a * v + '$ (la constante ne change pas la dispersion).' };
+    },
+    'tle-orthogonalite': function () {
+      var u = [nz(-5, 5), int(-5, 5), int(-5, 5)], v = [int(-5, 5), int(-5, 5), nz(-5, 5)], p = u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+      return { q: r`Calcule $\vec u \cdot \vec v$ pour $\vec u(` + u.join(r`\,;\,`) + r`)$ et $\vec v(` + v.join(r`\,;\,`) + ')$.', type: 'num', rep: p, corr: '$' + u[0] + r` \times ` + P(v[0]) + ' + ' + P(u[1]) + r` \times ` + P(v[1]) + ' + ' + P(u[2]) + r` \times ` + P(v[2]) + ' = ' + p + '$.' };
+    },
+    'mpsi-matrices': function () {
+      var a = int(-4, 5), b = int(-4, 5), c = int(-4, 5), d = int(-4, 5);
+      if (Math.random() < 0.5) return { q: r`Calcule le déterminant de $\begin{pmatrix} ` + a + ' & ' + b + r` \\ ` + c + ' & ' + d + r` \end{pmatrix}$.`, type: 'num', rep: a * d - b * c, corr: '$ad - bc = ' + a * d + ' - ' + P(b * c) + ' = ' + (a * d - b * c) + '$.' };
+      var e = int(-3, 4), f = int(-3, 4);
+      return { q: r`Calcule le coefficient en haut à gauche de $\begin{pmatrix} ` + a + ' & ' + b + r` \\ ` + c + ' & ' + d + r` \end{pmatrix}\begin{pmatrix} ` + e + r` & 1 \\ ` + f + r` & 0 \end{pmatrix}$.`, type: 'num', rep: a * e + b * f, corr: 'Ligne $1$ par colonne $1$ : $' + a + r` \times ` + P(e) + ' + ' + P(b) + r` \times ` + P(f) + ' = ' + (a * e + b * f) + '$.' };
+    },
+    'mpsi-equadiff': function () {
+      var r1 = nz(-4, 4), r2 = nz(-4, 4); while (r2 === r1) r2 = nz(-4, 4);
+      return { q: "On résout $y'' " + T(-(r1 + r2), "y'") + ' ' + T(r1 * r2, 'y') + ' = 0$. Quel est le produit des racines de l\'équation caractéristique ?', type: 'num', rep: r1 * r2, corr: '$r^2 ' + T(-(r1 + r2), 'r') + Cst(r1 * r2) + ' = (r ' + S(-r1) + ')(r ' + S(-r2) + ')$ : racines $' + r1 + '$ et $' + r2 + '$, produit $' + r1 * r2 + r`$. Solutions $\lambda e^{` + r1 + r`x} + \mu e^{` + r2 + 'x}$.' };
     }
   };
   window.GENERATEURS = G;

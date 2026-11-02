@@ -135,7 +135,7 @@
       function prendre(l) { if (l && !pris[l.id] && ids.length < 3) { pris[l.id] = 1; ids.push(l.id); } }
       var suiv = [];
       for (var k = idx; k < NIVEAUX.length && suiv.length < 3; k++) {
-        leconsDe(NIVEAUX[k].id).forEach(function (l) { if (!st.faites[l.id] && suiv.length < 3) suiv.push(l); });
+        leconsDe(NIVEAUX[k].id).forEach(function (l) { if (!st.faites[l.id] && suiv.length < 3 && !(window.Premium && !Store.estPremium() && Premium.anticipe(l))) suiv.push(l); });
       }
       prendre(suiv[0]); prendre(suiv[1]);
       var aRevoir = LECONS.filter(function (l) { var f = st.faites[l.id]; return f && (f.best != null ? f.best : f.score) < 3 && nivIndex(l.niveau) <= idx; });
@@ -252,7 +252,7 @@
       var c = leconsDe(n.id).length;
       return '<a class="chip chip-lvl lv-' + n.id + '" href="#/programme/' + n.id + '" style="text-decoration:none">' + n.nom + ' · ' + c + ' leçons</a>';
     }).join('');
-    var dp = Theme.liste.map(function (t) {
+    var dp = Theme.visibles().map(function (t) {
       return '<button type="button" class="dp" data-theme-pick="' + t.id + '" aria-pressed="' + (Theme.actuel() === t.id) + '">' +
         '<span class="dp-prev p-' + t.id + '"><i></i><i></i><i></i><i></i><i></i></span>' +
         '<span class="dp-txt"><b>' + U.esc(t.nom) + '</b><span>' + U.esc(t.desc) + '</span></span></button>';
@@ -335,13 +335,14 @@
       '</div></div>' +
       Mascotte.bulle(Mascotte.salut(st.profil.nom)) +
       '<div id="bandeau-devoirs"></div>' + (window.Premium ? Premium.bandeauPlan() : '') +
-      '<div class="daily">' + cartes + '</div>' + info +
+      '<div class="daily">' + cartes + '</div>' + info + (window.Epreuves ? Epreuves.bandeaux() : '') +
       (nDues ? '<a class="banner banner-rv" href="#/revisions">' + I('refresh') + '<div class="banner-t"><b>' + nDues + ' carte' + (nDues > 1 ? 's' : '') + ' mémo à réviser</b><span>Quelques minutes pour ne pas oublier les leçons déjà faites.</span></div><span class="btn btn-2">Réviser</span></a>' : '') +
       '<div class="card card-flat" style="margin-top:24px"><div class="row"><b>Programme ' + U.esc(NIVEAUX[idx].long) + '</b><span class="spacer"></span><span class="muted small mono">' + fNiv + ' / ' + tot + '</span></div>' +
       '<div class="progress" style="margin-top:10px"><i style="width:' + (tot ? fNiv / tot * 100 : 0) + '%"></i></div>' +
       (faitesAuj ? '<p class="small muted" style="margin:10px 0 0">Bravo, ta séance du jour est faite. À demain !</p>' : '') + '</div>'
     );
     if (window.Social) Social.bandeauDevoirs(U.$('#bandeau-devoirs', main));
+    if (window.Epreuves) Epreuves.compteurs(main);
   }
 
   function planNom(id) { for (var i = 0; i < PLANS.length; i++) if (PLANS[i].id === id) return PLANS[i].nom.toLowerCase(); return ''; }
@@ -392,15 +393,17 @@
     var f = st.faites[id];
     main.innerHTML = page(entete +
       '<div class="lesson-steps"><span class="ls on">' + I('book') + 'Cours · 10 min</span><span class="ls on">' + I('playline') + 'Vidéo · ' + U.esc(v && v.d ? v.d : '≈ 8 min') + '</span><span class="ls on" id="ls-exos">' + I('pencil') + 'Exercices · 12 min</span>' +
-      (f ? '<span class="ls ok">' + I('check') + 'Déjà faite · ' + f.score + '/3</span>' : '') + '</div>' +
+      (f ? '<span class="ls ok">' + I('check') + 'Déjà faite · ' + f.score + '/3</span>' : '') +
+      (st.evals && st.evals[id] ? '<a class="ls ok" href="#/evaluation/' + id + '">' + I('clock') + 'Évaluation · ' + String(st.evals[id].best).replace('.', ',') + '/20</a>' : f ? '<a class="ls" href="#/evaluation/' + id + '">' + I('clock') + 'Évaluation notée</a>' : '') + '</div>' +
       '<div class="lesson-outils"><button type="button" class="btn btn-2 btn-sm" id="l-note">' + I('pencil') + 'Prendre des notes</button><a class="btn btn-ghost btn-sm" href="#/fiche/' + l.id + '">' + I('book') + 'Fiche résumé</a><a class="btn btn-ghost btn-sm" href="#/entrainement/' + l.id + '">' + I('refresh') + 'S\'entraîner à l\'infini</a><button type="button" class="btn btn-ghost btn-sm" data-outil="calc">Calculatrice</button><button type="button" class="btn btn-ghost btn-sm" data-outil="brouillon">Brouillon</button></div></div>' +
       '<div class="block"><div class="block-h"><span class="block-num">1</span><h2>Le cours</h2></div><div class="card cours">' + l.cours + '</div></div>' +
       (l.retenir && l.retenir.length ? '<div class="block"><div class="block-h"><span class="block-num">' + I('star') + '</span><h2>À retenir</h2></div><div class="card"><ul class="retenir">' + l.retenir.map(function (x) { return '<li>' + I('check') + '<span>' + x + '</span></li>'; }).join('') + '</ul></div></div>' : '') +
       '<div class="block"><div class="block-h"><span class="block-num">2</span><h2>La vidéo conseillée</h2></div>' + videoHtml + '</div>' +
       '<div class="block"><div class="block-h"><span class="block-num">3</span><h2>Les 3 exercices</h2></div><p class="muted">Deux essais par exercice. La correction détaillée s\'affiche ensuite.</p>' +
       l.exos.map(function (e, i) { return '<div class="card" id="exo-' + i + '" style="margin-bottom:16px"></div>'; }).join('') +
-      '<div id="fin"></div></div>', true);
+      '<div id="fin"></div></div>' + (window.Epreuves ? Epreuves.blocLecon(l) : ''), true);
     U.math(main);
+    if (window.Epreuves) Epreuves.monterLecon(main, l);
 
     U.$('#l-note', main).onclick = function () { Outils.ouvrir('notes'); Notes.nouvelleDepuisLecon(); };
     var vb = U.$('#video button', main);
@@ -427,9 +430,11 @@
       var msg = score === 3 ? 'Parfait, leçon maîtrisée.' : score === 2 ? 'Très bien. Relis la correction de l\'exercice manqué.' : score === 1 ? 'C\'est un début. Cette leçon reviendra en révision.' : 'Pas de panique : cette leçon te sera reproposée en révision.';
       var fin = U.$('#fin', main);
       fin.innerHTML = '<div class="card end-card">' + Mascotte.bulle(msg + (xp ? ' <b>+' + xp + ' XP</b>' : '') + ' Ses cartes mémo reviendront demain dans tes révisions.', score >= 2 ? 'bravo' : 'pense') + '<span class="eyebrow">Leçon terminée</span><div class="end-score">' + score + ' / 3</div>' +
-        '<div class="btn-row" style="justify-content:center"><a class="btn" href="#/aujourdhui">' + I('sun') + 'Retour à aujourd\'hui</a><a class="btn btn-2" href="#/entrainement/' + id + '">S\'entraîner encore</a>' +
+        '<div class="btn-row" style="justify-content:center"><a class="btn" href="#/evaluation/' + id + '">' + I('clock') + 'Passer l\'évaluation</a><a class="btn btn-2" href="#/aujourdhui">' + I('sun') + 'Retour à aujourd\'hui</a><a class="btn btn-2" href="#/entrainement/' + id + '">S\'entraîner encore</a>' +
+        (window.PROBLEMES && PROBLEMES[id] ? '<button type="button" class="btn btn-ghost" id="vers-pb">' + I('star') + 'Le problème</button>' : '') +
         (Store.estPremium() ? '' : '<a class="btn btn-2" href="#/abonnement">Débloquer la suite</a>') + '</div></div>';
       U.$('#ls-exos', main).classList.add('ok');
+      var vp = U.$('#vers-pb', main); if (vp) vp.onclick = function () { U.$('#pb-lecon', main).scrollIntoView({ behavior: 'smooth', block: 'start' }); };
       fin.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
@@ -552,7 +557,7 @@
     var st = Store.get();
     if (!st.profil) { location.hash = '#/compte/connexion'; return; }
     var heures = ['07:00', '08:00', '12:00', '16:30', '17:30', '18:30', '19:30', '20:30'];
-    var themes = Theme.liste.map(function (t) {
+    var themes = Theme.visibles().map(function (t) {
       return '<button type="button" class="choice" data-theme-pick="' + t.id + '" aria-pressed="' + (Theme.actuel() === t.id) + '"><span class="choice-l">' + I(t.premium && !st.premium ? 'lock' : 'palette') + '</span><span><b>' + U.esc(t.nom) + '</b>' + (t.premium ? ' <span class="chip chip-prem">' + I('crown') + 'Exclusif</span>' : '') + '<br><span class="small muted">' + U.esc(t.desc) + '</span></span></button>';
     }).join('');
     var nivOpts = NIVEAUX.map(function (n) { return '<option value="' + n.id + '"' + (n.id === st.niveau ? ' selected' : '') + '>' + U.esc(n.long) + '</option>'; }).join('');
@@ -664,11 +669,11 @@
   /* ================= Sélecteur de design ================= */
   function modalThemes() {
     var prem = Store.estPremium();
-    var b = Theme.liste.map(function (t) {
+    var b = Theme.visibles().map(function (t) {
       var bloque = t.premium && !prem;
       return '<button type="button" class="dp' + (bloque ? ' dp-bloque' : '') + '" data-theme-pick="' + t.id + '" aria-pressed="' + (Theme.actuel() === t.id) + '">' +
         '<span class="dp-prev p-' + t.id + '"><i></i><i></i><i></i><i></i><i></i></span>' +
-        '<span class="dp-txt"><b>' + U.esc(t.nom) + (t.premium ? ' <span class="chip chip-prem">' + I(bloque ? 'lock' : 'crown') + 'Exclusif</span>' : '') + '</b><span>' + U.esc(t.desc) + '</span></span></button>';
+        '<span class="dp-txt"><b>' + U.esc(t.nom) + (t.premium ? ' <span class="chip chip-prem">' + I(bloque ? 'lock' : 'crown') + 'Exclusif</span>' : t.exclusif ? ' <span class="chip chip-prem">' + I('laurel') + 'Gagné</span>' : '') + '</b><span>' + U.esc(t.desc) + '</span></span></button>';
     }).join('');
     Modal.ouvrir('<h2 id="modal-title">Apparence</h2><div id="perso-zone">' + personnaliser() + '</div>' +
       '<h3 style="margin-top:28px">Design</h3><p class="muted">Le contenu reste le même, seule l\'ambiance change.' + (prem ? '' : ' Les designs exclusifs sont réservés aux abonnés.') + '</p><div class="theme-opts">' + b + '</div>', { large: true });
@@ -699,6 +704,7 @@
     var t = e.target.closest('[data-theme-pick]');
     if (!t) return;
     if (Theme.premium(t.getAttribute('data-theme-pick')) && !Store.estPremium()) { Modal.fermer(); location.hash = '#/abonnement'; toast('Design exclusif : réservé aux abonnés.'); return; }
+    if (Theme.exclusif(t.getAttribute('data-theme-pick')) && !Theme.possede(t.getAttribute('data-theme-pick'))) { toast('Ce thème se gagne en remportant l\'olympiade du mois.'); return; }
     Theme.appliquer(t.getAttribute('data-theme-pick'));
     U.$$('[data-theme-pick]').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-theme-pick') === Theme.actuel()); });
     /* couleur et mode ne valent que pour Minimaliste : on rafraîchit les réglages affichés */

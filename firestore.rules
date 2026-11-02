@@ -70,6 +70,21 @@ service cloud.firestore {
       allow delete: if connecte() && resource.data.prof == request.auth.uid;
     }
 
+    // Olympiade du mois : une copie par élève et par mois (id = "2026-11_uid"). Créée au départ
+    // (rendu = false), puis rendue une seule fois avec la note sur 100. Lisible par les élèves
+    // connectés pour le classement.
+    match /olympiades/{id} {
+      allow read: if connecte();
+      allow create: if connecte() && request.resource.data.uid == request.auth.uid
+        && id == request.resource.data.mois + '_' + request.auth.uid
+        && request.resource.data.rendu == false
+        && request.resource.data.keys().hasOnly(['uid', 'mois', 'nom', 'niveau', 'debut', 'rendu']);
+      allow update: if connecte() && resource.data.uid == request.auth.uid && resource.data.rendu == false
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rendu', 'score', 'temps', 'fin'])
+        && request.resource.data.rendu == true
+        && request.resource.data.score is number && request.resource.data.score >= 0 && request.resource.data.score <= 100;
+    }
+
     // Défis entre amis : visibles et modifiables par les deux joueurs uniquement.
     match /duels/{id} {
       allow read: if connecte() && (request.auth.uid == resource.data.de || request.auth.uid == resource.data.a);

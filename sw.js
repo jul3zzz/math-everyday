@@ -5,20 +5,21 @@
    des vidéos dans un cache à part, conservé d'une version à l'autre.
    Rappels : clic sur une notification → ouvre l'appli ; en arrière-plan (Android), la synchronisation
    périodique « rappel » lit l'état écrit par rappels.js dans le cache me-rappel. */
-var VERSION = 'me-v14';
+var VERSION = 'me-v15';
 var HORS_LIGNE = 'me-hors-ligne';
 var RAPPEL = 'me-rappel';
 var FICHIERS = [
   '', 'index.html', 'manifest.json', 'favicon.svg', 'icone-192.png', 'icone-512.png', 'icone-masque-512.png',
-  'assets/css/base.css', 'assets/css/themes.css', 'assets/css/outils.css', 'assets/css/plus.css', 'assets/css/themes-plus.css', 'assets/css/refonte.css',
+  'assets/css/base.css', 'assets/css/themes.css', 'assets/css/outils.css', 'assets/css/plus.css', 'assets/css/themes-plus.css', 'assets/css/refonte.css', 'assets/css/epreuves.css',
   'assets/js/config.js', 'assets/js/core.js', 'assets/js/test.js', 'assets/js/views.js', 'assets/js/progres.js',
   'assets/js/calc-moteur.js', 'assets/js/calculatrice.js', 'assets/js/notes.js', 'assets/js/entrainement.js',
   'assets/js/fiches.js', 'assets/js/brouillon.js', 'assets/js/geometrie.js', 'assets/js/formulaire.js',
   'assets/js/ia.js', 'assets/js/cloud.js', 'assets/js/synchro.js', 'assets/js/social.js',
-  'assets/js/calcmental.js', 'assets/js/atelier.js', 'assets/js/premium.js', 'assets/js/outils.js', 'assets/js/installer.js', 'assets/js/rappels.js', 'assets/js/verification.js', 'assets/js/app.js',
+  'assets/js/calcmental.js', 'assets/js/atelier.js', 'assets/js/premium.js', 'assets/js/outils.js', 'assets/js/installer.js', 'assets/js/rappels.js', 'assets/js/verification.js', 'assets/js/epreuves.js', 'assets/js/app.js',
   'assets/js/data/niveaux.js', 'assets/js/data/placement.js', 'assets/js/data/videos.js', 'assets/js/data/generateurs.js', 'assets/js/data/sujets.js',
   'assets/js/data/lecons-6e.js', 'assets/js/data/lecons-5e.js', 'assets/js/data/lecons-4e.js', 'assets/js/data/lecons-3e.js',
-  'assets/js/data/lecons-2nde.js', 'assets/js/data/lecons-1re.js', 'assets/js/data/lecons-tle.js', 'assets/js/data/lecons-mpsi.js'
+  'assets/js/data/lecons-2nde.js', 'assets/js/data/lecons-1re.js', 'assets/js/data/lecons-tle.js', 'assets/js/data/lecons-mpsi.js', 'assets/js/data/lecons-nouvelles.js',
+  'assets/js/data/problemes-6e.js', 'assets/js/data/problemes-5e.js', 'assets/js/data/problemes-4e.js', 'assets/js/data/problemes-3e.js', 'assets/js/data/problemes-2nde.js', 'assets/js/data/problemes-1re.js', 'assets/js/data/problemes-tle.js', 'assets/js/data/problemes-mpsi.js'
 ];
 var CDN = [
   'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css',

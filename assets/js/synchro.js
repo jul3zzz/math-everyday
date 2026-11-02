@@ -38,11 +38,11 @@
     var faites = {};
     Object.keys(d.faites || {}).forEach(function (k) { var f = d.faites[k]; faites[k.replace(/\./g, '_')] = f.best != null ? f.best : f.score; });
     var sem = Progres.semaine();
-    return {
+    return Object.assign({
       nom: d.profil ? d.profil.nom : '', code: d.codeAmi || null, niveau: d.niveau || null,
       xp: d.xp || 0, semaine: sem.lundi, xpSemaine: sem.xp, serie: Progres.serie(), nbLecons: Object.keys(d.faites || {}).length,
       faites: faites, prof: !!d.prof, premium: !!d.premium, maj: Date.now()
-    };
+    }, window.Epreuves ? Epreuves.publicCosm(d) : {});
   }
   function pousser() {
     clearTimeout(timer); timer = null;

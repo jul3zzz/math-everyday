@@ -69,7 +69,7 @@
   }
 
   /* ---------------- API ---------------- */
-  var GAINS = { lecon: function (o) { return 20 + 10 * (o.score || 0); }, exo: function () { return 5; }, carte: function (o) { return o.su ? 3 : 1; }, examen: function (o) { return Math.round(10 + (o.note || 0) * 3); } };
+  var GAINS = { lecon: function (o) { return 20 + 10 * (o.score || 0); }, exo: function () { return 5; }, carte: function (o) { return o.su ? 3 : 1; }, examen: function (o) { return Math.round(10 + (o.note || 0) * 3); }, defi: function (o) { return Math.round(30 + (o.note || 0) * 4); }, olympiade: function (o) { return Math.round(50 + (o.score || 0)); } };
   var Progres = {
     niveau: niveau, BADGES: BADGES, TITRES: TITRES,
     xp: function () { return st().xp; },

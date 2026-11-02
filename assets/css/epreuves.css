@@ -1,0 +1,174 @@
+/* Math Everyday — épreuves : problèmes longs, évaluations, défis de la semaine, olympiades,
+   cadres d'avatar et thème exclusif « Olympe » (gagné à l'olympiade du mois). */
+
+/* ---------- Copie ---------- */
+.ep-barre{flex-wrap:wrap}
+.ep-sommaire{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 6px}
+.ep-sommaire .chip{cursor:pointer;font:inherit;font-size:.8rem}
+.ep-sommaire .chip:hover{background:var(--hover)}
+.ep-partie{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:1.3rem;margin:30px 0 4px;scroll-margin-top:130px}
+.ep-partie .chip{font-size:.8rem}
+.pb-etoiles{color:#b8892b;letter-spacing:.12em;border-color:currentColor;background:transparent}
+.block-h .pb-etoiles{margin-left:auto}
+.pb-lecon .exo{margin:0}
+.pb-lecon .exo-h{margin-bottom:6px}
+.pb-lecon .exo-h .block-num{display:none}
+.ep-fin{margin:6px 0 24px}
+.ep-medaille{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;font-weight:700;margin:6px 0 10px;background:var(--m-bg);color:var(--m-ink)}
+.ep-medaille svg{width:20px;height:20px}
+.ep-medaille.petite{padding:3px 10px;font-size:.8rem;margin:0;gap:5px}
+.ep-medaille.petite svg{width:14px;height:14px}
+.m-or{--m-bg:#fdf3d0;--m-ink:#7a5a00}
+.m-argent{--m-bg:#eceef2;--m-ink:#3f4652}
+.m-bronze{--m-bg:#f6e3d3;--m-ink:#7a3f12}
+
+/* ---------- Comptes à rebours ---------- */
+.ep-compte{font-family:var(--font-mono);font-weight:600}
+.ep-compte.grand{display:flex;justify-content:center;gap:10px;margin:18px 0 12px;flex-wrap:wrap}
+.ep-compte.grand span{display:flex;flex-direction:column;align-items:center;min-width:76px;padding:12px 10px;border-radius:16px;background:var(--tuile-ic,var(--hover))}
+.ep-compte.grand b{font-size:2.1rem;line-height:1}
+.ep-compte.grand small{font-family:var(--font-body);font-size:.75rem;color:var(--ink-2);margin-top:4px}
+
+/* ---------- Bandeaux (page Aujourd'hui) ---------- */
+.ep-bandeaux{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:20px}
+.ep-band{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;padding:16px 18px}
+.ep-band>svg{width:26px;height:26px;padding:11px;box-sizing:content-box;border-radius:16px;background:var(--tuile-ic,var(--hover));color:var(--stat-ic,var(--ink));flex-shrink:0}
+.ep-band span{display:flex;flex-direction:column;min-width:0}
+.ep-band small{color:var(--ink-2);font-size:.85rem}
+.ep-band.urgent>svg{background:var(--ko-bg);color:var(--ko)}
+.ep-band:hover{background:var(--hover)}
+
+/* ---------- Page des défis ---------- */
+.ep-semaine{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;margin-top:18px}
+.ep-sem-ic svg{width:34px;height:34px;padding:18px;box-sizing:content-box;border-radius:22px;background:var(--tuile-ic,var(--hover));color:var(--stat-ic,var(--ink))}
+.ep-sem-t h2{margin:4px 0 6px;font-size:1.5rem}
+.ep-sem-t p{margin:0 0 12px}
+.ep-sem-r{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;max-width:140px}
+.ep-sem-r .avatar{width:64px;height:64px;font-size:1.6rem}
+.ep-olymp-b{text-decoration:none}
+.ep-defis{margin-top:14px}
+.ep-defi{display:flex;flex-direction:column;gap:6px}
+.ep-defi.semaine{box-shadow:inset 0 0 0 2px var(--btn-bg,var(--ink))}
+.ep-defi-h{display:flex;align-items:center;gap:14px}
+.ep-defi-h>svg{width:24px;height:24px;padding:11px;box-sizing:content-box;border-radius:15px;background:var(--tuile-ic,var(--hover));color:var(--stat-ic,var(--ink));flex-shrink:0}
+.ep-defi-h>div{display:flex;flex-direction:column;flex:1;min-width:0}
+.ep-defi-h b{font-family:var(--font-head);font-size:1.08rem}
+.ep-defi p{margin:4px 0}
+.ep-defi-f{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+.ep-intro .ep-defi-h>svg{width:30px;height:30px;padding:15px}
+.ep-gains{display:flex;gap:14px;flex-wrap:wrap}
+.ep-gain{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 16px;border-radius:16px;background:var(--box-bg,var(--hover));min-width:96px;text-align:center}
+.ep-gain-t{justify-content:center;max-width:220px}
+
+/* ---------- Vitrine ---------- */
+.ep-vit-tete{display:flex;align-items:center;gap:16px}
+.ep-vit-tete .avatar{width:64px;height:64px;font-size:1.6rem}
+.ep-vit-tete div{display:flex;flex-direction:column}
+.ep-vit-h{font-size:1rem;margin:20px 0 10px}
+.ep-vit{display:flex;flex-wrap:wrap;gap:8px}
+.ep-vit .cb{display:inline-flex;align-items:center;gap:6px}
+.ep-vit .cb svg{width:16px;height:16px}
+.ep-vit-cadres{gap:12px}
+.ep-cadre-b{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 10px 10px;min-width:92px;border:0;border-radius:16px;background:var(--box-bg,var(--hover));color:var(--ink);cursor:pointer;font:inherit}
+.ep-cadre-b.on{box-shadow:inset 0 0 0 2px var(--btn-bg,var(--ink))}
+.ep-cadre-b:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* ---------- Olympiades ---------- */
+.ep-olymp{margin-top:18px}
+.ep-olymp h2{margin:6px 0}
+.ep-regles{margin-top:18px}
+.ep-regles summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.ep-regles summary::-webkit-details-marker{display:none}
+.ep-regles summary::after{content:"+";margin-left:auto;font-size:1.3rem;color:var(--ink-2)}
+.ep-regles[open] summary::after{content:"−"}
+.ep-regles ul{margin-top:12px}
+.ep-gagnant{display:flex;align-items:center;gap:18px;margin-bottom:16px}
+.ep-gagnant .avatar{width:64px;height:64px;font-size:1.6rem}
+.ep-gagnant div{display:flex;flex-direction:column}
+.ep-gagnant b{font-family:var(--font-head);font-size:1.4rem}
+.ep-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ep-table table{min-width:560px;width:100%}
+.ep-table tr.moi td{background:var(--sel)}
+.ep-rang{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font-weight:700;font-size:.85rem;background:var(--hover)}
+.ep-rang.r1{background:#f3d36b;color:#4a3500}
+.ep-rang.r2{background:#d5d9e0;color:#2b313b}
+.ep-rang.r3{background:#e3b48b;color:#4b2508}
+
+/* ---------- Cadres d'avatar ----------
+   Un anneau de métal (or, argent, bronze) et un motif propre à chaque défi, dessiné par ::after. */
+.avatar[data-cadre]{position:relative;box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--metal)}
+.avatar[data-metal="or"]{--metal:#d4a017;--metal-2:#fff1b8}
+.avatar[data-metal="argent"]{--metal:#9aa3af;--metal-2:#f4f6f8}
+.avatar[data-metal="bronze"]{--metal:#b8733a;--metal-2:#f6d7bd}
+.avatar[data-cadre]::after{content:"";position:absolute;inset:-8px;border-radius:50%;pointer-events:none;
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px))}
+.avatar[data-cadre="pharaons"]::after{background:repeating-conic-gradient(var(--metal) 0 14deg,transparent 14deg 30deg)}
+.avatar[data-cadre="euclide"]::after{background:repeating-conic-gradient(var(--metal) 0 3deg,transparent 3deg 45deg)}
+.avatar[data-cadre="khwarizmi"]::after{background:repeating-conic-gradient(var(--metal) 0 6deg,transparent 6deg 12deg)}
+.avatar[data-cadre="descartes"]::after{background:conic-gradient(var(--metal) 0 25%,transparent 0 50%,var(--metal) 0 75%,transparent 0)}
+.avatar[data-cadre="pascal"]::after{background:repeating-conic-gradient(var(--metal) 0 5deg,transparent 5deg 24deg)}
+.avatar[data-cadre="fibonacci"]::after{background:conic-gradient(transparent,var(--metal))}
+.avatar[data-cadre="gauss"]::after{inset:-9px;background:var(--metal);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 4px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 4px))}
+.avatar[data-cadre="hypatie"]::after{background:conic-gradient(var(--metal),var(--metal-2),var(--metal),var(--metal-2),var(--metal))}
+.avatar[data-cadre="laurier"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--metal),0 0 14px color-mix(in srgb,var(--metal) 55%,transparent)}
+.avatar[data-cadre="laurier"]::after{inset:-10px;background:repeating-conic-gradient(from -8deg,#3f7d3a 0 9deg,var(--metal) 9deg 12deg,transparent 12deg 20deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 5px));mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 5px))}
+.avatar-s{width:24px;height:24px;font-size:.72rem;display:inline-grid;vertical-align:middle;margin-right:8px}
+.avatar-s[data-cadre]{box-shadow:0 0 0 1.5px var(--surface),0 0 0 3px var(--metal)}
+.avatar-s[data-cadre]::after{inset:-5px}
+
+/* ---------- Thème exclusif « Olympe » : marbre, laurier et or ---------- */
+[data-theme="olympe"]{
+  --bg:#f7f5f0;--surface:#ffffff;--ink:#14213d;--ink-2:#5b6478;
+  --line:#e4dfd3;--line-strong:#14213d;--line-card:#ebe6da;--hover:#f1ede3;
+  --focus:#b8892b;--sel:#f4ead0;--top-bg:rgba(247,245,240,.92);--top-blur:saturate(1.3) blur(12px);
+  --brand-accent:#b8892b;--nav-on-ink:#ffffff;--nav-on-bg:#14213d;--nav-on-line:#14213d;
+  --r:20px;--r-sm:14px;--r-btn:999px;--r-chip:99px;
+  --bw:0px;--bw-btn:0px;--bw-in:1px;--bw-track:0px;--bar-w:4px;
+  --shadow:0 1px 2px rgba(20,33,61,.05),0 10px 30px rgba(20,33,61,.06);--shadow-sm:0 1px 2px rgba(20,33,61,.06);--shadow-strong:0 0 0 2px #b8892b;
+  --shadow-btn:none;--shadow-btn-h:0 6px 18px rgba(184,137,43,.28);--shadow-modal:0 30px 80px rgba(20,33,61,.25);
+  --btn-bg:#14213d;--btn-bg-h:#22325a;--btn-ink:#ffffff;--btn-line:#14213d;--btn-lift:translateY(-1px);
+  --btn2-bg:#f1ede3;--btn2-ink:#14213d;--btn2-line:transparent;
+  --font-head:"Cormorant Garamond",Georgia,serif;--font-body:"Geist",system-ui,sans-serif;--font-mono:"Geist Mono",ui-monospace,monospace;
+  --font-btn:var(--font-body);--font-chip:var(--font-body);--font-eyebrow:var(--font-mono);--font-num:"Cormorant Garamond",Georgia,serif;
+  --head-w:700;--head-ls:0;--num-w:700;
+  --fs-body:17px;--fs-h1:2.7rem;--fs-h2:2rem;--fs-h2b:1.6rem;--fs-h3:1.3rem;--fs-hero:clamp(2.7rem,6vw,4.6rem);--fs-cours:1.05rem;
+  --hero-em:#b8892b;--hero-em-style:italic;
+  --chip-bg:#f1ede3;--num-ink:#14213d;--num-bg:#f4ead0;--num-on:#b8892b;--stat-ic:#b8892b;--locked-bg:#f1ede3;
+  --ok:#2f6b3a;--ok-bg:#e8f1e6;--ko:#a3262a;--ko-bg:#f8e6e4;
+  --banner-bg:#14213d;--banner-ink:#f7f5f0;--track:#ebe6da;--bar:#b8892b;--bar-knob:#ffffff;
+  --box-bg:#faf7ef;--box-title:#14213d;--c-def:#b8892b;--c-prop:#2f6b3a;--c-meth:#14213d;--c-warn:#a3262a;
+  --in-bg:#ffffff;--play-bg:#14213d;--play-ink:#ffffff;--tag-bg:#b8892b;--tag-ink:#ffffff;--scrim:rgba(20,33,61,.45);
+  --logo-bg:#14213d;--logo-ink:#f3d36b;--logo-line:#14213d;
+  --art-line:#14213d;--art-soft:#e4dfd3;--art-fill:transparent;--art-phi:#b8892b;
+  --masc-fond:#f4ead0;--masc-trait:#14213d;--masc-ink:#14213d;--masc-joue:rgba(184,137,43,.35);
+  --tuile-ic:#f4ead0;
+  color-scheme:light;
+}
+[data-theme="olympe"] body{background-image:linear-gradient(115deg,transparent 40%,rgba(20,33,61,.025) 45%,transparent 52%),linear-gradient(35deg,transparent 60%,rgba(184,137,43,.035) 64%,transparent 70%);background-attachment:fixed}
+[data-theme="olympe"] .top{border-bottom:1px solid var(--line)}
+[data-theme="olympe"] .eyebrow{color:#b8892b;letter-spacing:.14em}
+[data-theme="olympe"] h1,[data-theme="olympe"] h2{letter-spacing:.005em}
+[data-theme="olympe"] .hero h1 em{background:linear-gradient(90deg,#b8892b,#e0b84f,#b8892b);-webkit-background-clip:text;background-clip:text;color:transparent}
+[data-theme="olympe"] .banner{border:0}
+[data-theme="olympe"] .banner .btn-2{background:#f3d36b;color:#14213d}
+[data-theme="olympe"] .end-score{color:#b8892b}
+[data-theme="olympe"] .lv-mpsi{--lvl-bg:#14213d;--lvl-ink:#f3d36b;--lvl-line:#14213d}
+[data-theme="olympe"] .hero-art .ga-spiral{stroke:#b8892b}
+[data-theme="olympe"] .logo .lg-bg{stroke-width:0}
+[data-theme="olympe"] .k{background:#faf7ef;color:#14213d;border-color:#ebe6da}
+[data-theme="olympe"] .k-exe{background:#14213d;color:#f3d36b}
+.dp-prev.p-olympe{background:#f7f5f0 linear-gradient(115deg,transparent 40%,rgba(20,33,61,.05) 46%,transparent 54%);border-bottom:3px solid #b8892b}
+.p-olympe i:nth-child(1){left:16px;top:20px;width:44%;height:12px;background:#14213d;border-radius:4px}
+.p-olympe i:nth-child(2){left:16px;top:42px;width:58%;height:5px;background:#d9d2c1;border-radius:3px}
+.p-olympe i:nth-child(3){left:16px;top:54px;width:46%;height:5px;background:#d9d2c1;border-radius:3px}
+.p-olympe i:nth-child(4){left:16px;bottom:16px;width:74px;height:24px;background:#14213d;border-radius:99px}
+.p-olympe i:nth-child(5){right:16px;top:16px;width:30%;height:66%;background:#fff;border:2px solid #b8892b;border-radius:12px}
+
+@media (max-width:720px){
+  .ep-semaine{grid-template-columns:1fr;text-align:left}
+  .ep-sem-ic{display:none}
+  .ep-sem-r{flex-direction:row;max-width:none;text-align:left}
+  .ep-compte.grand span{min-width:64px;padding:10px 6px}
+  .ep-compte.grand b{font-size:1.7rem}
+  .ep-partie{scroll-margin-top:170px}
+}

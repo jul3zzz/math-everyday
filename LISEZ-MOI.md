@@ -40,8 +40,18 @@ puis ouvrir http://localhost:4182
 | `assets/js/data/lecons-*.js` | Les leçons, un fichier par niveau |
 | `assets/js/data/placement.js` | Les questions du test (bonne réponse toujours en 1re position, mélangée à l'affichage) |
 | `assets/js/data/videos.js` | La vidéo choisie pour chaque leçon |
+| `assets/js/data/lecons-nouvelles.js` | Leçons ajoutées après coup (champ `nouveau` : 30 jours d'avance pour les abonnés) |
+| `assets/js/data/problemes-*.js` | Un problème long par leçon (`etoiles` 2 ou 3), un fichier par niveau |
+| `assets/js/epreuves.js` | Évaluations notées, défis de la semaine, olympiade du mois, titres et cadres d'avatar |
+| `assets/css/epreuves.css` | Styles des épreuves, cadres d'avatar et thème « Olympe » (réservé au vainqueur) |
 
-Ajouter une leçon : copier un bloc `{ id: …, titre: …, cours: …, exos: [...] }` dans le fichier du niveau. Les maths s'écrivent en LaTeX entre `$…$`. Ne jamais écrire `<` ou `>` dans une formule : utiliser `\lt` et `\gt`.
+Ajouter une leçon : copier un bloc `{ id: …, titre: …, cours: …, exos: [...] }` dans le fichier du niveau (ou dans `lecons-nouvelles.js`), puis lui ajouter un générateur dans `generateurs.js` et un problème dans `problemes-<niveau>.js`. Les maths s'écrivent en LaTeX entre `$…$`. Ne jamais écrire `<` ou `>` dans une formule : utiliser `\lt` et `\gt`.
+
+## Défis et olympiades
+
+- **Défis de la semaine** (1 h, sur 20, au niveau de l'élève) : 8 défis qui tournent chaque semaine. Gratuit : le défi de la semaine, le dimanche, une tentative. Abonnés : tous, quand ils veulent. Récompenses dès 10/20 : un titre et un cadre d'avatar (bronze 10, argent 14, or 17), visibles par les amis.
+- **Olympiade** : le dernier samedi du mois, de 10 h à 22 h, 2 h d'épreuve, sur 100, ouverte à tous. Chaque niveau a son sujet (même forme partout), et une égalisation corrige l'écart de difficulté entre niveaux (dès 3 copies par niveau). Le vainqueur gagne le thème Olympe, le podium une couronne de laurier. Les copies vont dans la collection Firestore `olympiades` (règles dans `firestore.rules`).
+- Essai en local : dans la console, `window.__decalageHorloge = new Date(2026, 10, 28, 12).getTime() - Date.now()` avance l'horloge des épreuves (seulement sur localhost).
 
 ## Passer de la démo au réel (étape suivante)
 

@@ -19,11 +19,11 @@
   }
   function nav(route) {
     var st = Store.get();
-    var groupe = { revisions: 'sentrainer', entrainement: 'sentrainer', examens: 'sentrainer', fiches: 'sentrainer', fiche: 'sentrainer', atelier: 'sentrainer', 'calcul-mental': 'sentrainer', sujets: 'sentrainer', plan: 'sentrainer', bilan: 'progres', nouveautes: 'abonnement', duel: 'amis', classes: 'amis', lecon: st.profil ? 'aujourdhui' : '', compte: 'compte' };
+    var groupe = { defi: 'defis', olympiades: 'defis', evaluation: 'sentrainer', revisions: 'sentrainer', entrainement: 'sentrainer', examens: 'sentrainer', fiches: 'sentrainer', fiche: 'sentrainer', atelier: 'sentrainer', 'calcul-mental': 'sentrainer', sujets: 'sentrainer', plan: 'sentrainer', bilan: 'progres', nouveautes: 'abonnement', duel: 'amis', classes: 'amis', lecon: st.profil ? 'aujourdhui' : '', compte: 'compte' };
     var actif = actifCourant = groupe[route] != null ? groupe[route] : route;
     var nd = st.profil && window.Entrainement ? Entrainement.dues() : 0;
     var principaux = st.profil
-      ? [['aujourdhui', 'Aujourd\'hui', 'sun'], ['sentrainer', 'S\'entraîner', 'pencil', nd], ['programme', 'Programme', 'list'], ['progres', 'Progrès', 'star']]
+      ? [['aujourdhui', 'Aujourd\'hui', 'sun'], ['sentrainer', 'S\'entraîner', 'pencil', nd], ['defis', 'Défis', 'trophy'], ['programme', 'Programme', 'list'], ['progres', 'Progrès', 'star']]
       : [['programme', 'Programme', 'list'], ['formulaire', 'Formulaire', 'book'], ['abonnement', 'Abonnement', 'crown']];
     document.getElementById('nav').innerHTML = principaux.map(function (it) { return lien(it, actif); }).join('');
     /* à droite : le compte (ordinateur) */
@@ -31,8 +31,9 @@
     if (st.profil) {
       var initiale = U.esc((st.profil.nom || '?').trim().charAt(0).toUpperCase() || '?');
       var sec = secondaires(st);
-      ha.innerHTML = '<div class="compte-m"><button type="button" class="avatar-b' + (sec.some(function (x) { return x[0] === actif; }) ? ' on' : '') + '" id="avatar-b" aria-haspopup="true" aria-expanded="false" aria-controls="menu-compte" aria-label="Mon compte"><span class="avatar">' + initiale + '</span><span class="avatar-nom">' + U.esc(st.profil.nom) + '</span>' + I('chevron') + '</button>' +
-        '<div class="menu-d" id="menu-compte" hidden><div class="menu-tete"><span class="avatar avatar-l">' + initiale + '</span><span><b>' + U.esc(st.profil.nom) + '</b><small>' + U.esc(st.profil.mail || '') + '</small></span></div>' +
+      var cadre = window.Epreuves ? Epreuves.attrsAvatar() : '', titre = window.Epreuves ? Epreuves.titreEquipe() : '';
+      ha.innerHTML = '<div class="compte-m"><button type="button" class="avatar-b' + (sec.some(function (x) { return x[0] === actif; }) ? ' on' : '') + '" id="avatar-b" aria-haspopup="true" aria-expanded="false" aria-controls="menu-compte" aria-label="Mon compte"><span class="avatar"' + cadre + '>' + initiale + '</span><span class="avatar-nom">' + U.esc(st.profil.nom) + '</span>' + I('chevron') + '</button>' +
+        '<div class="menu-d" id="menu-compte" hidden><div class="menu-tete"><span class="avatar avatar-l"' + cadre + '>' + initiale + '</span><span><b>' + U.esc(st.profil.nom) + '</b><small>' + U.esc(titre || st.profil.mail || '') + '</small></span></div>' +
         sec.map(function (it) { return lien(it, actif, 'menu-i'); }).join('') +
         '<button type="button" class="menu-i" data-apparence>' + I('palette') + '<span class="nav-lbl">Apparence</span></button>' +
         (Installer.installee() ? '' : lien(['installer', 'Installer l\'appli', 'download'], actif, 'menu-i')) +
@@ -88,14 +89,14 @@
   function ouvrirFeuille() {
     var st = Store.get(), f = document.getElementById('feuille'), boite = document.getElementById('feuille-boite');
     var tuiles = [['programme', 'Programme', 'list']].concat(secondaires(st))
-      .concat([['formulaire', 'Formulaire', 'book'], ['atelier', 'Mode libre', 'compass'], ['calcul-mental', 'Calcul mental', 'target']]);
+      .concat([['defis', 'Défis', 'trophy'], ['olympiades', 'Olympiades', 'laurel'], ['formulaire', 'Formulaire', 'book'], ['atelier', 'Mode libre', 'compass'], ['calcul-mental', 'Calcul mental', 'target']]);
     /* grille de 3 colonnes toujours pleine (+ 2 tuiles fixes : Notes et Apparence) */
     if (!Installer.installee()) tuiles.push(['installer', 'Installer l\'appli', 'download']);
     var bonus = [['fiches', 'Fiches résumé', 'book'], ['examens', 'Examens blancs', 'clock'], ['sujets', 'Sujets type', 'star']];
     while ((tuiles.length + 2) % 3 && bonus.length) tuiles.push(bonus.shift());
     var N = window.Progres ? Progres.niveau(Progres.xp()) : null;
     boite.innerHTML = '<div class="feuille-poignee" aria-hidden="true"></div>' +
-      '<div class="menu-tete"><span class="avatar avatar-l">' + U.esc((st.profil.nom || '?').charAt(0).toUpperCase()) + '</span><span><b>' + U.esc(st.profil.nom) + '</b><small>' + (N ? 'Niveau ' + N.n + ' · ' + U.esc(N.titre) : '') + '</small></span></div>' +
+      '<div class="menu-tete"><span class="avatar avatar-l"' + (window.Epreuves ? Epreuves.attrsAvatar() : '') + '>' + U.esc((st.profil.nom || '?').charAt(0).toUpperCase()) + '</span><span><b>' + U.esc(st.profil.nom) + '</b><small>' + (N ? 'Niveau ' + N.n + ' · ' + U.esc((window.Epreuves && Epreuves.titreEquipe()) || N.titre) : '') + '</small></span></div>' +
       '<div class="feuille-grille">' + tuiles.map(function (it) { return lien(it, actifCourant, 'tuile'); }).join('') +
       '<button type="button" class="tuile" data-outil="notes">' + I('pencil') + '<span class="nav-lbl">Notes</span></button>' +
       '<button type="button" class="tuile" data-apparence>' + I('palette') + '<span class="nav-lbl">Apparence</span></button></div>' +
@@ -167,9 +168,9 @@
     if (r !== 'verifier' && window.Verification) Verification.arreter();
     /* retour de la page de paiement Stripe (?paiement=cs_…&offre=…) */
     if (window.Paiement) Paiement.retour();
-    main.onclick = null;
+    main.onclick = null; main.oninput = null;
     document.onkeydown = null;
-    if (Theme.premium(Theme.actuel()) && !Store.estPremium()) Theme.appliquer('minimal');
+    if ((Theme.premium(Theme.actuel()) && !Store.estPremium()) || (Theme.exclusif(Theme.actuel()) && !Theme.possede(Theme.actuel()))) Theme.appliquer('minimal');
     Modal.fermer();
     nav(r);
     switch (r) {
@@ -198,6 +199,10 @@
       case 'plan': Premium.plan(main); break;
       case 'bilan': Premium.bilan(main); break;
       case 'nouveautes': Premium.nouveautes(main); break;
+      case 'defis': Epreuves.defis(main, parts[1]); break;
+      case 'defi': Epreuves.defi(main, parts[1]); break;
+      case 'olympiades': Epreuves.olympiades(main); break;
+      case 'evaluation': Epreuves.evaluation(main, parts[1]); break;
       case 'installer': Installer.page(main); break;
       case 'verifier': Verification.page(main); break;
       default: Vues.accueil(main);
@@ -209,6 +214,8 @@
     window.__premier = false;
   }
 
+  /* redessine la navigation (nouveau cadre ou titre équipé) */
+  window.Nav = function () { nav(actifCourant); };
   U.$$('[data-logo]').forEach(function (el) { el.innerHTML = LOGO; });
   Theme.appliquer(Store.theme() || 'minimal');
   document.getElementById('theme-btn').onclick = Vues.themes;

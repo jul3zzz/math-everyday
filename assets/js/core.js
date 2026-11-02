@@ -81,6 +81,8 @@
     menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
     chevron: '<path d="M7 10l5 5 5-5"/>',
     calc: '<rect x="4.5" y="2.5" width="15" height="19" rx="2.5"/><rect x="7.5" y="5.5" width="9" height="4" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 16.5h.01M12 16.5h.01M16 16.5h.01M8 19.5h.01M12 19.5h4"/>',
+    trophy: '<path d="M7 3.5h10v5.5a5 5 0 0 1-10 0z"/><path d="M7 5.5H4.5a3 3 0 0 0 3 4.4M17 5.5h2.5a3 3 0 0 1-3 4.4M12 14v4M8.5 21h7M9.5 18h5"/>',
+    laurel: '<path d="M12 21.5V10"/><path d="M12 10C10.8 6.6 8.3 5 5.2 5c.4 3.2 2.9 5.1 6.8 5zM12 10c1.2-3.4 3.7-5 6.8-5-.4 3.2-2.9 5.1-6.8 5z"/><path d="M12 15.5c-1.5-2.7-4.3-3.8-7.2-3.3.9 2.9 3.8 4.2 7.2 3.3zM12 15.5c1.5-2.7 4.3-3.8 7.2-3.3-.9 2.9-3.8 4.2-7.2 3.3z"/>',
     sparkle:'<path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 17v4M17 19h4"/>'
   };
   function I(name, cls) {
@@ -346,14 +348,21 @@
     { id: 'dore', nom: 'Doré élégant', desc: 'Crème et or, comme un vieux traité de géométrie.' },
     { id: 'tableau', nom: 'Tableau noir', desc: 'Ardoise verte et craie, comme en classe.', premium: true },
     { id: 'cahier', nom: 'Cahier d\'écolier', desc: 'Papier quadrillé, marge rouge et stylo bleu.', premium: true },
-    { id: 'nuit', nom: 'Nuit douce', desc: 'Bleu nuit apaisant pour travailler le soir.', premium: true }
+    { id: 'nuit', nom: 'Nuit douce', desc: 'Bleu nuit apaisant pour travailler le soir.', premium: true },
+    { id: 'olympe', nom: 'Olympe', desc: 'Marbre, laurier et or. Réservé aux vainqueurs de l\'olympiade du mois.', exclusif: true }
   ];
   var Theme = {
     liste: THEMES,
     premium: function (id) { return THEMES.some(function (t) { return t.id === id && t.premium; }); },
+    exclusif: function (id) { return THEMES.some(function (t) { return t.id === id && t.exclusif; }); },
+    /* thème gagné (olympiades) */
+    possede: function (id) { var c = etat.cosmetiques; return !!(c && c.themes && c.themes.indexOf(id) >= 0); },
+    /* thèmes à proposer : les exclusifs seulement s'ils ont été gagnés */
+    visibles: function () { return THEMES.filter(function (t) { return !t.exclusif || Theme.possede(t.id); }); },
     appliquer: function (id) {
       if (!THEMES.some(function (t) { return t.id === id; })) id = 'minimal';
       if (Theme.premium(id) && !Store.estPremium()) id = 'minimal';
+      if (Theme.exclusif(id) && !Theme.possede(id)) id = 'minimal';
       document.documentElement.setAttribute('data-theme', id);
       Store.setTheme(id);
       var b = document.getElementById('theme-btn');
@@ -476,7 +485,11 @@
   window.Store = Store; window.Check = Check; window.Theme = Theme; window.Modal = Modal; window.toast = toast;
   window.LECONS = window.LECONS || [];
   /* Les fichiers data/lecons-*.js appellent addLecons([...]) */
+  /* Les fichiers data/problemes-*.js appellent addProblemes(niveau, { idLecon: problème }) */
+  window.PROBLEMES = window.PROBLEMES || {};
+  window.addProblemes = function (niveau, obj) { for (var k in obj) { obj[k].lecon = k; obj[k].niveau = niveau; window.PROBLEMES[k] = obj[k]; } };
   window.addLecons = function (niveau, liste) {
-    liste.forEach(function (l, i) { l.niveau = niveau; l.ordre = i + 1; window.LECONS.push(l); });
+    var deja = window.LECONS.filter(function (l) { return l.niveau === niveau; }).length; /* plusieurs fichiers par niveau */
+    liste.forEach(function (l, i) { l.niveau = niveau; l.ordre = deja + i + 1; window.LECONS.push(l); });
   };
 })();

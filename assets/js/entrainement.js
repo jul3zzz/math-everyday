@@ -267,6 +267,9 @@
     var tuiles = [
       ['#/revisions', 'refresh', 'Cartes mémo', nd ? nd + ' carte' + (nd > 1 ? 's' : '') + ' à revoir aujourd\'hui' : 'Révisions espacées des leçons déjà faites', nd],
       ['#/entrainement', 'pencil', 'Entraînement', 'Des exercices nouveaux à l\'infini, chapitre par chapitre'],
+      ['#/evaluation', 'clock', 'Évaluations', 'Un contrôle noté sur 20 pour chaque leçon terminée' + (Store.estPremium() ? '' : ' · 1 par jour')],
+      ['#/defis', 'trophy', 'Défis de la semaine', 'Une heure de problèmes, des titres et des cadres à gagner'],
+      ['#/olympiades', 'laurel', 'Olympiade du mois', 'Une épreuve de 2 h pour tous les niveaux, le vainqueur gagne le thème Olympe'],
       ['#/examens', 'clock', 'Examens blancs', 'Brevet, bac et concours blancs chronométrés, notés sur 20'],
       ['#/fiches', 'book', 'Fiches résumé', 'Une fiche d\'une page par leçon, à imprimer ou garder en PDF'],
       ['#/calcul-mental', 'target', 'Calcul mental', Store.estPremium() ? 'Séries de calculs de tête, sans limite' : 'Séries de calculs de tête · ' + CalculMental.LIMITE + ' calculs gratuits par jour'],
