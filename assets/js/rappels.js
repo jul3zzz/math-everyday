@@ -115,7 +115,7 @@
   function brancher(main, rafraichir) {
     var a = U.$('#rap-activer', main); if (a) a.onclick = function () { demander().then(rafraichir); };
     var c = U.$('#rap-couper', main); if (c) c.onclick = function () { ecrire(CLE_CHOIX, 'non'); partagerEtat(); toast('Rappels coupés sur cet appareil.'); rafraichir(); };
-    var t = U.$('#rap-test', main); if (t) t.onclick = function () { notifier('Math Everyday', 'Les rappels marchent : à demain !'); };
+    var t = U.$('#rap-test', main); if (t) t.onclick = function () { notifier('Math Everyday', 'Les rappels marchent : à demain.'); };
   }
 
   /* vérification chaque minute (résiste à la mise en veille et aux changements d'heure) */

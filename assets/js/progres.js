@@ -88,7 +88,7 @@
       if (type === 'examen') s.stats.examens.push({ date: U.today(), niveau: o.niveau, note: o.note, titre: o.titre });
       Store.save();
       var apres = niveau(s.xp).n;
-      if (apres > avant) setTimeout(function () { Progres.fete('Niveau ' + apres + ' : ' + niveau(s.xp).titre + ' !'); }, 400);
+      if (apres > avant) setTimeout(function () { Progres.fete('Niveau ' + apres + ' : ' + niveau(s.xp).titre + '.'); }, 400);
       Progres.verifierBadges();
       return g;
     },
@@ -128,7 +128,7 @@
         }
         break;
       }
-      if (utilise) { Store.save(); setTimeout(function () { toast('Joker utilisé : ta série est protégée !'); }, 600); }
+      if (utilise) { Store.save(); setTimeout(function () { toast('Joker utilisé : ta série est protégée.'); }, 600); }
       return n;
     },
     meilleureSerie: function () {
@@ -209,10 +209,9 @@
       return ASTUCES[i];
     },
     salut: function (nom) {
-      var h = new Date().getHours(), s = Progres.serie();
-      var debut = h < 6 ? 'Encore debout, ' : h < 12 ? 'Bonjour ' : h < 18 ? 'Salut ' : 'Bonsoir ';
-      var serie = s >= 2 ? ' Tu es sur une série de ' + s + ' jours, continue !' : s === 1 ? ' Tu as travaillé hier : on enchaîne ?' : '';
-      return debut + U.esc(nom) + ' !' + serie + '<br><span class="masc-ast"><b>Astuce du jour.</b> ' + U.esc(Mascotte.astuce()) + '</span>';
+      var s = Progres.serie();
+      var phrase = s >= 2 ? U.esc(nom) + ', tu en es à ' + s + ' jours de suite.' : s === 1 ? U.esc(nom) + ', tu as travaillé hier : on enchaîne ?' : U.esc(nom) + ', une leçon aujourd\'hui et ta série commence.';
+      return phrase + '<br><span class="masc-ast"><b>Astuce du jour.</b> ' + U.esc(Mascotte.astuce()) + '</span>';
     }
   };
 

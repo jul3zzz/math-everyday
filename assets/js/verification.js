@@ -16,7 +16,7 @@
     var z = U.$('#vf-etat', main);
     if (z) z.innerHTML = '<span class="vf-ok">' + I('check') + 'Adresse vérifiée, connexion…</span>';
     return Synchro.apresVerification().then(function () {
-      toast('Adresse vérifiée : bienvenue sur Math Everyday !');
+      toast('Adresse vérifiée : bienvenue sur Math Everyday.');
       Synchro.pousser();
       setTimeout(suite, 700);
     });

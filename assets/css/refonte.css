@@ -136,7 +136,6 @@ html{--tuile-ic:var(--hover)}
 .nav-menu a svg{width:22px;height:22px;flex-shrink:0}
 .nav-menu .nav-lbl{display:inline!important}
 html[data-theme=enfantin] .nav-menu{border:3px solid #1d1b4b;box-shadow:6px 6px 0 #1d1b4b}
-}
 .brand-name{font-size:1.2rem}
 .logo{width:40px;height:40px}
 .theme-btn{border:0;box-shadow:none;background:var(--hover);height:46px;padding:0 16px;border-radius:var(--r-sm)}

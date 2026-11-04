@@ -80,12 +80,12 @@
         e.preventDefault();
         var c = U.$('#am-code', main).value.trim().toUpperCase().replace(/\s/g, ''), er = U.$('#am-err', main);
         if (!/^PHI-[A-Z0-9]{5}$/.test(c)) { er.textContent = 'Un code ami ressemble à PHI-XXXXX.'; return; }
-        if (c === st.codeAmi) { er.textContent = 'C\'est ton propre code !'; return; }
+        if (c === st.codeAmi) { er.textContent = 'C\'est ton propre code.'; return; }
         Cloud.lire('codes/' + c).then(function (d) {
           if (!d) throw new Error('Aucun élève avec ce code.');
           if ((mien.amis || []).indexOf(d.uid) >= 0) throw new Error('Vous êtes déjà amis.');
           return Promise.all([Cloud.ajouterA('publics/' + u.uid, 'amis', d.uid), Cloud.ajouterA('publics/' + d.uid, 'amis', u.uid)]);
-        }).then(function () { toast('Ami ajouté !'); vAmis(main); }, function (x) { er.textContent = x.code ? Cloud.message(x) : x.message; });
+        }).then(function () { toast('Ami ajouté'); vAmis(main); }, function (x) { er.textContent = x.code ? Cloud.message(x) : x.message; });
       };
       main.onclick = function (e) {
         var r0 = e.target.closest('[data-retirer]');
@@ -154,7 +154,7 @@
       q();
     }
     function resultat(d, exos, sm, sa, adv) {
-      var verdict = !sa ? 'En attente de ' + esc(adv || 'ton ami') + '…' : sm.score > sa.score || (sm.score === sa.score && sm.temps < sa.temps) ? 'Tu as gagné !' : sm.score === sa.score && sm.temps === sa.temps ? 'Égalité parfaite !' : esc(adv || 'Ton ami') + ' a gagné.';
+      var verdict = !sa ? 'En attente de ' + esc(adv || 'ton ami') + '…' : sm.score > sa.score || (sm.score === sa.score && sm.temps < sa.temps) ? 'Tu as gagné' : sm.score === sa.score && sm.temps === sa.temps ? 'Égalité parfaite' : esc(adv || 'Ton ami') + ' a gagné.';
       main.innerHTML = page('<div class="card end-card">' + Mascotte.bulle(verdict, !sa || sm.score >= sa.score ? 'bravo' : 'pense') +
         '<div class="duel-score"><div><span class="small muted">Toi</span><div class="end-score">' + sm.score + '/10</div><span class="small muted">' + sm.temps + ' s</span></div><div class="duel-vs">contre</div><div><span class="small muted">' + esc(adv || 'Ami') + '</span><div class="end-score">' + (sa ? sa.score + '/10' : '?') + '</div><span class="small muted">' + (sa ? sa.temps + ' s' : 'pas encore joué') + '</span></div></div>' +
         '<div class="btn-row" style="justify-content:center"><a class="btn" href="#/amis">' + I('arrow') + 'Retour aux amis</a></div></div>' +
@@ -206,7 +206,7 @@
         Cloud.lire('codesClasse/' + c).then(function (d) {
           if (!d) throw new Error('Aucune classe avec ce code.');
           return Promise.all([Cloud.ajouterA('classes/' + d.classe, 'eleves', u.uid), Cloud.ajouterA('publics/' + u.uid, 'classes', d.classe)]);
-        }).then(function () { toast('Classe rejointe !'); vClasses(main); }, function (x) { er.textContent = x.code ? Cloud.message(x) : x.message; });
+        }).then(function () { toast('Classe rejointe'); vClasses(main); }, function (x) { er.textContent = x.code ? Cloud.message(x) : x.message; });
       };
       main.onclick = function (e) {
         var q = e.target.closest('[data-quitter]'); if (!q) return;

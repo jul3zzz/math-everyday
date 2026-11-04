@@ -113,6 +113,16 @@
   }
 
   var ongletChoisi = null, courant = '';
+  /* la vraie leçon de 3e sur les identités remarquables, telle qu'elle apparaît dans l'appli */
+  function apercuLecon() {
+    var r = String.raw;
+    return '<figure class="apercu" aria-label="Aperçu d\'une leçon de 3e"><div class="apercu-h"><span class="chip chip-lvl lv-3e">3e</span><span class="muted small">Leçon 2 sur 14</span></div>' +
+      '<h2>Identités remarquables et factorisation</h2>' +
+      '<div class="apercu-f">' + r`$$(a + b)^2 = a^2 + 2ab + b^2$$` + '</div>' +
+      '<p class="apercu-q">' + r`Calcule $101^2$ de tête.` + '</p>' +
+      '<div class="apercu-r"><span class="input">10 201</span></div>' +
+      '<div class="fb ok"><div class="fb-t">' + I('check') + 'Bonne réponse</div><div class="corr">' + r`$(100 + 1)^2 = 10,000 + 200 + 1 = 10,201$` + '</div></div></figure>';
+  }
   function rendre(main, porte, route) {
     var a = appareil(), cle = ongletChoisi || a.sys;
     if (!ETAPES[cle]) cle = 'autre';
@@ -130,13 +140,12 @@
       var firefox = a.nav === 'firefox' && !a.mobile && a.sys !== 'windows'
         ? '<p class="inst-note">' + I('bulb') + '<span>Firefox ne sait pas installer les applis web : ouvre ce lien dans <b>Chrome</b> ou <b>Edge</b>.</span></p>' : '';
       main.innerHTML =
-        '<section class="hero porte-hero"><div class="wrap">' +
-        '<span class="logo porte-logo" data-logo-porte></span>' +
+        '<section class="hero porte-hero"><div class="wrap hero-in"><div>' +
         '<span class="eyebrow">Appli gratuite · de la 6e à la prépa MPSI</span>' +
         '<h1>Les maths, <em>30 minutes</em> par jour, dans ton appli.</h1>' +
-        '<p class="hero-lead">Math Everyday s\'installe sur ton téléphone ou ton ordinateur : un test pour connaître ton niveau, une leçon offerte chaque jour, des exercices corrigés, et un rappel à l\'heure que tu choisis.</p>' +
+        '<p class="hero-lead">Un test pour connaître ton niveau, une leçon offerte chaque jour, des exercices corrigés et un rappel à l\'heure que tu choisis. Sur ton téléphone ou ton ordinateur.</p>' +
         verif + '<div class="porte-cta">' + boutonPrincipal(a) + '</div>' + firefox + deja +
-        '</div></section>' +
+        '</div>' + apercuLecon() + '</div></section>' +
         '<section class="section"><div class="wrap">' + tuto(cle, true) + '</div></section>' +
         '<section class="section"><div class="wrap"><div class="section-h"><h2>Math Everyday en 30 secondes</h2></div>' +
         '<div class="pub"><video controls playsinline preload="none" poster="assets/video/pub-apercu.jpg" src="assets/video/pub-math-everyday.mp4" aria-label="Vidéo de présentation de Math Everyday, 30 secondes"></video></div></div></section>' +
@@ -145,7 +154,7 @@
         '<div class="card"><span class="inst-ic">' + ic('horsligne') + '</span><h3>Même sans connexion</h3><p class="muted">Les leçons déjà ouvertes restent disponibles dans le bus ou en voyage.</p></div>' +
         '<div class="card"><span class="inst-ic">' + ic('ecran') + '</span><h3>Sans distractions</h3><p class="muted">Plein écran, sans onglets ni barre d\'adresse : juste toi et tes maths.</p></div>' +
         '</div></div></section>';
-      var logo = U.$('[data-logo-porte]', main); if (logo && window.LOGO) logo.innerHTML = LOGO;
+      U.math(U.$('.apercu', main));
     }
     var go = U.$('#inst-go', main);
     if (go) go.onclick = function () { if (!installer()) voir(); };

@@ -61,7 +61,7 @@
       return;
     }
     if (!file.length) {
-      main.innerHTML = page(entete() + '<div class="card center">' + Mascotte.bulle('Tout est à jour ! Prochaine carte : ' + prochaine() + '.', 'bravo') + '<button class="btn btn-2" type="button" id="rv-libre">Réviser quand même (10 cartes au hasard)</button></div>', true);
+      main.innerHTML = page(entete() + '<div class="card center">' + Mascotte.bulle('Tout est à jour. Prochaine carte : ' + prochaine() + '.', 'bravo') + '<button class="btn btn-2" type="button" id="rv-libre">Réviser quand même (10 cartes au hasard)</button></div>', true);
       U.$('#rv-libre', main).onclick = function () { file = U.shuffle(Object.keys(s.srs)).slice(0, 10); entrainementLibre = true; carte(); };
       return;
     }
@@ -179,7 +179,7 @@
     }
     if (!niv(nidChoisi)) { location.hash = '#/examens'; return; }
     if (!libre) {
-      main.innerHTML = page('<div class="card center">' + Mascotte.bulle('Tu as déjà passé ton examen blanc gratuit cette semaine. Il revient lundi ! Avec l\'abonnement, les examens sont illimités.', 'pense') + '<div class="btn-row" style="justify-content:center"><a class="btn" href="#/abonnement">' + I('crown') + 'Voir les offres</a><a class="btn btn-2" href="#/entrainement">S\'entraîner</a></div></div>', true);
+      main.innerHTML = page('<div class="card center">' + Mascotte.bulle('Tu as déjà passé ton examen blanc gratuit cette semaine. Il revient lundi. Avec l\'abonnement, les examens sont illimités.', 'pense') + '<div class="btn-row" style="justify-content:center"><a class="btn" href="#/abonnement">' + I('crown') + 'Voir les offres</a><a class="btn btn-2" href="#/entrainement">S\'entraîner</a></div></div>', true);
       return;
     }
     var cfg = configExamen(nidChoisi), titre = nomExamen(nidChoisi) + ' — ' + niv(nidChoisi).long;
@@ -243,7 +243,7 @@
       qs.forEach(function (q) { q.ok = q.rep !== '' && Check.juger(q.e, q.rep); if (q.ok) justes++; });
       var note = Math.round(justes / qs.length * 40) / 2;
       var xp = Progres.gagner('examen', { niveau: nid, note: note, titre: nomExamen(nid) + ' ' + niv(nid).nom });
-      var appr = note >= 18 ? 'Excellent, c\'est une copie de major !' : note >= 16 ? 'Très bien, mention très bien !' : note >= 14 ? 'Bien, mention bien.' : note >= 12 ? 'Assez bien.' : note >= 10 ? 'C\'est la moyenne : relis les corrections.' : 'Il reste du travail : les chapitres ratés sont listés ci-dessous.';
+      var appr = note >= 18 ? 'Excellent, c\'est une copie de major.' : note >= 16 ? 'Très bien, mention très bien.' : note >= 14 ? 'Bien, mention bien.' : note >= 12 ? 'Assez bien.' : note >= 10 ? 'C\'est la moyenne : relis les corrections.' : 'Il reste du travail : les chapitres ratés sont listés ci-dessous.';
       main.innerHTML = page('<div class="card end-card">' + Mascotte.bulle(appr, note >= 10 ? 'bravo' : 'pense') + '<span class="eyebrow">' + esc(titre) + '</span><div class="end-score">' + String(note).replace('.', ',') + ' / 20</div><p>' + justes + ' exercice' + (justes > 1 ? 's' : '') + ' juste' + (justes > 1 ? 's' : '') + ' sur ' + qs.length + ' · +' + xp + ' XP</p>' +
         '<div class="btn-row" style="justify-content:center"><a class="btn" href="#/examens">' + I('refresh') + 'Autres examens</a><a class="btn btn-2" href="#/entrainement">S\'entraîner</a></div></div>' +
         '<h2 style="margin-top:28px;font-size:1.3rem">Correction</h2>' +
@@ -278,9 +278,12 @@
       ['#/plan', 'clock', 'Plan de révision', s.plan && s.plan.date >= U.today() ? 'Ton programme jusqu\'au ' + s.plan.date.split('-').reverse().join('/') : 'Un programme jour par jour jusqu\'à ton examen', 0, true]
     ];
     var prem = Store.estPremium();
+    function ligne(t) { return '<a class="pl" href="' + t[0] + '"><span class="pl-n">' + I(t[1]) + '</span><span class="pl-t"><b>' + t[2] + '</b><span>' + t[3] + (t[5] && !prem ? ' · abonnés' : '') + '</span></span>' + I(t[5] && !prem ? 'lock' : 'arrow') + '</a>'; }
     main.innerHTML = page('<span class="eyebrow">S\'entraîner</span><h1>Ancrer ce que tu as appris</h1>' +
-      Mascotte.bulle(nd ? 'Tu as ' + nd + ' carte' + (nd > 1 ? 's' : '') + ' mémo à revoir : c\'est le meilleur moyen de ne rien oublier !' : 'Rien à réviser pour l\'instant. Un peu d\'entraînement ?', nd ? 'content' : 'pense') +
-      '<div class="hub">' + tuiles.map(function (t) { return '<a class="card hub-t" href="' + t[0] + '">' + I(t[1]) + '<b>' + t[2] + '</b><span class="muted small">' + t[3] + '</span>' + (t[4] ? '<span class="hub-pastille">' + t[4] + '</span>' : '') + (t[5] ? '<span class="hub-prem' + (prem ? ' on' : '') + '">' + I(prem ? 'check' : 'crown') + (prem ? 'Inclus' : 'Abonnés') + '</span>' : '') + '</a>'; }).join('') + '</div>' +
+      Mascotte.bulle(nd ? 'Tu as ' + nd + ' carte' + (nd > 1 ? 's' : '') + ' mémo à revoir : c\'est le meilleur moyen de ne rien oublier.' : 'Rien à réviser pour l\'instant. Un peu d\'entraînement ?', nd ? 'content' : 'pense') +
+      '<div class="hub hub-une">' + tuiles.slice(0, 2).map(function (t) { return '<a class="card hub-t" href="' + t[0] + '">' + I(t[1]) + '<b>' + t[2] + '</b><span class="muted small">' + t[3] + '</span>' + (t[4] ? '<span class="hub-pastille">' + t[4] + '</span>' : '') + '</a>'; }).join('') + '</div>' +
+      '<h2 class="hub-h">Les épreuves</h2><div class="prog-list">' + [2, 3, 4, 5, 9].map(function (i) { return ligne(tuiles[i]); }).join('') + '</div>' +
+      '<h2 class="hub-h">Les outils</h2><div class="prog-list">' + [6, 7, 8, 10].map(function (i) { return ligne(tuiles[i]); }).join('') + '</div>' +
       '<p class="small muted" style="margin-top:22px">Le formulaire complet, la calculatrice, le brouillon et la géométrie sont dans les outils (boutons en bas à droite).</p>');
   }
 
@@ -303,14 +306,14 @@
       '<div class="progress" style="margin:8px 0 4px"><i style="width:' + (N.dans / N.besoin * 100) + '%"></i></div><span class="small muted mono">' + N.dans + ' / ' + N.besoin + ' XP · total ' + Progres.xp() + ' XP</span></div>' +
       '<div class="btn-row niv-act"><button class="btn btn-2 btn-sm" type="button" id="pg-masc">' + I('palette') + 'Ma mascotte</button><a class="btn btn-2 btn-sm" href="#/bilan">' + I('target') + 'Bilan détaillé</a></div></div>' +
       (Store.estPremium()
-        ? '<div class="banner banner-prem">' + I('crown') + '<div class="banner-t"><b>Membre φ</b><span>' + Progres.jokersRestants() + ' joker' + (Progres.jokersRestants() > 1 ? 's' : '') + ' de série ce mois-ci (un jour manqué est protégé automatiquement) · XP doublée le week-end' + (Progres.weekend() ? ' : c\'est maintenant !' : '') + '</span></div></div>'
+        ? '<div class="banner banner-prem">' + I('crown') + '<div class="banner-t"><b>Membre φ</b><span>' + Progres.jokersRestants() + ' joker' + (Progres.jokersRestants() > 1 ? 's' : '') + ' de série ce mois-ci (un jour manqué est protégé automatiquement) · XP doublée le week-end' + (Progres.weekend() ? ' : c\'est maintenant.' : '') + '</span></div></div>'
         : '<a class="banner banner-prem" href="#/abonnement">' + I('crown') + '<div class="banner-t"><b>Avec l\'abonnement</b><span>2 jokers par mois pour protéger ta série, XP doublée le week-end, mascotte personnalisable et badge Membre φ.</span></div><span class="btn btn-2">Voir</span></a>') +
       '<div class="grid g4" style="margin:18px 0">' +
       tuile('flame', Progres.serie(), 'jours de suite', 'record : ' + Progres.meilleureSerie()) + tuile('book', nbF, 'leçons faites', LECONS.length + ' au total') +
       tuile('pencil', st0.exosOk, 'exercices justes', st0.exosTot ? Math.round(st0.exosOk / st0.exosTot * 100) + ' % de réussite' : 'en entraînement') + tuile('refresh', st0.cartes, 'cartes révisées', nbB + ' badge' + (nbB > 1 ? 's' : '')) + '</div>' +
       '<div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0;font-size:1.2rem">Objectif de la semaine</h2><label class="small">Leçons par semaine <select class="input" id="pg-obj" style="min-height:34px;max-width:80px;display:inline-block;margin-left:6px">' + [3, 5, 7, 10, 14].map(function (v) { return '<option' + (v === obj ? ' selected' : '') + '>' + v + '</option>'; }).join('') + '</select></label></div>' +
       '<div class="progress" style="margin:14px 0 6px;height:14px"><i style="width:' + Math.min(100, sem.lecons / obj * 100) + '%"></i></div>' +
-      '<p class="small muted" style="margin:0">' + sem.lecons + ' / ' + obj + ' leçons cette semaine · ' + sem.jours + ' jour' + (sem.jours > 1 ? 's' : '') + ' actif' + (sem.jours > 1 ? 's' : '') + ' · ' + sem.xp + ' XP' + (sem.lecons >= obj ? ' · objectif atteint !' : '') + '</p></div>' +
+      '<p class="small muted" style="margin:0">' + sem.lecons + ' / ' + obj + ' leçons cette semaine · ' + sem.jours + ' jour' + (sem.jours > 1 ? 's' : '') + ' actif' + (sem.jours > 1 ? 's' : '') + ' · ' + sem.xp + ' XP' + (sem.lecons >= obj ? ' · objectif atteint.' : '') + '</p></div>' +
       '<div class="card" style="margin-top:18px"><h2 style="margin:0 0 12px;font-size:1.2rem">Calendrier de série</h2>' + Progres.calendrier(26) + '</div>' +
       '<h2 style="margin-top:28px;font-size:1.3rem">Badges <span class="muted small">' + nbB + ' / ' + Progres.BADGES.length + '</span></h2><div class="badges">' + badges + '</div>');
     U.$('#pg-masc', main).onclick = Premium.editeurMascotte;

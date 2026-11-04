@@ -4,7 +4,7 @@
 
   var PLANS = [
     { id: 'mensuel', nom: 'Mensuel', prix: '4,99 €', per: '/ mois', note: 'Satisfait ou remboursé le premier mois', avantages: ['Leçons illimitées, tous niveaux', 'Les 3 leçons du jour débloquées', 'Résiliable à tout moment', 'Remboursé si le premier mois ne te convient pas'] },
-    { id: 'annuel', nom: 'Annuel', prix: '39,99 €', per: '/ an', note: 'Soit 3,33 € par mois, 2 mois offerts', best: true, avantages: ['Tout le contenu du mensuel', '33 % moins cher que le mensuel', 'Un an de maths, de la 6e à la prépa', 'Idéal pour une année scolaire'] },
+    { id: 'annuel', nom: 'Annuel', prix: '39,99 €', per: '/ an', note: 'Soit 3,33 € par mois, environ 4 mois offerts', best: true, avantages: ['Tout le contenu du mensuel', '33 % moins cher que le mensuel', 'Un an de maths, de la 6e à la prépa', 'Idéal pour une année scolaire'] },
     { id: 'vie', nom: 'À vie', prix: '49,99 €', per: 'une seule fois', note: 'Paiement unique, accès pour toujours', avantages: ['Tout le contenu, pour toujours', 'Toutes les futures leçons incluses', 'Aucun renouvellement', 'Suit l\'élève jusqu\'en prépa'] }
   ];
   window.PLANS = PLANS;
@@ -39,7 +39,7 @@
       try { sessionStorage.removeItem(CLE_PAIEMENT); } catch (e) { /* rien */ }
       Store.set({ premium: { plan: att.plan, depuis: U.today(), session: att.session } });
       if (window.Synchro && Synchro.actif) Synchro.pousser();
-      setTimeout(function () { toast('Paiement reçu : abonnement ' + planNom(att.plan) + ' activé. Merci !'); }, 300);
+      setTimeout(function () { toast('Paiement reçu : abonnement ' + planNom(att.plan) + ' activé. Merci.'); }, 300);
     }
   };
   window.Paiement = Paiement;
@@ -104,7 +104,7 @@
         var b = f.querySelector('[type="submit"]'), err = U.$('#cle-err', f);
         err.textContent = ''; b.disabled = true;
         Cles.utiliser(f.cle.value).then(function (plan) {
-          toast('Clé acceptée : abonnement ' + planNom(plan) + ' activé !');
+          toast('Clé acceptée : abonnement ' + planNom(plan) + ' activé.');
           if (apres) apres(); else location.hash = '#/aujourdhui';
         }, function (x) { b.disabled = false; err.textContent = x.message; if (/compte gratuit/.test(x.message)) location.hash = '#/compte'; });
       };
@@ -195,7 +195,7 @@
       }
       var derniere = '';
       function fb(ok, final) {
-        var t = ok ? (tentative === 1 ? 'Bonne réponse !' : 'Bonne réponse, au deuxième essai.') : (final ? 'Ce n\'est pas ça.' : 'Pas tout à fait. Réessaie !');
+        var t = ok ? (tentative === 1 ? 'Bonne réponse' : 'Bonne réponse, au deuxième essai') : (final ? 'Ce n\'est pas ça' : 'Pas tout à fait, réessaie');
         var body = '';
         if (ok || final) body = '<div class="corr"><b>Correction.</b> ' + exo.corr + '</div>';
         else if (exo.indice) body = '<div class="corr"><b>Indice.</b> ' + exo.indice + '</div>';
@@ -243,7 +243,7 @@
       ['Ton compte', 'Gratuit, en une minute : prénom, e-mail et mot de passe. Ta progression est gardée.'],
       ['Le test', '20 questions qui s\'adaptent à toi pour estimer ton niveau, de la 6e à la prépa.'],
       ['La confirmation', '5 exercices à rédiger pour confirmer, et tu es placé au bon niveau.'],
-      ['Chaque jour', 'Un mail avec 3 leçons choisies pour toi. Une est gratuite, tous les jours.'],
+      ['Chaque jour', '3 leçons choisies pour toi, dont une gratuite, et un rappel à l\'heure que tu veux.'],
       ['30 minutes', 'La leçon, une vidéo conseillée et 3 exercices corrigés. Calculatrice et notes à portée de main.']
     ].map(function (s, i) {
       return '<div class="step"><span class="step-n">' + (i + 1) + '</span><h3>' + s[0] + '</h3><p>' + s[1] + '</p></div>';
@@ -262,10 +262,10 @@
       '<section class="hero"><div class="wrap hero-in">' +
       '<div><span class="eyebrow">De la 6e à la prépa MPSI</span>' +
       '<h1>Les maths, <em>30 minutes</em> par jour.</h1>' +
-      '<p class="hero-lead">Un test pour connaître ton niveau, puis chaque jour une leçon claire, une vidéo choisie avec soin et 3 exercices corrigés. Sans te noyer, sans rien rater.</p>' +
+      '<p class="hero-lead">Un test pour connaître ton niveau, puis chaque jour une leçon, une vidéo et 3 exercices corrigés.</p>' +
       '<div class="btn-row">' + cta + '</div>' +
       '<div class="hero-meta"><span>' + I('book') + nb + ' leçons</span><span>' + I('playline') + 'Une vidéo par leçon</span><span>' + I('sun') + '1 leçon gratuite par jour</span></div>' +
-      (window.Installer && Installer.installee() ? '' : '<a class="inst-lien" href="#/installer">' + I('download') + '<span>Sur le web ou en appli : <b>installe-la sur ton ordinateur ou ton téléphone</b></span>' + I('arrow') + '</a>') + '</div>' +
+      '</div>' +
       '<div class="hero-art">' + rectangleOr(323.6) + '</div>' +
       '</div></section>' +
 
@@ -308,7 +308,7 @@
       var revision = f && f.date !== U.today();
       var etat, btn, cls = 'card dl';
       if (f && f.date === U.today()) { cls += ' is-done'; etat = '<span class="chip dl-badge">' + I('check') + f.score + '/3</span>'; btn = '<a class="btn btn-2 btn-sm" href="#/lecon/' + id + '">Revoir</a>'; }
-      else if (acc === true) { if (chosen) cls += ' is-chosen'; etat = chosen ? '<span class="chip dl-badge">Ta leçon gratuite</span>' : (prem ? '<span class="chip dl-badge">' + I('crown') + 'Illimité</span>' : ''); btn = '<a class="btn btn-sm" href="#/lecon/' + id + '">' + I('arrow') + (revision ? 'Réviser' : 'Commencer') + '</a>'; }
+      else if (acc === true) { if (chosen) cls += ' is-chosen'; etat = chosen ? '<span class="chip dl-badge">Ta leçon gratuite</span>' : ''; btn = '<a class="btn btn-sm" href="#/lecon/' + id + '">' + I('arrow') + (revision ? 'Réviser' : 'Commencer') + '</a>'; }
       else if (acc === 'choix') { etat = '<span class="chip dl-badge">' + I('unlock') + 'Gratuite</span>'; btn = '<a class="btn btn-sm" href="#/lecon/' + id + '">' + I('arrow') + 'Choisir celle-ci</a>'; }
       else { cls += ' is-locked'; etat = '<span class="chip dl-badge">' + I('lock') + 'Abonnés</span>'; btn = '<a class="btn btn-2 btn-sm" href="#/abonnement">' + I('crown') + 'Débloquer</a>'; }
       var type = revision ? 'À revoir' : 'Leçon ' + l.ordre + ' / ' + leconsDe(l.niveau).length;
@@ -319,14 +319,14 @@
     }).join('');
 
     var info;
-    if (prem) info = '<div class="banner">' + I('crown') + '<div class="banner-t"><b>Abonnement ' + U.esc(planNom(st.premium.plan)) + ' actif</b><span>Toutes les leçons sont débloquées. Tu peux aussi piocher dans le programme complet.</span></div><a class="btn btn-2" href="#/programme">Programme complet</a></div>';
-    else if (j.choisie) info = '<div class="banner">' + I('bell') + '<div class="banner-t"><b>Ta leçon gratuite du jour est choisie.</b><span>Demain, 3 nouvelles leçons t\'attendent' + (st.notif.actif ? ' (mail à ' + U.esc(st.notif.heure) + ')' : '') + '. Pour faire les autres dès maintenant, passe à l\'illimité.</span></div><a class="btn btn-2" href="#/abonnement">Voir les offres</a></div>';
-    else info = '<div class="banner">' + I('sun') + '<div class="banner-t"><b>Choisis ta leçon gratuite.</b><span>Une des 3 leçons est offerte aujourd\'hui. Les deux autres restent accessibles avec l\'abonnement.</span></div></div>';
+    if (prem) info = '';
+    else if (j.choisie) info = '<div class="banner">' + I('bell') + '<div class="banner-t"><b>Ta leçon gratuite du jour est choisie</b><span>Demain, 3 nouvelles leçons t\'attendent' + (st.notif.actif ? ' (rappel à ' + U.esc(st.notif.heure) + ')' : '') + '. Pour faire les autres dès maintenant, passe à l\'illimité.</span></div><a class="btn btn-2" href="#/abonnement">Voir les offres</a></div>';
+    else info = '<div class="banner">' + I('sun') + '<div class="banner-t"><b>Choisis ta leçon gratuite</b><span>Une des 3 leçons est offerte aujourd\'hui. Les deux autres restent accessibles avec l\'abonnement.</span></div></div>';
 
     var idx = nivIndex(st.niveau);
     var tot = leconsDe(st.niveau).length, fNiv = leconsDe(st.niveau).filter(function (l) { return st.faites[l.id]; }).length;
     main.innerHTML = page(
-      '<div class="today-h"><div><span class="eyebrow">' + U.esc(U.dateLongue()) + '</span><h1>Bonjour ' + U.esc(st.profil.nom) + '.</h1></div>' +
+      '<div class="today-h"><div><h1>' + U.esc(U.dateLongue().replace(/^./, function (c) { return c.toUpperCase(); })) + '</h1></div>' +
       '<div class="stats">' +
       '<div class="stat">' + I('flame') + '<span><b>' + serie + '</b><small>jour' + (serie > 1 ? 's' : '') + ' de suite</small></span></div>' +
       '<a class="stat" href="#/progres" style="text-decoration:none">' + I('star') + '<span><b>Niv. ' + Nv.n + '</b><small>' + U.esc(Nv.titre) + '</small></span></a>' +
@@ -337,9 +337,7 @@
       '<div id="bandeau-devoirs"></div>' + (window.Premium ? Premium.bandeauPlan() : '') +
       '<div class="daily">' + cartes + '</div>' + info + (window.Epreuves ? Epreuves.bandeaux() : '') +
       (nDues ? '<a class="banner banner-rv" href="#/revisions">' + I('refresh') + '<div class="banner-t"><b>' + nDues + ' carte' + (nDues > 1 ? 's' : '') + ' mémo à réviser</b><span>Quelques minutes pour ne pas oublier les leçons déjà faites.</span></div><span class="btn btn-2">Réviser</span></a>' : '') +
-      '<div class="card card-flat" style="margin-top:24px"><div class="row"><b>Programme ' + U.esc(NIVEAUX[idx].long) + '</b><span class="spacer"></span><span class="muted small mono">' + fNiv + ' / ' + tot + '</span></div>' +
-      '<div class="progress" style="margin-top:10px"><i style="width:' + (tot ? fNiv / tot * 100 : 0) + '%"></i></div>' +
-      (faitesAuj ? '<p class="small muted" style="margin:10px 0 0">Bravo, ta séance du jour est faite. À demain !</p>' : '') + '</div>'
+      '<a class="card spi-carte" href="#/programme/' + st.niveau + '">' + spirale(fNiv, tot) + '<span class="spi-t"><span class="muted small">Programme ' + U.esc(NIVEAUX[idx].long) + '</span><b>' + fNiv + ' ' + (fNiv > 1 ? 'leçons faites' : 'leçon faite') + ' sur ' + tot + '</b><span class="muted small">' + (faitesAuj ? 'Ta séance du jour est faite. À demain.' : 'Chaque leçon faite allonge la spirale.') + '</span></span>' + I('arrow') + '</a>'
     );
     if (window.Social) Social.bandeauDevoirs(U.$('#bandeau-devoirs', main));
     if (window.Epreuves) Epreuves.compteurs(main);
@@ -432,7 +430,7 @@
       fin.innerHTML = '<div class="card end-card">' + Mascotte.bulle(msg + (xp ? ' <b>+' + xp + ' XP</b>' : '') + ' Ses cartes mémo reviendront demain dans tes révisions.', score >= 2 ? 'bravo' : 'pense') + '<span class="eyebrow">Leçon terminée</span><div class="end-score">' + score + ' / 3</div>' +
         '<div class="btn-row" style="justify-content:center"><a class="btn" href="#/evaluation/' + id + '">' + I('clock') + 'Passer l\'évaluation</a><a class="btn btn-2" href="#/aujourdhui">' + I('sun') + 'Retour à aujourd\'hui</a><a class="btn btn-2" href="#/entrainement/' + id + '">S\'entraîner encore</a>' +
         (window.PROBLEMES && PROBLEMES[id] ? '<button type="button" class="btn btn-ghost" id="vers-pb">' + I('star') + 'Le problème</button>' : '') +
-        (Store.estPremium() ? '' : '<a class="btn btn-2" href="#/abonnement">Débloquer la suite</a>') + '</div></div>';
+        '</div></div>';
       U.$('#ls-exos', main).classList.add('ok');
       var vp = U.$('#vers-pb', main); if (vp) vp.onclick = function () { U.$('#pb-lecon', main).scrollIntoView({ behavior: 'smooth', block: 'start' }); };
       fin.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -456,8 +454,8 @@
     }).join('');
     var N = niv(nid);
     main.innerHTML = page(
-      '<span class="eyebrow">Programme</span><h1>' + U.esc(N.long) + '</h1>' +
-      '<p class="muted">' + leconsDe(nid).length + ' leçons, chacune avec un cours, une vidéo et 3 exercices corrigés.' + (Store.estPremium() ? ' Tout est débloqué.' : ' Les leçons faites restent accessibles pour réviser.') + '</p>' +
+      '<div class="prog-tete"><div><span class="eyebrow">Programme</span><h1>' + U.esc(N.long) + '</h1>' +
+      '<p class="muted">' + leconsDe(nid).length + ' leçons, chacune avec un cours, une vidéo et 3 exercices corrigés.' + (Store.estPremium() ? ' Tout est débloqué.' : ' Les leçons faites restent accessibles pour réviser.') + '</p></div>' + (st.profil ? spirale(leconsDe(nid).filter(function (l) { return st.faites[l.id]; }).length, leconsDe(nid).length) : '') + '</div>' +
       '<div class="tabs" role="tablist" aria-label="Niveaux">' + tabs + '</div>' +
       '<div class="prog-list">' + liste + '</div>'
     );
@@ -468,7 +466,7 @@
     var st = Store.get();
     var cartes = PLANS.map(function (p) {
       var actif = st.premium && st.premium.plan === p.id;
-      return '<article class="card plan' + (p.best ? ' is-best' : '') + '">' + (p.best ? '<span class="plan-tag"><span class="chip">Le plus choisi</span></span>' : '') +
+      return '<article class="card plan' + (p.best ? ' is-best' : '') + '">' + '' +
         '<h2 class="plan-name">' + p.nom + '</h2><div class="plan-price">' + p.prix + ' <small>' + p.per + '</small></div>' +
         '<p class="muted small" style="margin:0">' + p.note + '</p>' +
         '<ul>' + p.avantages.map(function (a) { return '<li>' + I('check') + '<span>' + a + '</span></li>'; }).join('') + '</ul>' +
@@ -484,7 +482,7 @@
       '<div class="perks">' + AVANTAGES.map(function (a) { return '<a class="perk" href="' + a[3] + '">' + I(a[0]) + '<b>' + a[1] + '</b><span>' + a[2] + '</span></a>'; }).join('') + '</div>' +
       '<div class="card" style="margin-top:34px;overflow-x:auto"><table class="compare"><thead><tr><th>Ce qui est inclus</th><th>Gratuit</th><th>Abonné</th></tr></thead><tbody>' +
       '<tr><td>Test de niveau (20 questions + 5 exercices)</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
-      '<tr><td>Mail quotidien avec 3 leçons proposées</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
+      '<tr><td>Rappel quotidien et 3 leçons proposées</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
       '<tr><td>Leçons complètes par jour</td><td>1</td><td>Illimité</td></tr>' +
       '<tr><td>Vidéo conseillée et 3 exercices corrigés</td><td>' + ok + '</td><td>' + ok + '</td></tr>' +
       '<tr><td>Accès libre à tout le programme (' + LECONS.length + ' leçons)</td><td>' + no + '</td><td>' + ok + '</td></tr>' +
@@ -636,7 +634,7 @@
       if (f.nouveau.value.length < 8) { toast('Le nouveau mot de passe doit faire au moins 8 caractères.'); return; }
       Store.changerMdp(f.ancien.value, f.nouveau.value).then(function () { f.reset(); toast('Mot de passe changé.'); }, function (x) { toast(x && x.message && x.message !== 'mdp' ? x.message : 'Mot de passe actuel incorrect.'); });
     };
-    U.$('#r-deco', main).onclick = function () { Store.deconnexion(); Test.recommencer(); location.hash = '#/'; toast('Tu es déconnecté. À bientôt !'); };
+    U.$('#r-deco', main).onclick = function () { Store.deconnexion(); Test.recommencer(); location.hash = '#/'; toast('Tu es déconnecté. À bientôt.'); };
     U.$('#r-suppr', main).onclick = function () {
       var enLigne = window.Synchro && Synchro.actif;
       Modal.ouvrir('<h2 id="modal-title">Supprimer ton compte ?</h2><p class="muted">Ton profil, ta progression, tes notes et ton abonnement seront définitivement effacés' + (enLigne ? ', en ligne et sur cet appareil.' : ' de cet appareil.') + '</p>' +
@@ -662,7 +660,7 @@
       '<div class="mail-body"><div style="width:34px;height:34px">' + LOGO.replace('<svg', '<svg style="width:34px;height:34px"').replace('class="lg-bg"', 'class="lg-bg" fill="#111"').replace('class="lg-phi"', 'class="lg-phi" stroke="#fff"') + '</div>' +
       '<h2>Bonjour ' + U.esc(st.profil.nom) + ',</h2><p>Voici les 3 leçons choisies pour toi aujourd\'hui (' + U.esc(niv(st.niveau).long) + '). ' + (Store.estPremium() ? 'Tu es abonné : elles sont toutes ouvertes.' : 'Choisis-en une : elle est offerte, avec sa vidéo et ses 3 exercices corrigés.') + '</p>' +
       items + '<a class="mail-cta" href="#/aujourdhui">Faire ma leçon (≈ 30 min)</a>' +
-      '<p style="color:#555;font-size:13.5px">Série en cours : ' + Progres.serie() + ' jour' + (Progres.serie() > 1 ? 's' : '') + '. Ne la casse pas !' + (Entrainement.dues() ? ' Et ' + Entrainement.dues() + ' cartes mémo t\'attendent.' : '') + '</p></div>' +
+      '<p style="color:#555;font-size:13.5px">Série en cours : ' + Progres.serie() + ' jour' + (Progres.serie() > 1 ? 's' : '') + '. Ne la casse pas.' + (Entrainement.dues() ? ' Et ' + Entrainement.dues() + ' cartes mémo t\'attendent.' : '') + '</p></div>' +
       '<div class="mail-foot">Tu reçois ce mail car tu as activé le rappel quotidien. Se désabonner · Changer l\'heure</div></div>';
   }
 
@@ -777,7 +775,7 @@
           Test.recommencer();
           var st = Store.get();
           location.hash = st.niveau ? '#/aujourdhui' : '#/test';
-          toast('Bon retour ' + st.profil.nom + ' !');
+          toast('Bon retour ' + st.profil.nom + '.');
         }, function (x) { err.textContent = x.cloud ? x.message : x.message === 'inconnu' ? 'Aucun compte avec cet e-mail sur cet appareil.' : 'Mot de passe incorrect.'; });
         return;
       }
@@ -791,7 +789,7 @@
         Test.recommencer();
         if (window.Synchro && Synchro.actif && !Synchro.verifie()) { location.hash = '#/verifier'; toast('Compte créé. Ouvre le mail qu\'on vient de t\'envoyer pour l\'activer.'); return; }
         location.hash = '#/test';
-        toast('Compte créé. Bienvenue ' + nom + ' ! Place au test de niveau.');
+        toast('Compte créé. Bienvenue ' + nom + '. Place au test de niveau.');
       }, function (x) { bouton.disabled = false; err.textContent = (x && x.message && x.message !== 'existe') ? x.message : 'Impossible de créer le compte.'; });
     };
     var ob = U.$('#c-oubli', main);

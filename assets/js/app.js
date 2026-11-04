@@ -70,7 +70,7 @@
       return;
     }
     if (e.target.closest('[data-apparence]')) { fermerTout(); Vues.themes(); return; }
-    if (e.target.closest('[data-deco]')) { fermerTout(); Store.deconnexion(); if (window.Test) Test.recommencer(); location.hash = '#/'; toast('Tu es déconnecté. À bientôt !'); return; }
+    if (e.target.closest('[data-deco]')) { fermerTout(); Store.deconnexion(); if (window.Test) Test.recommencer(); location.hash = '#/'; toast('Tu es déconnecté. À bientôt.'); return; }
     if (e.target.closest('[data-ouvrir-feuille]')) { ouvrirFeuille(); return; }
     if (e.target.closest('[data-fermer-feuille]')) { fermerFeuille(); return; }
     if (e.target.closest('.feuille a, .feuille [data-outil]')) { fermerFeuille(); return; }
@@ -219,7 +219,7 @@
   U.$$('[data-logo]').forEach(function (el) { el.innerHTML = LOGO; });
   Theme.appliquer(Store.theme() || 'minimal');
   document.getElementById('theme-btn').onclick = Vues.themes;
-  document.getElementById('foot-note').textContent = 'Version démo · comptes, mails et paiements simulés sur cet appareil · ' + LECONS.length + ' leçons de la 6e à la MPSI';
+  document.getElementById('foot-note').textContent = LECONS.length + ' leçons, de la 6e à la prépa MPSI';
   if (window.Outils) Outils.init();
   window.addEventListener('hashchange', router);
   router();

@@ -78,7 +78,7 @@
       case 'sujet': return ['star', 'Sujet type examen', '#/sujets'];
       case 'fiches': return ['book', 'Relire ses fiches résumé', '#/fiches/' + it.niveau];
       case 'mental': return ['target', 'Calcul mental (une série)', '#/calcul-mental'];
-      case 'repos': return ['sun', 'Repos : dors bien, tu es prêt !', '#/plan'];
+      case 'repos': return ['sun', 'Repos : dors bien, tu es prêt.', '#/plan'];
     }
     return ['check', it.t, '#/'];
   }
@@ -173,7 +173,7 @@
       '<div class="card"><h2 style="font-size:1.15rem">XP par semaine</h2>' + graph + '</div>' +
       (doms.length ? '<div class="card" style="margin-top:18px"><h2 style="font-size:1.15rem">Réussite par domaine</h2><div class="bars">' + doms.map(function (d) { return '<div class="bar-row bilan-r"><span>' + esc(d.k) + '</span>' + barre(d.t) + '<span>' + Math.round(d.t * 100) + ' %</span></div>'; }).join('') + '</div></div>' : '') +
       '<div class="grid g2" style="margin-top:18px">' +
-      '<div class="card"><h2 style="font-size:1.15rem">À retravailler en priorité</h2>' + (faibles.length ? '<div class="prog-list" style="grid-template-columns:1fr">' + faibles.map(function (x) { return '<a class="pl" href="#/entrainement/' + x.l.id + '"><span class="pl-n">' + Math.round(x.taux * 100) + '</span><span class="pl-t"><b>' + esc(x.l.titre) + '</b><span>' + esc(niv(x.l.niveau).nom) + ' · ' + esc(x.l.domaine) + ' · s\'entraîner</span></span>' + I('arrow') + '</a>'; }).join('') + '</div>' : '<p class="muted small">Rien à signaler : continue comme ça !</p>') + '</div>' +
+      '<div class="card"><h2 style="font-size:1.15rem">À retravailler en priorité</h2>' + (faibles.length ? '<div class="prog-list" style="grid-template-columns:1fr">' + faibles.map(function (x) { return '<a class="pl" href="#/entrainement/' + x.l.id + '"><span class="pl-n">' + Math.round(x.taux * 100) + '</span><span class="pl-t"><b>' + esc(x.l.titre) + '</b><span>' + esc(niv(x.l.niveau).nom) + ' · ' + esc(x.l.domaine) + ' · s\'entraîner</span></span>' + I('arrow') + '</a>'; }).join('') + '</div>' : '<p class="muted small">Rien à signaler : continue comme ça.</p>') + '</div>' +
       '<div class="card"><h2 style="font-size:1.15rem">Points forts</h2>' + (forts.length ? '<ul class="retenir">' + forts.map(function (x) { return '<li>' + I('star') + '<span>' + esc(x.l.titre) + ' <span class="muted small">(' + Math.round(x.taux * 100) + ' %)</span></span></li>'; }).join('') + '</ul>' : '<p class="muted small">Ils apparaîtront au fil des leçons réussies.</p>') + '</div></div>');
   }
 
@@ -229,7 +229,7 @@
       U.math(main);
       this.remove();
       var res = U.$('#sj-res', main);
-      res.innerHTML = '<div class="card end-card" style="margin-top:18px">' + Mascotte.bulle(note >= 16 ? 'Excellent travail, c\'est une copie solide !' : note >= 10 ? 'C\'est la moyenne : relis les corrections des questions ratées.' : 'Courage : chaque correction lue te rapproche du jour J.', note >= 10 ? 'bravo' : 'pense') + '<div class="end-score">' + String(note).replace('.', ',') + ' / 20</div><p>+' + xp + ' XP</p><div class="btn-row" style="justify-content:center"><a class="btn" href="#/sujets">Autres sujets</a></div></div>';
+      res.innerHTML = '<div class="card end-card" style="margin-top:18px">' + Mascotte.bulle(note >= 16 ? 'Excellent travail, c\'est une copie solide.' : note >= 10 ? 'C\'est la moyenne : relis les corrections des questions ratées.' : 'Courage : chaque correction lue te rapproche du jour J.', note >= 10 ? 'bravo' : 'pense') + '<div class="end-score">' + String(note).replace('.', ',') + ' / 20</div><p>+' + xp + ' XP</p><div class="btn-row" style="justify-content:center"><a class="btn" href="#/sujets">Autres sujets</a></div></div>';
       res.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
   }
@@ -261,7 +261,7 @@
   }
   function editeurMascotte() {
     var s = Store.get();
-    if (!Store.estPremium()) { Modal.ouvrir('<h2 id="modal-title">Mascotte personnalisable</h2>' + Mascotte.bulle('Change mes couleurs et ajoute-moi des accessoires : c\'est réservé aux abonnés !', 'content') + '<div class="btn-row"><a class="btn" href="#/abonnement" data-close>' + I('crown') + 'Voir les offres</a></div>'); return; }
+    if (!Store.estPremium()) { Modal.ouvrir('<h2 id="modal-title">Mascotte personnalisable</h2>' + Mascotte.bulle('Change mes couleurs et ajoute-moi des accessoires : c\'est réservé aux abonnés.', 'content') + '<div class="btn-row"><a class="btn" href="#/abonnement" data-close>' + I('crown') + 'Voir les offres</a></div>'); return; }
     s.mascotte = s.mascotte || { fond: '', acc: '' };
     function rendu() {
       Modal.ouvrir('<h2 id="modal-title">Ma mascotte</h2><div class="masc-apercu">' + Mascotte.svg('bravo') + '</div>' +

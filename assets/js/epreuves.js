@@ -142,7 +142,7 @@
       var L = leconsNiv(nid), ex = {};
       var qs = questions(L, 10), ps = problemes(nid, null, 3, 2, ex), phi = problemes(nid, null, 1, 3, ex);
       return { titre: 'Olympiade · ' + niv(nid).long, niveau: nid, minutes: DUREE_OLYMP, bareme: 100,
-        consigne: 'Deux heures. Le sujet est le même pour tous les élèves de ton niveau. Bonne chance !',
+        consigne: 'Deux heures. Le sujet est le même pour tous les élèves de ton niveau. Bonne chance.',
         parties: [
           { titre: 'Le sprint', consigne: '10 questions, 3 points chacune.', blocs: [{ titre: 'Questions', questions: qs, points: 30 }] },
           { titre: 'Les problèmes', consigne: 'Trois problèmes longs, 15 points chacun.', blocs: ps.map(function (p) { return blocProbleme(p, 15); }) },
@@ -337,7 +337,7 @@
     U.$$('.ep-consigne, .ep-sommaire', main).forEach(function (x) { x.remove(); });
     U.$$('#ep-rendre2', main).forEach(function (x) { x.closest('.btn-row').remove(); });
     var bon = res.note >= S.bareme / 2;
-    var html = '<div class="card end-card ep-fin">' + Mascotte.bulle((auto ? 'Temps écoulé : ta copie a été rendue automatiquement. ' : '') + (res.note >= S.bareme * 0.8 ? 'Remarquable, c\'est une très belle copie !' : bon ? 'Bien joué. Relis les corrections des questions ratées.' : 'Chaque correction lue te fera progresser. Relis-les tranquillement.'), bon ? 'bravo' : 'pense') +
+    var html = '<div class="card end-card ep-fin">' + Mascotte.bulle((auto ? 'Temps écoulé : ta copie a été rendue automatiquement. ' : '') + (res.note >= S.bareme * 0.8 ? 'Remarquable, c\'est une très belle copie.' : bon ? 'Bien joué. Relis les corrections des questions ratées.' : 'Chaque correction lue te fera progresser. Relis-les tranquillement.'), bon ? 'bravo' : 'pense') +
       '<span class="eyebrow">' + esc(S.titre) + '</span><div class="end-score">' + virgule(res.note) + ' / ' + S.bareme + '</div>' +
       '<p class="muted small">Temps : ' + tempsLisible(res.temps) + (res.xp ? ' · +' + res.xp + ' XP' : '') + '</p>' +
       (res.metal ? '<div class="ep-medaille m-' + res.metal + '">' + I('trophy') + '<b>Médaille ' + nomMetal(res.metal) + '</b></div>' : '') +
@@ -419,7 +419,7 @@
       return;
     }
     if (!prem && evalsAujourdhui() >= 1) {
-      main.innerHTML = page('<div class="card center">' + Mascotte.bulle('Tu as déjà passé ton évaluation gratuite aujourd\'hui. Reviens demain, ou passe à l\'illimité !', 'pense') + '<div class="btn-row" style="justify-content:center"><a class="btn" href="#/abonnement">' + I('crown') + 'Voir les offres</a><a class="btn btn-2" href="#/entrainement/' + lid + '">S\'entraîner</a></div></div>', true);
+      main.innerHTML = page('<div class="card center">' + Mascotte.bulle('Tu as déjà passé ton évaluation gratuite aujourd\'hui. Reviens demain, ou passe à l\'illimité.', 'pense') + '<div class="btn-row" style="justify-content:center"><a class="btn" href="#/abonnement">' + I('crown') + 'Voir les offres</a><a class="btn btn-2" href="#/entrainement/' + lid + '">S\'entraîner</a></div></div>', true);
       return;
     }
     var e = s.evals[lid];
@@ -463,7 +463,7 @@
       '<p class="muted" style="max-width:44em">Une heure de questions et de problèmes longs, à ton niveau (' + esc(niv(niveauConcours()).long) + '). Avec 10/20 tu gagnes le titre du défi et son cadre d\'avatar en bronze, 14/20 en argent, 17/20 en or.' + (prem ? ' Abonné : tous les défis sont ouverts, quand tu veux, autant de fois que tu veux.' : ' Formule gratuite : le défi de la semaine, le dimanche (une tentative).') + '</p>' +
       '<div class="card ep-semaine"><div class="ep-sem-ic">' + I(ds.ic) + '</div><div class="ep-sem-t"><span class="eyebrow">Défi de la semaine</span><h2>' + esc(ds.nom) + '</h2><p class="muted">' + esc(ds.desc) + '</p><div class="row" style="gap:10px;flex-wrap:wrap;align-items:center">' + etat + '</div></div>' +
       '<div class="ep-sem-r">' + apercuCadre(ds.id, (c.cadres[ds.id] || 'or'), (Store.get().profil.nom || '?').charAt(0).toUpperCase()) + '<span class="small muted">' + esc(ds.titre) + '</span></div></div>' +
-      '<a class="banner ep-olymp-b" href="#/olympiades">' + I('laurel') + '<div class="banner-t"><b>' + (cal.ouverte ? esc(cal.ouverte.nom) + ' : c\'est aujourd\'hui !' : esc(cal.prochaine.nom) + ' le ' + cal.prochaine.jour.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })) + '</b><span>' + (cal.ouverte ? 'Épreuve de 2 h, jusqu\'à 22 h. Le vainqueur gagne le thème Olympe.' : '<span class="ep-compte" data-compte="' + cal.prochaine.debut + '" data-avant="Dans "></span> · 2 h d\'épreuve, le vainqueur gagne le thème exclusif Olympe.') + '</span></div><span class="btn btn-2">Voir</span></a>' +
+      '<a class="banner ep-olymp-b" href="#/olympiades">' + I('laurel') + '<div class="banner-t"><b>' + (cal.ouverte ? esc(cal.ouverte.nom) + ' : c\'est aujourd\'hui' : esc(cal.prochaine.nom) + ' le ' + cal.prochaine.jour.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })) + '</b><span>' + (cal.ouverte ? 'Épreuve de 2 h, jusqu\'à 22 h. Le vainqueur gagne le thème Olympe.' : '<span class="ep-compte" data-compte="' + cal.prochaine.debut + '" data-avant="Dans "></span> · 2 h d\'épreuve, le vainqueur gagne le thème exclusif Olympe.') + '</span></div><span class="btn btn-2">Voir</span></a>' +
       '<h2 style="margin-top:30px;font-size:1.3rem">Tous les défis</h2><div class="grid g2 ep-defis">' + DEFIS.map(function (d) {
         var q = peutDefi(d), b = meilleur(d.id), m = c.cadres[d.id];
         var bouton = q.ok ? '<a class="btn btn-sm" href="#/defi/' + d.id + '">' + I('arrow') + 'Relever</a>'
@@ -505,7 +505,7 @@
     if (enCours('defi', id)) { afficherCopie(main, s.copie, apresDefi()); return; }
     var p = peutDefi(d), nid = niveauConcours();
     if (!p.ok) {
-      var msg = p.raison === 'abonne' ? 'Ce défi est réservé aux abonnés. En formule gratuite, tu as le défi de la semaine (« ' + esc(defiSemaine().nom) + ' »), le dimanche.' : p.raison === 'fait' ? 'Tu as déjà relevé le défi de cette semaine (' + virgule(p.res.note) + '/20). Rendez-vous dimanche prochain !' : 'Le défi de la semaine s\'ouvre le dimanche, toute la journée.';
+      var msg = p.raison === 'abonne' ? 'Ce défi est réservé aux abonnés. En formule gratuite, tu as le défi de la semaine (« ' + esc(defiSemaine().nom) + ' »), le dimanche.' : p.raison === 'fait' ? 'Tu as déjà relevé le défi de cette semaine (' + virgule(p.res.note) + '/20). Rendez-vous dimanche prochain.' : 'Le défi de la semaine s\'ouvre le dimanche, toute la journée.';
       main.innerHTML = page('<div class="card center">' + Mascotte.bulle(msg, 'pense') + '<div class="btn-row" style="justify-content:center">' + (p.raison === 'abonne' ? '<a class="btn" href="#/abonnement">' + I('crown') + 'Voir les offres</a>' : '') + '<a class="btn btn-2" href="#/defis">Tous les défis</a></div></div>', true);
       return;
     }
@@ -562,7 +562,7 @@
       gagnerCadre('laurier', rang === 1 ? 'argent' : 'bronze');
     }
     Store.save();
-    if (rang < 3) setTimeout(function () { Progres.fete(rang === 0 ? 'Tu as gagné l\'olympiade ! ' + (rec.length ? 'Tu reçois ' + rec.join(' et ') + '.' : '') : 'Tu es sur le podium : ' + (rang + 1) + 'e place !'); }, 400);
+    if (rang < 3) setTimeout(function () { Progres.fete(rang === 0 ? 'Tu as gagné l\'olympiade ! ' + (rec.length ? 'Tu reçois ' + rec.join(' et ') + '.' : '') : 'Tu es sur le podium : ' + (rang + 1) + 'e place.'); }, 400);
   }
   function tableau(cl, moi, max) {
     if (!cl.liste.length) return '<p class="muted small">Aucune copie rendue.</p>';
@@ -593,7 +593,7 @@
     if (O) {
       var deja = s.olymp[O.mois];
       if (deja) bloc = '<div class="card ep-olymp center"><span class="eyebrow">' + esc(O.nom) + '</span><h2>Copie rendue : ' + virgule(deja.score) + '/100</h2><p class="muted">Les résultats seront publiés à 22 h, à la fermeture de l\'épreuve.</p><div class="ep-compte grand" data-compte="' + O.fin + '" data-avant="Résultats dans "></div></div>';
-      else if (O.fin - cal.t < 10 * 60000) bloc = '<div class="card ep-olymp center"><h2>L\'épreuve ferme dans quelques minutes</h2><p class="muted">Il est trop tard pour commencer. Rendez-vous le mois prochain !</p></div>';
+      else if (O.fin - cal.t < 10 * 60000) bloc = '<div class="card ep-olymp center"><h2>L\'épreuve ferme dans quelques minutes</h2><p class="muted">Il est trop tard pour commencer. Rendez-vous le mois prochain.</p></div>';
       else bloc = '<div class="card ep-olymp"><span class="eyebrow">' + esc(O.nom) + ' · c\'est maintenant</span><h2>L\'épreuve est ouverte jusqu\'à 22 h</h2>' +
         '<div class="row" style="gap:8px;margin:8px 0 12px">' + chipNiv(nid) + '<span class="chip">' + I('clock') + (O.fin - cal.t < DUREE_OLYMP * 60000 ? duree(O.fin - cal.t).replace(/:\d\d$/, '') + ' restantes (fermeture à 22 h)' : '2 heures') + '</span><span class="chip">sur 100</span></div>' +
         '<ul class="retenir"><li>' + I('check') + '<span>Une seule tentative. Le chronomètre démarre dès que tu commences et ne s\'arrête plus.</span></li><li>' + I('check') + '<span>Calculatrice et brouillon autorisés (dans les outils). Pas d\'aide extérieure : c\'est ton olympiade.</span></li><li>' + I('check') + '<span>Tu composes au niveau ' + esc(niv(nid).long) + '.</span></li></ul>' +
@@ -637,7 +637,7 @@
       var t = maintenant();
       els.forEach(function (el) {
         var r = +el.getAttribute('data-compte') - t;
-        if (r <= 0) { el.textContent = 'Maintenant !'; return; }
+        if (r <= 0) { el.textContent = 'C\'est ouvert'; return; }
         var j = Math.floor(r / 864e5), h = Math.floor(r % 864e5 / 36e5), m = Math.floor(r % 36e5 / 6e4), sec = Math.floor(r % 6e4 / 1000);
         el.innerHTML = (el.getAttribute('data-avant') || '') + (el.classList.contains('grand')
           ? '<span><b>' + j + '</b><small>jour' + (j > 1 ? 's' : '') + '</small></span><span><b>' + pad(h) + '</b><small>h</small></span><span><b>' + pad(m) + '</b><small>min</small></span><span><b>' + pad(sec) + '</b><small>s</small></span>'
@@ -653,7 +653,7 @@
     var h = '<div class="ep-bandeaux">';
     if (c) h += '<a class="card ep-band urgent" href="' + route(c) + '">' + I('clock') + '<span><b>Épreuve en cours</b><small>Le chronomètre tourne : <span data-compte="' + limite(c) + '"></span></small></span></a>';
     h += '<a class="card ep-band" href="#/defis">' + I('trophy') + '<span><b>' + esc(ds.nom) + '</b><small>' + (p.ok ? 'Ouvert maintenant · 1 h' : p.raison === 'fait' ? 'Fait cette semaine · ' + virgule(p.res.note) + '/20' : Store.estPremium() ? 'Tous les défis sont ouverts' : 'Dimanche · <span data-compte="' + prochainDimanche() + '"></span>') + '</small></span></a>';
-    h += '<a class="card ep-band" href="#/olympiades">' + I('laurel') + '<span><b>' + esc(cal.ouverte ? cal.ouverte.nom : cal.prochaine.nom) + '</b><small>' + (cal.ouverte ? 'C\'est aujourd\'hui, jusqu\'à 22 h !' : '<span data-compte="' + cal.prochaine.debut + '"></span>') + '</small></span></a>';
+    h += '<a class="card ep-band" href="#/olympiades">' + I('laurel') + '<span><b>' + esc(cal.ouverte ? cal.ouverte.nom : cal.prochaine.nom) + '</b><small>' + (cal.ouverte ? 'C\'est aujourd\'hui, jusqu\'à 22 h' : '<span data-compte="' + cal.prochaine.debut + '"></span>') + '</small></span></a>';
     return h + '</div>';
   }
 

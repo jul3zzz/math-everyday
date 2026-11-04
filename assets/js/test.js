@@ -144,7 +144,7 @@
     var msg;
     if (T.final === e.idx) msg = c.score + ' exercices réussis sur ' + c.liste.length + ' : ton niveau est confirmé.';
     else if (T.final < e.idx) msg = c.score + ' exercice' + (c.score > 1 ? 's' : '') + ' réussi' + (c.score > 1 ? 's' : '') + ' sur ' + c.liste.length + ' : on te place un cran plus bas pour consolider les bases avant d\'attaquer ' + NIVEAUX[e.idx].long + '.';
-    else msg = 'Sans faute ! Tu peux viser plus haut.';
+    else msg = 'Sans faute. Tu peux viser plus haut.';
     var g = NIVEAUX.map(function (n, i) {
       return '<button type="button" class="lvl-btn" data-final="' + i + '" aria-pressed="' + (T.final === i) + '">' + n.nom + '<small>' + U.esc(n.cycle) + '</small></button>';
     }).join('');
@@ -192,7 +192,7 @@
         });
         T = null;
         location.hash = '#/aujourdhui';
-        toast('C\'est parti ! Voici tes 3 leçons du jour.');
+        toast('C\'est parti. Voici tes 3 leçons du jour.');
         return;
       }
       window.scrollTo(0, 0);

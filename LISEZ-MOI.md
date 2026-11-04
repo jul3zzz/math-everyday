@@ -44,6 +44,7 @@ puis ouvrir http://localhost:4182
 | `assets/js/data/problemes-*.js` | Un problème long par leçon (`etoiles` 2 ou 3), un fichier par niveau |
 | `assets/js/epreuves.js` | Évaluations notées, défis de la semaine, olympiade du mois, titres et cadres d'avatar |
 | `assets/css/epreuves.css` | Styles des épreuves, cadres d'avatar et thème « Olympe » (réservé au vainqueur) |
+| `assets/css/finition.css` | Dernière couche : espacements, casse, chiffres, cours sans cadres empilés, spirale d'or. Passe inspirée de [unslop](https://github.com/heydamir/unslop) de Damir Sokolovsky (@heydamir), CC BY 4.0 |
 
 Ajouter une leçon : copier un bloc `{ id: …, titre: …, cours: …, exos: [...] }` dans le fichier du niveau (ou dans `lecons-nouvelles.js`), puis lui ajouter un générateur dans `generateurs.js` et un problème dans `problemes-<niveau>.js`. Les maths s'écrivent en LaTeX entre `$…$`. Ne jamais écrire `<` ou `>` dans une formule : utiliser `\lt` et `\gt`.
 

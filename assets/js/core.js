@@ -121,6 +121,37 @@
       '</svg>';
   }
 
+  /* Spirale d'or : la progression d'un niveau. Une perle par leçon, à intervalles réguliers sur la courbe,
+     du centre vers l'extérieur ; le trait avance à chaque leçon faite. */
+  function spirale(fait, total) {
+    var w = 161.8, h = 100, x = 0, y = 0, W = w, H = h, k = 0, px = 0, py = h, pts = [], sq = '';
+    for (var i = 0; i < 9; i++) {
+      var s, ex, ey;
+      if (k === 0) { s = H; sq += carre(x, y, s); ex = x + s; ey = y; x += s; W -= s; }
+      else if (k === 1) { s = W; sq += carre(x, y, s); ex = x + s; ey = y + s; y += s; H -= s; }
+      else if (k === 2) { s = H; sq += carre(x + W - s, y, s); ex = x + W - s; ey = y + s; W -= s; }
+      else { s = W; sq += carre(x, y + H - s, s); ex = x; ey = y + H - s; H -= s; }
+      /* quart de cercle de (px, py) à (ex, ey), dans le sens des aiguilles d'une montre */
+      var dx = ex - px, dy = ey - py, cx = (px + ex) / 2 - dy / 2, cy = (py + ey) / 2 + dx / 2, vx = px - cx, vy = py - cy;
+      for (var t = i ? 1 : 0; t <= 12; t++) {
+        var a = t / 12 * Math.PI / 2, co = Math.cos(a), si = Math.sin(a);
+        pts.push([cx + vx * co - vy * si, cy + vx * si + vy * co]);
+      }
+      px = ex; py = ey; k = (k + 1) % 4;
+    }
+    pts.reverse();
+    var cum = [0];
+    for (var j = 1; j < pts.length; j++) cum.push(cum[j - 1] + Math.hypot(pts[j][0] - pts[j - 1][0], pts[j][1] - pts[j - 1][1]));
+    var L = cum[cum.length - 1];
+    function point(d) { var n = 1; while (n < pts.length - 1 && cum[n] < d) n++; var r = (d - cum[n - 1]) / ((cum[n] - cum[n - 1]) || 1); return [pts[n - 1][0] + (pts[n][0] - pts[n - 1][0]) * r, pts[n - 1][1] + (pts[n][1] - pts[n - 1][1]) * r]; }
+    function trace(d) { var o = 'M' + pts[0][0].toFixed(2) + ' ' + pts[0][1].toFixed(2); for (var n = 1; n < pts.length && cum[n] <= d; n++) o += 'L' + pts[n][0].toFixed(2) + ' ' + pts[n][1].toFixed(2); var b = point(d); return o + 'L' + b[0].toFixed(2) + ' ' + b[1].toFixed(2); }
+    var perles = '';
+    for (var p = 1; p <= total; p++) { var q = point(L * p / total); perles += '<circle class="spi-perle' + (p <= fait ? ' on' : '') + '" cx="' + q[0].toFixed(2) + '" cy="' + q[1].toFixed(2) + '" r="' + (p === fait ? 3 : 1.6) + '"/>'; }
+    function carre(a, b, c) { return '<rect x="' + a.toFixed(2) + '" y="' + b.toFixed(2) + '" width="' + c.toFixed(2) + '" height="' + c.toFixed(2) + '"/>'; }
+    return '<svg class="spirale" viewBox="-4 -4 169.8 108" role="img" aria-label="' + fait + ' leçon' + (fait > 1 ? 's' : '') + ' faite' + (fait > 1 ? 's' : '') + ' sur ' + total + '"><g class="spi-sq">' + sq + '</g>' +
+      '<path class="spi-fond" d="' + trace(L) + '"/>' + (fait > 0 ? '<path class="spi-trait" d="' + trace(L * Math.min(fait, total) / total) + '"/>' : '') + perles + '</svg>';
+  }
+
   /* ---------------- Stockage local ---------------- */
   /* Plusieurs comptes par appareil : racine = { theme, comptes: { mail: { hash, sel, data } }, actif }.
      Store.get() renvoie les données du compte connecté (ou d'un invité, non sauvegardé). */
@@ -480,7 +511,7 @@
     clearTimeout(tTimer); tTimer = setTimeout(function () { t.classList.remove('on'); }, 2600);
   }
 
-  window.U = U; window.I = I; window.LOGO = LOGO; window.rectangleOr = rectangleOr;
+  window.U = U; window.I = I; window.LOGO = LOGO; window.rectangleOr = rectangleOr; window.spirale = spirale;
   window.Affichage = Affichage;
   window.Store = Store; window.Check = Check; window.Theme = Theme; window.Modal = Modal; window.toast = toast;
   window.LECONS = window.LECONS || [];

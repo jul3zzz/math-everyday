@@ -5,12 +5,12 @@
    des vidéos dans un cache à part, conservé d'une version à l'autre.
    Rappels : clic sur une notification → ouvre l'appli ; en arrière-plan (Android), la synchronisation
    périodique « rappel » lit l'état écrit par rappels.js dans le cache me-rappel. */
-var VERSION = 'me-v15';
+var VERSION = 'me-v16';
 var HORS_LIGNE = 'me-hors-ligne';
 var RAPPEL = 'me-rappel';
 var FICHIERS = [
   '', 'index.html', 'manifest.json', 'favicon.svg', 'icone-192.png', 'icone-512.png', 'icone-masque-512.png',
-  'assets/css/base.css', 'assets/css/themes.css', 'assets/css/outils.css', 'assets/css/plus.css', 'assets/css/themes-plus.css', 'assets/css/refonte.css', 'assets/css/epreuves.css',
+  'assets/css/base.css', 'assets/css/themes.css', 'assets/css/outils.css', 'assets/css/plus.css', 'assets/css/themes-plus.css', 'assets/css/refonte.css', 'assets/css/epreuves.css', 'assets/css/finition.css',
   'assets/js/config.js', 'assets/js/core.js', 'assets/js/test.js', 'assets/js/views.js', 'assets/js/progres.js',
   'assets/js/calc-moteur.js', 'assets/js/calculatrice.js', 'assets/js/notes.js', 'assets/js/entrainement.js',
   'assets/js/fiches.js', 'assets/js/brouillon.js', 'assets/js/geometrie.js', 'assets/js/formulaire.js',

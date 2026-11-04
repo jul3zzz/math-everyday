@@ -33,7 +33,7 @@
     else if (a !== 0 && v !== 0 && proche(v, 1 / a)) D.push('<b>Inverse.</b> Tu as trouvé l\'inverse du résultat : as-tu inversé un quotient (numérateur et dénominateur) ?');
     else if (a !== 0 && (proche(v, 2 * a) || proche(v, a / 2))) D.push('<b>Facteur 2.</b> Tu es à un facteur 2 près : un oubli de « ÷ 2 » (aire d\'un triangle, rayon/diamètre, milieu) ou un double produit ?');
     else if (a !== 0 && proche(v * v, a) || proche(v, a * a)) D.push('<b>Carré ou racine.</b> Ta réponse est liée au bon résultat par un carré : as-tu oublié une racine carrée, ou élevé au carré en trop ?');
-    else if (Math.abs(v - a) <= 0.05 * Math.max(1, Math.abs(a))) D.push('<b>Presque !</b> Tu es très proche : c\'est sûrement un arrondi trop tôt ou une petite erreur de calcul. Garde les valeurs exactes jusqu\'à la fin.');
+    else if (Math.abs(v - a) <= 0.05 * Math.max(1, Math.abs(a))) D.push('<b>Presque.</b> Tu es très proche : c\'est sûrement un arrondi trop tôt ou une petite erreur de calcul. Garde les valeurs exactes jusqu\'à la fin.');
     else if (Number.isInteger(a) && Math.abs(v - a) === 1) D.push('<b>Erreur d\'une unité.</b> Attention aux inégalités strictes, aux bornes incluses ou exclues, et aux décomptes (on compte souvent un intervalle de trop ou de moins).');
     else D.push('La démarche n\'est pas la bonne. Reprends la méthode du cours, puis compare ton calcul ligne par ligne avec la correction.');
     if (exo.tol && exo.tol >= 0.005) D.push('Cet exercice accepte une valeur arrondie : vérifie la précision demandée (dixième, centième…).');

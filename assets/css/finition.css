@@ -1,0 +1,287 @@
+/* Math Everyday — finition (chargée en dernier), passe inspirée de « unslop » par Damir Sokolovsky
+   (@heydamir, github.com/heydamir/unslop, CC BY 4.0).
+   Direction : patient, exact, un peu complice. Univers : la table de travail, papier, encre, compas, rectangle d'or.
+   Un moment riche par écran (la formule, l'aperçu d'une leçon, le compte à rebours) et la spirale d'or comme signature.
+   Espacements sur une grille de 4 px, une seule courbe d'animation. Chaque design garde son identité :
+   Enfantin reste franc et coloré, Doré garde ses filets, Tableau et Cahier gardent leur écriture dans les grands titres. */
+
+:root{--ease:cubic-bezier(.22,1,.36,1)}
+
+/* ===================== Couleur : un papier, une encre, une seule couleur vive ===================== */
+html[data-theme="minimal"]{
+  --r:16px;--r-sm:10px;--r-btn:10px;--r-chip:6px;
+  --bg:#f6f5f1;--ink:#191816;--ink-2:#5e5b54;--line:#e6e4dd;--hover:#efeee8;--sel:#e4e2da;--top-bg:rgba(246,245,241,.92);
+  --chip-bg:#efeee8;--num-bg:#efeee8;--btn2-bg:#ebe9e2;--btn2-ink:#191816;--tuile-ic:#efeee8;--in-bg:#f3f2ec;--track:#e6e4dd;--box-bg:#f8f7f3;
+  --spi:#a8761c;
+}
+html[data-theme="minimal"][data-mode="sombre"]{
+  --bg:#141413;--surface:#1b1b19;--ink:#efeee9;--ink-2:#a8a69f;--line:#2b2a27;--hover:#242422;--sel:#34332f;--top-bg:rgba(20,20,19,.92);
+  --chip-bg:#242422;--num-bg:#242422;--btn2-bg:#262523;--btn2-ink:#efeee9;--tuile-ic:#242422;--in-bg:#201f1d;--track:#2b2a27;--box-bg:#201f1d;--locked-bg:#191917;
+  --bar-knob:#141413;--acc-ink:#141413;--spi:#d9a441;
+}
+@media (prefers-color-scheme:dark){
+  html[data-theme="minimal"]:not([data-mode="clair"]){
+    --bg:#141413;--surface:#1b1b19;--ink:#efeee9;--ink-2:#a8a69f;--line:#2b2a27;--hover:#242422;--sel:#34332f;--top-bg:rgba(20,20,19,.92);
+    --chip-bg:#242422;--num-bg:#242422;--btn2-bg:#262523;--btn2-ink:#efeee9;--tuile-ic:#242422;--in-bg:#201f1d;--track:#2b2a27;--box-bg:#201f1d;--locked-bg:#191917;
+    --bar-knob:#141413;--acc-ink:#141413;--spi:#d9a441;
+  }
+}
+html[data-theme="enfantin"]{--spi:#d4194f;--c-def:#ffd23f;--c-prop:#ffd23f;--c-meth:#3ec1d3;--c-warn:#ff6f91;--bar-w:8px}
+html[data-theme="dore"]{--spi:#7a5b1f;--banner-ink:var(--ink)}
+html[data-theme="tableau"]{--spi:#f3d36b;--font-num:"Nunito",system-ui,sans-serif}
+html[data-theme="cahier"]{--spi:#c81e1e;--font-num:"Nunito",system-ui,sans-serif;--btn-lift:none;--shadow-btn:none;--shadow-btn-h:none;--shadow:0 1px 2px rgba(31,42,68,.06);--shadow-sm:none}
+html[data-theme="nuit"]{--spi:#c7d2fe;--art-phi:#c7d2fe;--c-prop:#c7d2fe;--masc-joue:rgba(165,180,252,.3);--font-num:var(--font-body);--font-chip:var(--font-body);--font-eyebrow:var(--font-body);--head-w:500;--r:16px;--r-sm:10px;--r-btn:10px;--r-chip:6px}
+html[data-theme="olympe"]{--spi:#b8892b;--font-eyebrow:var(--font-body);--font-chip:var(--font-body);--r:16px;--r-sm:10px;--r-btn:10px;--r-chip:6px}
+html[data-theme="minimal"]{--font-num:var(--font-body);--font-chip:var(--font-body);--font-eyebrow:var(--font-body);--head-w:500;--head-ls:-.02em;--fs-h1:2.25rem;--hero-em:var(--ink)}
+
+/* plus de voiles ni de textes en dégradé */
+html[data-theme="dore"] body,html[data-theme="tableau"] body,html[data-theme="nuit"] body,html[data-theme="olympe"] body{background-image:none}
+html[data-theme="nuit"] .hero h1 em,html[data-theme="olympe"] .hero h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--hero-em)}
+html[data-theme="nuit"] .hero-art .ga-spiral{stroke:var(--spi)}
+html[data-theme="tableau"] h1,html[data-theme="tableau"] h2,html[data-theme="tableau"] .hero h1{text-shadow:none}
+.p-nuit i:nth-child(1){background:#c7d2fe}
+.p-nuit i:nth-child(4){box-shadow:none}
+.dp-prev.p-nuit{background:#0f172a}
+html[data-theme="minimal"] .hero-art .ga-spiral{stroke:var(--spi)}
+
+/* bandeaux : une surface calme, pas un aplat ; il n'y a plus qu'une action forte par écran */
+html:not([data-theme="enfantin"]){--banner-bg:var(--surface);--banner-ink:var(--ink)}
+html:not([data-theme="enfantin"]) .banner .btn,html:not([data-theme="enfantin"]) .banner .btn-2{background:var(--btn2-bg);color:var(--btn2-ink);border-color:var(--btn2-line,transparent)}
+html:not([data-theme="enfantin"]) .banner .btn:hover,html:not([data-theme="enfantin"]) .banner .btn-2:hover{background:var(--hover)}
+html:not([data-theme="enfantin"]) .banner-t span{opacity:1;color:var(--ink-2)}
+.banner{text-decoration:none}
+
+/* ===================== Espacement et tailles ===================== */
+.top-in{min-height:64px}
+.logo{width:36px;height:36px}
+.brand-name{font-size:1.125rem}
+.btn{min-height:44px;padding:0 20px}
+.btn-sm{min-height:36px;padding:0 12px}
+.btn-lg{min-height:48px;padding:0 24px;font-size:1rem}
+html[data-theme="dore"] .btn{min-height:44px}
+html[data-theme="dore"] .btn-sm{min-height:36px}
+html[data-theme="dore"] .btn-lg{min-height:48px}
+.btn svg{width:18px;height:18px}
+.card{padding:calc(24px * var(--esp))}
+.grid,.daily,.hub,.plans,.prog-list,.set-grid,.perks,.badges{gap:calc(16px * var(--esp))}
+.dl{gap:calc(12px * var(--esp));min-height:0}
+.today-h{margin-bottom:calc(24px * var(--esp));align-items:center}
+.block{margin:calc(48px * var(--esp)) 0}
+.banner{margin-top:calc(24px * var(--esp));padding:16px 20px}
+.pl{padding:12px 16px;gap:12px}
+.lesson-steps{margin-top:16px;gap:4px 16px}
+.lesson-outils{gap:4px}
+.hub-h{font-size:1.125rem;margin:calc(32px * var(--esp)) 0 12px}
+.hub-une{grid-template-columns:3fr 2fr;margin-top:calc(16px * var(--esp))}
+@media (min-width:901px){.daily{grid-template-columns:1.4fr 1fr 1fr}}
+@media (max-width:720px){
+  .btn{min-height:48px}
+  .btn-sm{min-height:44px}
+  .btn-lg{min-height:48px}
+  .hub-une{grid-template-columns:1fr}
+  html[data-theme="dore"] .btn{min-height:48px}
+}
+/* les boutons d'outils ne recouvrent plus le texte : la page garde une marge tant qu'il n'y a pas la place */
+@media (min-width:721px) and (max-width:1279px){body:not(.porte):not(.outils-range) main .wrap{padding-right:88px}}
+
+/* ===================== Icônes : un jeu, une taille, le ton du texte ===================== */
+.ic{stroke-width:1.6}
+.nav a{padding:8px 12px;gap:8px;border-radius:var(--r-sm)}
+.nav a svg,.nav-plus-b svg{width:18px;height:18px}
+.nav-plus-b{padding:8px 12px;gap:8px}
+.theme-btn{width:40px;height:40px;background:transparent}
+.theme-btn svg{width:18px;height:18px}
+.avatar-b{height:40px;padding:0 8px 0 4px;gap:8px;border-radius:var(--r-sm);background:transparent}
+.avatar-b>svg{width:16px;height:16px}
+.avatar{width:32px;height:32px;font-weight:600;font-size:.875rem}
+.menu-i,.nav-menu a{padding:8px 12px;gap:12px;font-size:.9375rem;font-weight:500}
+.menu-i svg,.nav-menu a svg{width:18px;height:18px}
+.chip svg{width:14px;height:14px}
+.stats .stat svg{display:none}
+.grid>.stat svg{display:none}
+html[data-theme="enfantin"] .stats .stat svg{display:block;width:20px;height:20px;padding:0;background:none}
+html:not([data-theme="enfantin"]) .hub-t>svg{width:22px;height:22px;padding:0;background:none;border-radius:0;color:var(--ink-2)}
+html:not([data-theme="enfantin"]) .perk svg,html:not([data-theme="enfantin"]) .nv>svg,html:not([data-theme="enfantin"]) .set-grid .card h2 svg{width:20px;height:20px;padding:0;background:none;border-radius:0;color:var(--ink-2)}
+.banner svg{width:20px;height:20px}
+.retenir svg{width:18px;height:18px;margin-top:5px}
+.ls svg{width:16px;height:16px}
+.dl-time svg,.hero-meta svg{width:16px;height:16px}
+.pl svg{width:18px;height:18px}
+.pl-n svg{width:18px;height:18px;color:var(--ink-2)}
+.inst-ic{width:auto;height:auto;background:none;border-radius:0;display:block;color:var(--ink-2)}
+.inst-ic svg{width:22px;height:22px}
+.ep-sem-ic svg,.ep-defi-h>svg,.ep-intro .ep-defi-h>svg,.ep-band>svg{width:22px;height:22px;padding:0;background:none;border-radius:0;color:var(--ink-2)}
+.ep-band.urgent>svg{background:none}
+
+/* barre d'outils : un seul bloc discret à la place de trois gros ronds */
+.fab{right:16px;bottom:16px;gap:0;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.fab-b{width:44px;height:44px;border-radius:10px;background:transparent;color:var(--ink-2);box-shadow:none}
+.fab-b:hover{background:var(--hover);color:var(--ink);opacity:1;transform:none}
+.fab-b svg{width:20px;height:20px}
+.fab-b span{right:56px}
+html[data-theme="enfantin"] .fab{border:3px solid #1d1b4b;box-shadow:4px 4px 0 #1d1b4b;background:#fff}
+html[data-theme="enfantin"] .fab-b{border:0!important;box-shadow:none;background:transparent;color:#1d1b4b}
+
+/* ===================== Texte : poids, casse, chiffres ===================== */
+.eyebrow{text-transform:none;letter-spacing:0;font-size:.875rem;font-weight:500;margin-bottom:8px}
+html[data-theme="minimal"] .eyebrow{letter-spacing:0;color:var(--ink-2)}
+html[data-theme="nuit"] .eyebrow{color:var(--ink-2)}
+html[data-theme="olympe"] .eyebrow{letter-spacing:0}
+html[data-theme="enfantin"] .eyebrow{letter-spacing:0}
+html[data-theme="dore"] .eyebrow{letter-spacing:.06em}
+html:not([data-theme="enfantin"]) .btn{font-weight:600}
+html[data-theme="dore"] .btn,html[data-theme="dore"] .btn-lg{text-transform:none;letter-spacing:0;font-size:1.0625rem}
+html[data-theme="dore"] .btn-sm{font-size:1rem}
+html:not([data-theme="enfantin"]) .chip,html:not([data-theme="enfantin"]) .tab{font-weight:500}
+html:not([data-theme="enfantin"]) .pl-t b{font-weight:500}
+html:not([data-theme="enfantin"]) .nav a,html:not([data-theme="enfantin"]) .nav-plus-b{font-weight:500}
+.fb-t{font-weight:600}
+.field label{font-weight:500}
+.fiche-h,.fiche-ret b,.fo-dom>b,.cm-g>b,.n-box>p:first-child b{text-transform:none;letter-spacing:0}
+.stat b,.plan-price,.end-score,.step-n,.block-num,.pl-n,.ep-compte,.ex-chrono,.ep-rang,.big-lvl,.quiz-count{font-variant-numeric:tabular-nums lining-nums}
+html:not([data-theme="enfantin"]) .plan-price{font-weight:500;letter-spacing:-.01em}
+html:not([data-theme="enfantin"]) .end-score{font-weight:500}
+html:not([data-theme="enfantin"]) .stat b{font-weight:500}
+html[data-theme="dore"] .end-score,html[data-theme="dore"] .big-lvl{font-style:normal}
+
+/* Tableau et Cahier : l'écriture à la main seulement dans les grands titres, le reste se lit d'un coup d'œil */
+html[data-theme="tableau"] :is(h3,.dl h3,.hub-t b,.plan-name,.exo-h b,.banner-t b,.dp-txt b,.big-lvl),
+html[data-theme="cahier"] :is(h3,.dl h3,.hub-t b,.plan-name,.exo-h b,.banner-t b,.dp-txt b,.big-lvl){font-family:var(--font-body);font-weight:700}
+html[data-theme="tableau"] .dl h3,html[data-theme="cahier"] .dl h3{font-size:1.1875rem}
+html[data-theme="tableau"] h3,html[data-theme="cahier"] h3{font-size:1.125rem}
+
+/* ===================== Aujourd'hui ===================== */
+.stats{gap:0;flex-wrap:nowrap}
+.stats .stat{background:none;box-shadow:none;border:0;border-radius:0;padding:0 20px;gap:0;display:block;border-left:1px solid var(--line)}
+.stats .stat:first-child{border-left:0;padding-left:0}
+.stats .stat:last-child{padding-right:0}
+.stats .stat b{font-size:1.375rem;line-height:1.2}
+.stats .stat small{font-size:.8125rem;margin-top:2px}
+html[data-theme="enfantin"] .stats{gap:12px;flex-wrap:wrap}
+html[data-theme="enfantin"] .stats .stat{display:flex;align-items:center;gap:8px;background:#fff;border:3px solid #1d1b4b;border-radius:16px;padding:8px 12px;box-shadow:3px 3px 0 #1d1b4b}
+.dl-top .chip:not(.chip-lvl):not(.dl-badge){background:none;border:0;padding:0;color:var(--ink-2);font-weight:400;font-size:.875rem}
+.dl-foot{flex-direction:column;align-items:flex-start;gap:12px;margin-top:auto}
+.dl-foot .spacer{display:none}
+html[data-theme="enfantin"] .dl-top .chip:not(.chip-lvl):not(.dl-badge){background:#fff;border:2px solid #1d1b4b;padding:3px 10px;color:#1d1b4b;font-weight:700}
+html[data-theme="enfantin"] .daily .dl:nth-child(1) .dl-top .chip:nth-child(2){background:#ffd23f}
+html[data-theme="enfantin"] .daily .dl:nth-child(2) .dl-top .chip:nth-child(2){background:#3ec1d3}
+html[data-theme="enfantin"] .daily .dl:nth-child(3) .dl-top .chip:nth-child(2){background:#ff6f91}
+.dl h3{font-size:1.1875rem}
+.daily .dl:first-child h3{font-size:1.375rem}
+.masc-bulle{font-size:.9375rem}
+.masc-ast{margin-top:4px}
+
+/* Signature : la spirale d'or */
+.spirale{display:block;width:100%;height:auto;overflow:visible}
+.spi-sq rect{fill:none;stroke:var(--line);stroke-width:.5;vector-effect:non-scaling-stroke}
+.spi-fond{fill:none;stroke:var(--track);stroke-width:1.2;stroke-linecap:round}
+.spi-trait{fill:none;stroke:var(--spi);stroke-width:2.4;stroke-linecap:round}
+.spi-perle{fill:var(--surface);stroke:var(--ink-2);stroke-width:.6}
+.spi-perle.on{fill:var(--spi);stroke:var(--spi)}
+.spi-carte{display:flex;align-items:center;gap:24px;margin-top:calc(24px * var(--esp));text-decoration:none;color:inherit;transition:background-color .15s var(--ease)}
+.spi-carte:hover{background:var(--hover)}
+.spi-carte .spirale{width:176px;flex-shrink:0}
+.spi-t{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
+.spi-t b{font-family:var(--font-head);font-size:1.375rem;font-weight:var(--head-w);line-height:1.2}
+html[data-theme="tableau"] .spi-t b,html[data-theme="cahier"] .spi-t b{font-family:var(--font-body);font-size:1.25rem}
+.spi-carte>svg:last-child{width:18px;height:18px;flex-shrink:0;color:var(--ink-2)}
+.prog-tete{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:8px}
+.prog-tete .spirale{width:200px;flex-shrink:0}
+html[data-theme="enfantin"] .spi-sq rect{stroke:#1d1b4b;stroke-opacity:.2}
+html[data-theme="enfantin"] .spi-fond{stroke:#d9d6ee}
+@media (max-width:560px){
+  .spi-carte{gap:16px}
+  .spi-carte .spirale{width:112px}
+  .spi-t b{font-size:1.125rem}
+  .spi-t .small:last-child{display:none}
+  .prog-tete{display:block}
+  .prog-tete .spirale{width:100%;max-width:220px;margin:0 0 16px}
+  .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%}
+  .stats .stat{flex:none;padding:0 8px}
+  .stats .stat b{font-size:1.125rem;white-space:nowrap}
+  .stats .stat small{font-size:.75rem;line-height:1.3}
+  html[data-theme="enfantin"] .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* ===================== Le cours : une belle page, sans cadres empilés ===================== */
+html:not([data-theme="enfantin"]) :is(.def,.prop,.methode,.attention){border:0;box-shadow:none;border-radius:var(--r-sm);padding:16px 20px;background:var(--box-bg)}
+html:not([data-theme="enfantin"]) :is(.def,.prop,.methode,.attention)>b:first-child{font-family:var(--font-body);font-variant:normal;text-transform:none;letter-spacing:0;font-size:.9375rem;font-weight:600;color:var(--box-title);margin-bottom:4px}
+html:not([data-theme="enfantin"]) .attention>b:first-child{color:var(--c-warn)}
+html[data-theme="minimal"] :is(.def,.prop,.methode,.attention){border-left-width:0}
+html[data-theme="cahier"] :is(.def,.prop,.methode,.attention){background:#f7f9fe}
+html:not([data-theme="enfantin"]) .ex-box{border:1px solid var(--line);background:none;border-radius:var(--r-sm)}
+html[data-theme="enfantin"] .def>b:first-child,html[data-theme="enfantin"] .prop>b:first-child,html[data-theme="enfantin"] .methode>b:first-child,html[data-theme="enfantin"] .attention>b:first-child{text-transform:none;letter-spacing:0;font-size:1rem}
+.cours .katex-display{margin:16px 0;font-size:1.14em}
+.block-h{gap:12px;margin-bottom:12px}
+html:not([data-theme="enfantin"]) .block-num{width:28px;height:28px;border-radius:8px;background:var(--tuile-ic);font-size:.875rem;font-weight:500;color:var(--ink-2)}
+html:not([data-theme="enfantin"]) .block-num svg{width:16px;height:16px}
+html[data-theme="dore"] .block-num{border-radius:50%;background:none}
+html:not([data-theme="enfantin"]) .pl-n{width:32px;height:32px;border-radius:8px;font-size:.875rem;font-weight:500}
+html:not([data-theme="enfantin"]) .pl.is-done .pl-n{background:var(--ok-bg);color:var(--ok)}
+html:not([data-theme="enfantin"]) .choice-l{width:28px;height:28px;border-radius:8px;font-family:var(--font-body);font-weight:500}
+.lesson-h .row .chip:not(.chip-lvl){background:none;border:0;padding:0;color:var(--ink-2);font-weight:400;font-size:.875rem}
+html[data-theme="enfantin"] .lesson-h .row .chip:not(.chip-lvl){background:#fff;border:2px solid #1d1b4b;padding:3px 10px;color:#1d1b4b;font-weight:700}
+html:not([data-theme="enfantin"]) .ls{background:none;border:0;padding:0;font-weight:400;font-size:.875rem;color:var(--ink-2);gap:6px}
+html:not([data-theme="enfantin"]) .ls.ok{color:var(--ok)}
+html:not([data-theme="enfantin"]) a.ls{text-decoration:underline;text-underline-offset:3px}
+
+/* ===================== Accueil et page de téléchargement ===================== */
+.hero-meta{margin-top:24px;gap:8px 16px}
+.step-n{font-size:1.5rem}
+html[data-theme="enfantin"] .step-n{font-size:2.5rem}
+html[data-theme="dore"] .step-n{font-size:2.25rem}
+html:not([data-theme="enfantin"]) .step-n{color:var(--ink-2)}
+.porte-hero{text-align:left;padding:64px 0 48px}
+.porte-hero .hero-in{max-width:1120px;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.porte-hero .hero-lead{margin-left:0;margin-right:0;font-size:1.125rem}
+.porte-hero .inst-note{margin:0 0 16px!important}
+.porte-cta{align-items:flex-start;margin-top:0}
+.porte-deja{margin-top:16px}
+.apercu{margin:0;padding:24px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.apercu-h{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.apercu h2{font-size:1.375rem;margin:0 0 8px}
+.apercu-f{margin:0 0 16px;padding:8px 16px;background:var(--box-bg);border-radius:var(--r-sm);overflow:hidden}
+.apercu-f .katex-display{margin:8px 0;font-size:1.2em}
+.apercu-q{margin:0 0 8px}
+.apercu-r .input{display:flex;align-items:center;max-width:none;min-height:44px;font-variant-numeric:tabular-nums}
+.apercu .fb{margin-top:8px}
+.porte-atouts .card{background:none;border:0;box-shadow:none;outline:0;padding:0}
+.porte-atouts .card h3{margin:8px 0 4px;font-size:1.0625rem}
+html[data-theme="enfantin"] .apercu{border:3px solid #1d1b4b;box-shadow:6px 6px 0 #1d1b4b}
+@media (max-width:900px){
+  .porte-hero .hero-in{grid-template-columns:1fr;gap:32px}
+  .porte-hero{padding:32px 0}
+  .porte-cta .btn{width:100%}
+}
+
+/* ===================== Détails ===================== */
+.plan.is-best{box-shadow:inset 0 0 0 1.5px var(--ink)}
+html[data-theme="enfantin"] .plan.is-best{box-shadow:var(--shadow-strong)}
+html[data-theme="dore"] .plan.is-best{box-shadow:none}
+.plans{align-items:stretch}
+.plan-price{font-size:2.25rem}
+.hub-pastille{top:16px;right:16px;min-width:24px;height:24px;font-size:.8125rem;font-weight:600;background:var(--ink);color:var(--bg)}
+.nav-pastille{background:var(--ink)!important;color:var(--bg)!important;font-weight:600}
+html[data-theme="enfantin"] .hub-pastille,html[data-theme="enfantin"] .nav-pastille{background:#d4194f!important;color:#fff!important}
+.ep-medaille{font-weight:600}
+.ep-compte.grand span{border-radius:12px}
+.badge{border-style:solid;border-color:var(--line)}
+.badge svg{width:22px;height:22px}
+html[data-theme="enfantin"] .badge{border-style:dashed}
+
+/* ===================== Mouvement : une courbe, rien qui boucle, rien qui saute ===================== */
+[data-theme="enfantin"] .masc{animation:none}
+.hub-t:hover,.ex-carte:hover,.perk:hover,.dp:hover{transform:none;background:var(--hover)}
+.dp:hover{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
+.hub-t,.ex-carte,.perk,.dp,.pl,.tuile,.inst-lien,.ep-band,.menu-i,.avatar-b{transition:background-color .15s var(--ease),box-shadow .15s var(--ease)}
+.btn{transition:background-color .15s var(--ease),color .15s var(--ease),transform .12s var(--ease),box-shadow .15s var(--ease)}
+.btn:active{transform:scale(.98)}
+.nav a{transition:background-color .15s var(--ease),color .15s var(--ease)}
+.progress>i{transition:none}
+.fab-b{transition:background-color .15s var(--ease),color .15s var(--ease)}
+.menu-d:not([hidden]),.nav-menu:not([hidden]){animation-duration:.18s;animation-timing-function:var(--ease)}
+.feuille-boite{animation-timing-function:var(--ease)}
+.bb[aria-current="page"] svg,.bb.on svg{transform:none}
+.tuile:active,.bb:active svg{transform:scale(.98)}
+.toast{transition:opacity .2s var(--ease),transform .2s var(--ease)}
+@media (prefers-reduced-motion:reduce){.btn:active,.tuile:active,.bb:active svg{transform:none}}
