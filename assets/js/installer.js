@@ -121,7 +121,7 @@
       '<div class="apercu-f">' + r`$$(a + b)^2 = a^2 + 2ab + b^2$$` + '</div>' +
       '<p class="apercu-q">' + r`Calcule $101^2$ de tête.` + '</p>' +
       '<div class="apercu-r"><span class="input">10 201</span></div>' +
-      '<div class="fb ok"><div class="fb-t">' + I('check') + 'Bonne réponse</div><div class="corr">' + r`$(100 + 1)^2 = 10,000 + 200 + 1 = 10,201$` + '</div></div></figure>';
+      '<div class="fb ok"><div class="fb-t">' + I('check') + 'Bonne réponse</div><div class="corr">' + r`$(100 + 1)^2 = 10\,000 + 200 + 1 = 10\,201$` + '</div></div></figure>';
   }
   function rendre(main, porte, route) {
     var a = appareil(), cle = ongletChoisi || a.sys;
