@@ -5,7 +5,7 @@
    des vidéos dans un cache à part, conservé d'une version à l'autre.
    Rappels : clic sur une notification → ouvre l'appli ; en arrière-plan (Android), la synchronisation
    périodique « rappel » lit l'état écrit par rappels.js dans le cache me-rappel. */
-var VERSION = 'me-v16';
+var VERSION = 'me-v17';
 var HORS_LIGNE = 'me-hors-ligne';
 var RAPPEL = 'me-rappel';
 var FICHIERS = [
